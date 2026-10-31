@@ -1826,6 +1826,16 @@ a.am .amgo{display:none}
 /* and in a list row it keeps the 34px disc the glyph had */
 .listrow .lrico.hasimg{border-radius:50%}
 
+/* An album cover is not a face. Where an artist has no portrait one of their records
+   stands in, and it is drawn as a record: a rounded square, slightly inset, so the row
+   says at a glance which of the two it is showing rather than cropping a sleeve into a
+   head-shaped hole. The same shape language the playlist art already uses. */
+   Only the corners change. The box, the ring and the gap stay exactly as they are, so a
+   row that mixes faces and sleeves still reads as one line. */
+.hascov{border-radius:5px !important}
+.acirc .aco.hascov{border-radius:7px !important;
+  box-shadow:inset 0 0 0 .5px rgb(255 255 255 / .16), 0 1px 3px rgb(0 0 0 / .28)}
+
 /* ---------- what all:unset throws away ----------
    A browser's own stylesheet sets user-select:none on a button, because a control is
    something you press, not something you read. all:unset discards that along with the

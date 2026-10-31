@@ -96,6 +96,50 @@ if(fs.existsSync(PDIR)){
   if(dead.length||idle.length||orphan.length) process.exitCode=1;
 }
 
+// ---- album covers, the stand-in where there is no portrait ----
+// COVERART only ever draws for a name PHOTO does not cover, so an entry in both is dead
+// weight at best and, if the two ever disagree about which is newer, a silent swap.
+const CDIR=path.join(__dirname,"..","covers");
+if(fs.existsSync(CDIR)){
+  const have=new Set(fs.readdirSync(CDIR).filter(f=>f.endsWith(EXT)).map(f=>f.slice(0,-EXT.length)));
+  const want=Object.entries(D.COVERART||{});
+  const dead=want.filter(([,f])=>!have.has(f));
+  const idle=[...have].filter(f=>!want.some(([,g])=>g===f));
+  const both=want.filter(([n])=>(D.PHOTO||{})[n]);
+  say("album covers: "+want.length+" named, "+have.size+" on disk", want.length>0);
+  say("  every name pointing at a file that is there",
+    dead.length===0 ? true : dead.slice(0,5).map(([n,f])=>n+" -> "+f+EXT).join(", "));
+  say("  and nothing in the folder going unused",
+    idle.length===0 ? true : idle.slice(0,5).join(", "));
+  say("  and none of them standing in for an artist who has a portrait"
+    + (both.length?" ("+both.length+": "+both.slice(0,4).map(([n])=>n).join(", ")+")":""),
+    both.length===0);
+  // a sleeve is square like a cover, not 4:3 like a press photo
+  const jpeg=p=>{ const b=fs.readFileSync(p); let i=2;
+    while(i<b.length-9){ if(b[i]!==0xFF){ i++; continue; } const m=b[i+1];
+      if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC)
+        return {h:b.readUInt16BE(i+5), w:b.readUInt16BE(i+7)};
+      i+=2+b.readUInt16BE(i+2); }
+    return null; };
+  const odd=[];
+  for(const f of have){
+    const d=jpeg(path.join(CDIR,f+EXT));
+    if(d && Math.abs(d.w-d.h)>1) odd.push(f+" "+d.w+"x"+d.h);
+  }
+  say("  every one of them square", odd.length===0 ? true : odd.slice(0,6).join(", "));
+  const known=new Set();
+  const notes=[];
+  D.DATA.forEach(r=>{ (D.ART[r[0]]||[]).forEach(a=>known.add(a));
+    (D.ROSTER[r[0]]||[]).forEach(a=>known.add(a));
+    if(r[5]) notes.push(r[5]); });
+  const blob=notes.join(" | ");
+  const orphan=want.filter(([n])=>!known.has(n) && blob.indexOf(n)<0).map(([n])=>n);
+  say("  and every cover belonging to an artist the map names"
+    + (orphan.length?" ("+orphan.length+" do not: "+orphan.slice(0,4).join(", ")+")":""),
+    orphan.length===0);
+  if(dead.length||idle.length||both.length||odd.length||orphan.length) process.exitCode=1;
+}
+
 const fails=[dead.length,ghost.length,shared.length,other.length,odd.length,small.length]
   .reduce((a,b)=>a+b,0);
 process.exitCode = fails ? 1 : 0;
