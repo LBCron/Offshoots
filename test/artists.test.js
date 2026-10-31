@@ -517,5 +517,47 @@ const onPage=async(q,k)=>{ await until(q,k=>{
     }
     await c2.close(); }
 
+  // An Apple artist link is born as a search URL and is upgraded to the artist page once
+  // the id is known. The upgrade used to select a.am only, which is the inline link in the
+  // note; the circles (a.acirc) and the Key artists rows (a.amrow) carry the same job and
+  // were never touched, so they stayed on /search for good. Seeding the cache makes this
+  // a check of the wiring rather than of Apple's API, which the test box cannot reach.
+  { const ID=39960597;
+    // read a real key artist off the panel first, so the seed matches whatever is there
+    const scout=await ctx.newPage();
+    await scout.goto(URL+"#garage"); await selected(scout); await opened(scout);
+    const who=await scout.evaluate(()=>{
+      const a=document.querySelector("a.acirc[data-name]");
+      return a?a.dataset.name:""; });
+    await scout.close();
+    if(!who) say("a key artist circle links to the artist, not a search","no circles here");
+    else {
+      const q=await ctx.newPage();
+      await q.addInitScript(n=>{ try{ localStorage.setItem("amid",
+        JSON.stringify({[n]:39960597})) }catch(e){} }, who);
+      await q.goto(URL+"#garage"); await selected(q); await opened(q);
+      const circ=await q.evaluate(n=>{
+        const a=[...document.querySelectorAll("a.acirc[data-name]")]
+          .find(x=>x.dataset.name===n);
+        return a?a.getAttribute("href"):"gone"; }, who);
+      say("a key artist circle links to the artist, not a search ("+who+")",
+        circ==="https://music.apple.com/us/artist/"+ID);
+
+      const head=await q.$(".subh.subgo");
+      if(!head) say("  and so does the row on the Key artists page","no sub-page here");
+      else {
+        await head.click(); await onPage(q,"artists");
+        const row=await q.evaluate(n=>{
+          const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden).pop();
+          const a=[...u.querySelectorAll("a.amrow[data-name]")]
+            .find(x=>x.dataset.name===n);
+          return a?a.getAttribute("href"):"gone"; }, who);
+        // a pushed page builds its links after setSvc has run, so the push has to ask again
+        say("  and so does the row on the Key artists page"
+          +(row==="https://music.apple.com/us/artist/"+ID?"":": "+row),
+          row==="https://music.apple.com/us/artist/"+ID);
+      }
+      await q.close(); } }
+
   await b.close();
 })();

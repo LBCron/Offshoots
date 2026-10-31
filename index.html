@@ -4125,6 +4125,35 @@ function setSvc(s){
   document.querySelectorAll("select.svcsel").forEach(x=>x.setAttribute("aria-label",
     SVCTIP+" Currently "+svcName()+"."));
 }
+// ---------- lazy Apple Music artist lookups ----------
+// A queue, so a long list does not open 130 connections at once and earn a 403.
+const amQ=[]; let amInFlight=0; const AMMAX=4;
+function amPump(){
+  while(amInFlight<AMMAX && amQ.length){
+    const job=amQ.shift(); amInFlight++;
+    job().catch(()=>{}).then(()=>{ amInFlight--; setTimeout(amPump,120); });
+  }
+}
+function amPaint(a){
+  const id=AMID[a.dataset.name];
+  if(id && SVC==="apple") a.href=`${amScheme}music.apple.com/us/artist/${id}`;
+}
+const amSeen=new WeakSet();
+const amObs = typeof IntersectionObserver==="function" ? new IntersectionObserver(es=>{
+  for(const e of es){ if(!e.isIntersecting) continue; const a=e.target; amObs.unobserve(a); amQueue(a); }
+},{rootMargin:"200px"}) : null;
+function amQueue(a){
+  const nm=a.dataset.name; if(!nm) return;
+  if(AMID[nm]!==undefined){ amPaint(a); return; }
+  amQ.push(()=>amResolve(nm).then(()=>amPaint(a))); amPump();
+}
+function amWatch(a){
+  if(SVC!=="apple" || !a.dataset.name) return;
+  if(AMID[a.dataset.name]!==undefined){ amPaint(a); return; }   // cached, nothing to wait for
+  if(!amObs){ amQueue(a); return; }
+  if(amSeen.has(a)) return;
+  amSeen.add(a); amObs.observe(a);
+}
 const amPending=new Map();
 function amResolve(name){
   if(AMID[name]!==undefined) return Promise.resolve(AMID[name]);
@@ -4170,7 +4199,10 @@ if(MACOS) document.addEventListener("click",e=>{
 });
 function amUpgrade(){
   if(SVC!=="apple") return;
-  document.querySelectorAll("a.am[data-name]").forEach(a=>{ const nm=a.dataset.name; amResolve(nm).then(id=>{ if(id && SVC==="apple") a.href=`${amScheme}music.apple.com/us/artist/${id}`; }); });
+  // Every artist link, not just the inline ones: the circles are a.acirc and the rows a.amrow.
+  // Watched rather than resolved on the spot — a Key artists page carries 130 of them and Apple
+  // rate-limits, so each one waits until it is actually on screen.
+  document.querySelectorAll("a[data-name]").forEach(a=>amWatch(a));
 }
 const byId = Object.fromEntries(nodes.map(n=>[n.id,n]));
 nodes.forEach(n=>n.parents.forEach(p=>byId[p].children.push(n.id)));
@@ -5602,6 +5634,7 @@ function pushPage(key){
   }
   body.scrollTop=0; setOpen(true); syncBack(); closeNav();
   body.dispatchEvent(new Event("scroll"));
+  amUpgrade();   // a pushed page brings its own artist links, which start life as search URLs
   return true;
 }
 function popPage(){
