@@ -204,6 +204,10 @@ svg{display:block}
 aside h2{font-weight:700;font-size:28px;line-height:1.1;letter-spacing:-.022em;margin:8px 0 4px;text-wrap:balance}
 .yr{font-family:var(--f-mono);font-size:var(--t-sub);color:var(--muted)}
 .note{margin:12px 0 8px;font-size:var(--t-body);line-height:var(--t-body-lh)}
+/* a command to type, in the install steps. Default monospace renders a size larger than
+   the prose around it, so it is pulled back and given a ground to sit on. */
+code{font-family:var(--f-mono);font-size:.92em;background:var(--fill2);
+  padding:1px 5px;border-radius:5px;overflow-wrap:break-word}
 .artists{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:baseline;margin:0 0 16px;font-size:var(--t-body);line-height:var(--t-body-lh)}
 .artists span{font-size:var(--t-foot);letter-spacing:0;color:var(--muted);font-weight:600;margin-right:2px}
 .artists b{font-weight:500}

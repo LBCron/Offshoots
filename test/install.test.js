@@ -120,5 +120,43 @@ const UA={
   { const r=await sheet("andchrome",true);
     say("Android gets no Share-sheet button either", r.btn===false); }
 
+  // ---------- one section per platform someone might arrive on ----------
+  // Linux was missing entirely, which on Ubuntu and Mint is worse than it sounds: both
+  // ship Firefox, Firefox on the desktop cannot install a web app at all, and a reader
+  // following the Windows steps in it would find no install icon and conclude the page
+  // was broken rather than that they needed a different browser.
+  { const ctx=await b.newContext({viewport:{width:390,height:844}});
+    const p=await ctx.newPage();
+    await p.goto(URL+"#install"); await ready(p); await onPage(p,"install");
+    const r=await p.evaluate(()=>{
+      const u=document.querySelector('.ppage[data-p="install"]');
+      const heads=[...u.querySelectorAll(".subh")].map(h=>h.textContent.trim());
+      const i=heads.findIndex(h=>/linux/i.test(h));
+      const sec=i<0 ? "" : (()=>{ // the text from the Linux heading to the next one
+        const all=[...u.querySelectorAll(".subh")]; let t="", n=all[i].nextElementSibling;
+        while(n && !n.classList.contains("subh")){ t+=" "+n.textContent; n=n.nextElementSibling; }
+        return t; })();
+      const codes=[...u.querySelectorAll("code")];
+      return {heads, sec, codes:codes.map(c=>c.textContent),
+        codeStyled: codes.length>0 && codes.every(c=>{
+          const s=getComputedStyle(c);
+          return /mono/i.test(s.fontFamily) && s.backgroundColor!=="rgba(0, 0, 0, 0)";}),
+        spill: codes.some(c=>c.getBoundingClientRect().right > u.getBoundingClientRect().right)};});
+    const want=["iPhone","Android","Mac","Windows","Linux"];
+    const missing=want.filter(w=>!r.heads.some(h=>h.indexOf(w)===0||h.indexOf(w)>=0));
+    say("a section for every platform ("+r.heads.length+")"
+      +(missing.length?", missing "+missing.join(", "):""), missing.length===0);
+    say("  Linux names both distributions",
+      /ubuntu/i.test(r.heads.join(" ")) && /mint/i.test(r.heads.join(" ")));
+    // the single most useful sentence in it: the default browser cannot do this
+    say("  and says plainly that Firefox cannot do it",
+      /firefox/i.test(r.sec) && /(cannot|can't|no install)/i.test(r.sec));
+    say("  with the command for each ("+r.codes.length+")",
+      r.codes.some(c=>/snap install chromium/.test(c))
+      && r.codes.some(c=>/apt install chromium/.test(c)));
+    say("  set as commands rather than prose", r.codeStyled);
+    say("  and none of them running off the edge at 390px", r.spill===false);
+    await ctx.close(); }
+
   await b.close(); srv.close();
 })();
