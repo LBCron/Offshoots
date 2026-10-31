@@ -156,6 +156,33 @@ const UA={
       && r.codes.some(c=>/apt install chromium/.test(c)));
     say("  set as commands rather than prose", r.codeStyled);
     say("  and none of them running off the edge at 390px", r.spill===false);
+
+    // Linux is the longest of the five and the one fewest readers need, so it is folded
+    // away. A closed <details> is collapsed by content-visibility rather than display,
+    // so its children still report their intrinsic size: the height that means anything
+    // is the fold's own, and the summary has to stay a full tap target while shut.
+    const f=await p.evaluate(()=>{
+      const d=document.querySelector('.ppage[data-p="install"] details.xfold');
+      if(!d) return null;
+      const s=d.querySelector("summary");
+      return {open:d.open, h:Math.round(d.getBoundingClientRect().height),
+        tap:Math.round(s.getBoundingClientRect().height),
+        heading:/Linux/.test(s.textContent),
+        caret:!!s.querySelector("svg"),
+        turned:getComputedStyle(s.querySelector("svg")).transform};});
+    say("  folded away, not laid out flat", !!f && f.open===false);
+    say("  its summary the heading itself, still a full tap ("+(f&&f.tap)+"px)",
+      !!f && f.heading && f.tap>=44);
+    say("  collapsed to the heading alone ("+(f&&f.h)+"px)", !!f && f.h<=56);
+    say("  with a caret lying on its side", !!f && f.caret && f.turned==="none");
+    await p.click('.ppage[data-p="install"] details.xfold summary');
+    await settle(p);
+    const o=await p.evaluate(()=>{
+      const d=document.querySelector('.ppage[data-p="install"] details.xfold');
+      return {open:d.open, h:Math.round(d.getBoundingClientRect().height),
+        turned:getComputedStyle(d.querySelector("summary svg")).transform};});
+    say("  opening it shows the steps ("+o.h+"px)", o.open===true && o.h>300);
+    say("  and turns the caret down", o.turned!=="none");
     await ctx.close(); }
 
   await b.close(); srv.close();

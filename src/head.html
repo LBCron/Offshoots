@@ -1377,6 +1377,25 @@ body.searching #bottomSearch{display:block}
 .fold .about{padding-right:2px}
 .installwrap .subh{margin-top:18px}
 .installwrap .subh:first-child{margin-top:0}
+/* A platform section folded away. Linux is the longest of the five and the one fewest
+   readers need, so it is closed by default; the others are short enough that hiding them
+   would cost a tap to save nothing. The summary keeps the heading's own type, so a shut
+   fold reads as one more heading in the list rather than as a different kind of control,
+   and the caret is the one the list rows use, lying on its side until it is opened. */
+.xfold{margin-top:18px}
+.xfold summary{display:flex;align-items:center;gap:8px;list-style:none;cursor:pointer;
+  min-height:var(--tap);margin:0;-webkit-tap-highlight-color:transparent}
+.xfold summary::-webkit-details-marker{display:none}
+.xfold summary span{flex:1;min-width:0}
+.xfold summary svg{flex:none;width:17px;height:17px;color:var(--muted);opacity:.75;
+  transition:transform .18s,opacity .18s}
+.xfold summary:hover svg{opacity:1}
+.xfold[open] summary svg{transform:rotate(90deg);opacity:1}
+.xfold summary:focus-visible{outline:0;border-radius:8px;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+.xfold .xfoldb > :first-child{margin-top:4px}
+.xfold[open]{padding-bottom:6px}
+@media (prefers-reduced-motion:reduce){ .xfold summary svg{transition:none} }
 .about .stats{font-family:var(--f-mono);font-size:var(--t-foot);line-height:var(--t-foot-lh);color:var(--muted);margin:0 0 12px;font-variant-numeric:tabular-nums}
 @media (max-width:899px){ .zoom{bottom:calc(14px + env(safe-area-inset-bottom,0px))} }
 
