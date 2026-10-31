@@ -311,6 +311,31 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
         return t && /^[A-Z0-9]{1,2}$/.test(t.textContent.trim());})};});
   say("  all "+art.n+" carry a square ("+art.img+" covers, "+art.ph+" tiles)", art.n>0 && art.sq);
   say("  and a tile says which style it stands for", art.inked);
+  // A row prints the style's name an inch to the right of its picture, so the picture
+  // uses the copy of the artwork with the lettering taken off. The titled version is
+  // the playlist's own cover and stays on the playlist row, where it is the playlist.
+  // Not every style has art at all, and one with none falls through art/ to the family
+  // tile, which is the design. What must not happen is a row showing the TITLED artwork
+  // when the untitled copy of that same picture exists: that is the one printing the
+  // name twice, an inch apart.
+  const from=await p.evaluate(()=>{
+    const r=[...document.querySelectorAll(".ppage:not([hidden]) .pick")];
+    // a top-level const is in script scope, not on window
+    const S=(typeof STYLEART!=="undefined") ? STYLEART : null;
+    if(!S) return {n:-1};
+    const out={n:0, bare:0, wrong:[], noart:0};
+    for(const x of r){
+      const i=x.querySelector("img.pcov"); if(!i) continue;
+      const s=i.getAttribute("src")||"", id=x.dataset.go||"";
+      out.n++;
+      if(s.indexOf("styles/")===0){ out.bare++; continue; }
+      if(S[id]) out.wrong.push(id+" -> "+s); else out.noart++;
+    }
+    return out;});
+  say("  drawn from the untitled art ("+from.bare+" of "+from.n
+      +(from.noart?", "+from.noart+" with no art either way":"")+")",
+    from.n===-1 ? "STYLEART is not reachable from the page"
+      : from.wrong.length===0 ? true : from.wrong.slice(0,3).join(", "));
   // no play mark on these. The rows go to a style on the map, not to a playlist, and a
   // triangle on a row that does not play anything is a promise the row cannot keep.
   const marks=await p.evaluate(()=>{

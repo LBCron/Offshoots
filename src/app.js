@@ -20,19 +20,25 @@ function wiki(n){
 }
 // Emily's own Apple Music class playlists, keyed by style id (paths are relative to music.apple.com)
 // cover art, if art/<id>.jpg is sitting next to the page; missing files remove themselves
-const ART_DIR="art/", ART_EXT=".jpg";
+const ART_DIR="art/", STYLE_DIR="styles/", ART_EXT=".jpg";
 // two letters for a style with no art file, so the row keeps its shape
 function initials(name){
   const w=String(name||"").split(/[^A-Za-z0-9]+/).filter(Boolean);
   if(!w.length) return "?";
   return (w.length>1 ? w[0][0]+w[1][0] : w[0].slice(0,2)).toUpperCase();
 }
-const cover = (id,n) => {
+// bare:true asks for the version of the artwork with no lettering on it, for the places
+// where the row already prints the name an inch away. Falls back to the titled art, and
+// that falls back to the family-colour tile, so a style with neither still has a square.
+const cover = (id,n,bare) => {
   const f = (typeof COVER!=="undefined" && COVER[id]) || id;   // COVER maps a style to its file name; otherwise the id is the file name
+  const s = bare && typeof STYLEART!=="undefined" && STYLEART[id];
   const node = n || byId[id];
   const c = node ? FAM[node.fam].c : "";
   const ini = initials(node?node.name:id);
-  return `<img class="pcov" src="${ART_DIR}${encodeURIComponent(f)}${ART_EXT}" alt="" loading="lazy" decoding="async" data-c="${esc(c)}" data-ini="${esc(ini)}">`;
+  const src = s ? `${STYLE_DIR}${encodeURIComponent(s)}${ART_EXT}`
+                : `${ART_DIR}${encodeURIComponent(f)}${ART_EXT}`;
+  return `<img class="pcov" src="${src}" alt="" loading="lazy" decoding="async" data-c="${esc(c)}" data-ini="${esc(ini)}">`;
 };
 // cover plus a playlist title say what the section is; a heading on top of that is noise
 function playLabel(n){
@@ -1366,7 +1372,7 @@ function modePicks(m){
     // recognised the name. Where there is no file the shared handler swaps in the tile
     // it uses on the playlist row: family colour, initials, same square.
     return `<button type="button" class="pick c withart" style="--c:${FAM[n.fam].c}" data-go="${esc(id)}" title="Show ${esc(n.name)} on the map">`
-      + cover(id,n)
+      + cover(id,n,true)
       + `<span class="pknm">${esc(n.name)}</span>`
       + `<span class="pkwhy">${esc(why)}</span>`
       + `<span class="pkfam">${esc(FAM[n.fam].short)} · ${n.year}</span></button>`;

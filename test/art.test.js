@@ -96,6 +96,28 @@ if(fs.existsSync(PDIR)){
   if(dead.length||idle.length||orphan.length) process.exitCode=1;
 }
 
+// ---- the untitled style art ----
+// Same pictures as art/, lettering removed. STYLEART only ever draws where a row prints
+// the name itself, and it falls back to art/, so a gap here is cosmetic rather than
+// broken; a name pointing at a file that is not there is not.
+const SDIR=path.join(__dirname,"..","styles");
+if(fs.existsSync(SDIR)){
+  const have=new Set(fs.readdirSync(SDIR).filter(f=>f.endsWith(EXT)).map(f=>f.slice(0,-EXT.length)));
+  const want=Object.entries(D.STYLEART||{});
+  const ids=new Set(D.DATA.map(r=>r[0]));
+  const dead=want.filter(([,f])=>!have.has(f));
+  const idle=[...have].filter(f=>!want.some(([,g])=>g===f));
+  const ghost=want.filter(([id])=>!ids.has(id)).map(([id])=>id);
+  say("untitled style art: "+want.length+" styles, "+have.size+" files", want.length>0);
+  say("  every one pointing at a file that is there",
+    dead.length===0 ? true : dead.slice(0,5).map(([i,f])=>i+" -> "+f+EXT).join(", "));
+  say("  and nothing in the folder going unused",
+    idle.length===0 ? true : idle.slice(0,5).join(", "));
+  say("  and belonging to a style that exists",
+    ghost.length===0 ? true : ghost.slice(0,5).join(", "));
+  if(dead.length||idle.length||ghost.length) process.exitCode=1;
+}
+
 // ---- album covers, the stand-in where there is no portrait ----
 // COVERART only ever draws for a name PHOTO does not cover, so an entry in both is dead
 // weight at best and, if the two ever disagree about which is newer, a silent swap.
