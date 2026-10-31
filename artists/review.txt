@@ -1,0 +1,346 @@
+114 matches worth checking. The name is one word and not a
+band, or the evidence was thin. Open the source link; if it is the
+wrong person, delete the .jpg and its entry in credits.json.
+
+  6LACK
+      matched: 6lack - American singer-songwriter and rapper (born 1992)
+      https://commons.wikimedia.org/wiki/File:6LACK.jpg
+  6ix9ine
+      matched: 6ix9ine - American rapper from New York (born 1996)
+      https://commons.wikimedia.org/wiki/File:6ix9ine_(Daniel_Hernadez).jpg
+  Agustín Lara
+      matched:  - Mexican composer and interpreter of songs and boleros (1897–1970)
+      https://commons.wikimedia.org/wiki/File:Agust%C3%ADn_Lara,_circa_1950s.jpg
+  Alberta Hunter
+      matched: Alberta Hunter - American blues singer, songwriter, and nurse (1895-1984)
+      https://commons.wikimedia.org/wiki/File:AlbertaHunter1930.png
+  Amiri Baraka
+      matched: Amiri Baraka - African-American writer (1934–2014)
+      https://commons.wikimedia.org/wiki/File:Amiri_Baraka_2013.jpg
+  Antonio Aguilar
+      matched: Antonio Aguilar - Mexican singer and actor (1919–2007)
+      https://commons.wikimedia.org/wiki/File:Antonio_Aguilar_in_The_Undefeated.jpg
+  Arcángel
+      matched: Arcángel - American rapper and singer
+      https://commons.wikimedia.org/wiki/File:Arc%C3%A1ngel_2023_Interview_-_Tony_Dandrades.png
+  Arsenio Rodríguez
+      matched: Arsenio Rodríguez - Cuban musician (1911–1970)
+      https://commons.wikimedia.org/wiki/File:Conjunto_de_Arsenio_Rodr%C3%ADguez.JPG
+  Artie Shaw
+      matched: Artie Shaw - American clarinetist, composer, and bandleader (1910-2004)
+      https://commons.wikimedia.org/wiki/File:Artie_Shaw_5_-_Film_Second_Chorus.jpg
+  Attila the Hun
+      matched: Attila the Hun - calypsonian
+      https://commons.wikimedia.org/wiki/File:Atilla_the_Hun_(calypsonian)_ca._1938-1940.jpg
+  Baauer
+      matched: Baauer - American DJ and record producer (born 1989)
+      https://commons.wikimedia.org/wiki/File:Baauer_Big_Dancing_by_Leah_Gair_cropped.jpg
+  Babyface
+      matched: Babyface Ray - American rapper (born 1991)
+      https://commons.wikimedia.org/wiki/File:Babyface_Ray_2022.png
+  Beau Jocque
+      matched: Beau Jocque - American musician (1953-1999)
+      https://commons.wikimedia.org/wiki/File:BeauJocque1997.jpg
+  Big L
+      matched: Big Lean - Canadian rapper and singer
+      https://commons.wikimedia.org/wiki/File:Big_Lean.jpg
+  Big Mama Thornton
+      matched: Big Mama Thornton - American rhythm and blues singer and songwriter
+      https://commons.wikimedia.org/wiki/File:Blues_is_a_woman_Reitz_(Big_Mama_Thornton).jpg
+  Bismillah Khan
+      matched: Bismillah Khan - Indian shehnai player (1916–2006)
+      https://commons.wikimedia.org/wiki/File:Bismillah_at_Concert1_(edited).jpg
+  Björk
+      matched: Björk - Icelandic singer (born 1965)
+      https://commons.wikimedia.org/wiki/File:Bj%C3%B6rk_by_Hello,_I_am_Bruce_at_Nature_Awareness_Nattura_concert_Reykjavik_2008.jpg
+  Blaze
+      matched: Blaze Bayley - British heavy metal singer
+      https://commons.wikimedia.org/wiki/File:Blaze_Bayley.jpg
+  Bob Childers
+      matched: Bob Childers - American singer-songwriter (1946-2008)
+      https://commons.wikimedia.org/wiki/File:Bob_Childers_(1).jpg
+  Bobby Rydell
+      matched: Bobby Rydell - American singer and teen idol (1942–2022)
+      https://commons.wikimedia.org/wiki/File:Bobby_Rydell.jpg
+  Boozoo Chavis
+      matched: Boozoo Chavis - American musician (1930-2001)
+      https://commons.wikimedia.org/wiki/File:Boozoochavis.jpg
+  Brotha Lynch Hung
+      matched: Brotha Lynch Hung - American rapper from California
+      https://commons.wikimedia.org/wiki/File:Brotha_Lynch_Hung.jpg
+  Bunji Garlin
+      matched: Bunji Garlin - musical artist
+      https://commons.wikimedia.org/wiki/File:TnT_PoS_Bunji%2BFay-Ann_Fire_Fete_2014.jpg
+  Burial
+      matched: Burial - British electronic musician
+      https://commons.wikimedia.org/wiki/File:Burial1.svg
+  Cachao
+      matched: Cachao - Cuban double bassist and composer (1918–2008)
+      https://commons.wikimedia.org/wiki/File:Cachao_(2).jpg
+  Cartola
+      matched: Cartola - Brazilian singer, composer and poet (1908–1980)
+      https://commons.wikimedia.org/wiki/File:M%C3%BAsico_Cartola.jpg
+  Charles Brown
+      matched: Charles Brown - American blues singer and pianist (1922-1999)
+      https://commons.wikimedia.org/wiki/File:Charlesbrown1996.jpg
+  Chas McDevitt
+      matched: Chas McDevitt - Scottish skiffle musician
+      https://commons.wikimedia.org/wiki/File:Chas_McDevitt_Aldershot_2017.jpg
+  Cowboy Troy
+      matched: Cowboy Troy - American country singer
+      https://commons.wikimedia.org/wiki/File:Cowboy_Troy-blueshirt-whitehat.jpg
+  Cuco
+      matched: Cuco - Mexican-American singer-songwriter
+      https://commons.wikimedia.org/wiki/File:CUCO_at_Tropic%C3%A1lia_Music_%26_Taco_Fest.png
+  DJ Deeon
+      matched: DJ Deeon - American house producer
+      https://commons.wikimedia.org/wiki/File:DJ_Deeon,_2009_(cropped).jpg
+  DJ EZ
+      matched: DJ EZ - British DJ
+      https://commons.wikimedia.org/wiki/File:DJ_EZ,_2012.jpg
+  DJ Marlboro
+      matched: DJ Marlboro - Brazilian DJ
+      https://commons.wikimedia.org/wiki/File:Dj_marlboro_bsb.jpg
+  DannyLux
+      matched: DannyLux - American singer
+      https://commons.wikimedia.org/wiki/File:DannyLux_Performing_at_Syracuse_University.jpg
+  Derrick May
+      matched: Derrick May - American DJ and techno record producer
+      https://commons.wikimedia.org/wiki/File:Derrick_May.jpg
+  Dio
+      matched: Dio - Dutch rapper
+      https://commons.wikimedia.org/wiki/File:Dio_bij_New_Attraction.jpg
+  Dntel
+      matched:  - American electronic musician and DJ
+      https://commons.wikimedia.org/wiki/File:Dntel.jpg
+  Donovan
+      matched: Donovan - Scottish musician (born 1946)
+      https://commons.wikimedia.org/wiki/File:Donovan_Washington_2007.jpg
+  Doom
+      matched: MF DOOM - British rapper (1971–2020)
+      https://commons.wikimedia.org/wiki/File:MF_Doom_-_Hultsfred_2011_(cropped).jpg
+  Excision
+      matched: Excision - Canadian musician and DJ
+      https://commons.wikimedia.org/wiki/File:Spring_Awakening_Music_Festival_6_16_2013_(9157130674)_(cropped).jpg
+  Fletcher Henderson
+      matched: Fletcher Henderson - American pianist, bandleader, arranger and composer (1897–1952)
+      https://commons.wikimedia.org/wiki/File:Fletcher_Henderson_(1943_publicity_photo).jpg
+  Goldie
+      matched: Goldie - British DJ and producer
+      https://commons.wikimedia.org/wiki/File:Goldie_2003_crop.jpg
+  Gunther Schuller
+      matched: Gunther Schuller - American composer and conductor (1925–2015)
+      https://commons.wikimedia.org/wiki/File:Gunther_Schuller_(2008).jpg
+  Harry Von Tilzer
+      matched: Harry Von Tilzer - American composer (1872–1946)
+      https://commons.wikimedia.org/wiki/File:HarryVonTilzer.jpg
+  Illenium
+      matched: Illenium - American musician, DJ, producer, and songwriter (born 1990)
+      https://commons.wikimedia.org/wiki/File:ILLENIUM_In_Las_Vegas.png
+  Imanbek
+      matched: Imanbek - Kazakh record producer
+      https://commons.wikimedia.org/wiki/File:Imanbek_(2021).png
+  Isabella Lovestory
+      matched: Isabella Lovestory - Honduran singer based in Canada
+      https://commons.wikimedia.org/wiki/File:Isabella_Lovestory.jpg
+  JME
+      matched: Jme - British grime MC (born 1985)
+      https://commons.wikimedia.org/wiki/File:Jme,_UK_MC_.jpg
+  Jerry Butler
+      matched: Jerry Butler - American soul singer and songwriter (1939–2025)
+      https://commons.wikimedia.org/wiki/File:Jerry_Butler_(1970).png
+  Jesse Saunders
+      matched: Jesse Saunders - American musician
+      https://commons.wikimedia.org/wiki/File:Promotional_photo!_2013-08-09_00-25.jpeg
+  Jimmie Rodgers
+      matched: Jimmie Rodgers - American country singer (1897–1933)
+      https://commons.wikimedia.org/wiki/File:Jimmie_Rodgers_in_1931.jpg
+  Jlin
+      matched:  - electronic musician
+      https://commons.wikimedia.org/wiki/File:JLin_performing_at_Elsewhere_in_Brooklyn,_New_York,_on_August_8,_2021.jpg
+  Johnny Duncan
+      matched: Johnny Duncan - American country singer (1938–2006)
+      https://commons.wikimedia.org/wiki/File:Johnny_Duncan_(1971).png
+  Kano
+      matched: Kano - English rapper, songwriter and actor
+      https://commons.wikimedia.org/wiki/File:Kano_(Rapper).jpg
+  Kavinsky
+      matched:  - French DJ, electronic record producer, and actor (1975–2026)
+      https://commons.wikimedia.org/wiki/File:Kavinsky_2.jpg
+  Kay Flock
+      matched: Kay Flock - American rapper (born 2003)
+      https://commons.wikimedia.org/wiki/File:Kay_Flock_in_2021.png
+  Keith Green
+      matched: Keith Green - American contemporary Christian musician and songwriter (1953–1982)
+      https://commons.wikimedia.org/wiki/File:Keithgreen.jpg
+  Kikuo
+      matched: Kikuo - Japanese composer (born 1988)
+      https://commons.wikimedia.org/wiki/File:Kikuo_Japanese_Musician_and_Vocaloid_Artist.jpg
+  Kitaro
+      matched: Kitarō - musician, composer, record producer, arranger
+      https://commons.wikimedia.org/wiki/File:Kitaro_5.jpg
+  Kode9
+      matched: Kode9 - British musician
+      https://commons.wikimedia.org/wiki/File:Kode9.jpg
+  Ladysmith Black Mambazo
+      matched: Ladysmith Black Mambazo - South African male a capella ensemble
+      https://commons.wikimedia.org/wiki/File:Ladysmith-Black-Mambazo.jpg
+  Laurel Aitken
+      matched: Laurel Aitken - Cuban singer (1927–2005)
+      https://commons.wikimedia.org/wiki/File:Aitken14.jpg
+  Lecrae
+      matched: Lecrae - American rapper, singer and record producer (born 1979)
+      https://commons.wikimedia.org/wiki/File:Lecrae_at_Marine_Corps_Air_Station_Iwakuni,_Japan,_Jan._9,_2018_(cropped).jpg
+  Lennie Tristano
+      matched: Lennie Tristano - American jazz pianist and composer (1919–1978)
+      https://commons.wikimedia.org/wiki/File:Lennie_Tristano_1947_(Gottlieb).jpg
+  Les Baxter
+      matched: Les Baxter's Balladeers - American musical group; 1960s folk group formed by band leader Les Baxter
+      https://commons.wikimedia.org/wiki/File:Les_Baxter%27s_Balladeers.png
+  Lola Beltrán
+      matched: Lola Beltrán - Mexican actress and singer (1932-1996)
+      https://commons.wikimedia.org/wiki/File:Lola_Beltr%C3%A1n_portrait,_c._1956_(cropped).jpg
+  Luc Ferrari
+      matched: Luc Ferrari - French composer (1929–2005)
+      https://commons.wikimedia.org/wiki/File:Luc_Ferrari_Composer_of_France.jpg
+  MC Marcinho
+      matched: MC Marcinho - Brazilian composer and singer
+      https://commons.wikimedia.org/wiki/File:MC_Marcinho_at_Os_Suburbanos_in_2019.jpg
+  Ma Rainey
+      matched: Ma Rainey - American blues singer (1886–1939)
+      https://commons.wikimedia.org/wiki/File:MaRainey.jpg
+  Madlib
+      matched: Madlib - American DJ and music producer (born 1973)
+      https://commons.wikimedia.org/wiki/File:MadlibMarch2014Echo_(cropped).jpg
+  Madonna
+      matched: Madonna - American singer, songwriter, and actress (born 1958)
+      https://commons.wikimedia.org/wiki/File:MadonnaO2171023_(97_of_133)_(53269593787)_(cropped).jpg
+  Marcus Roberts
+      matched: Marcus Roberts - American musician
+      https://commons.wikimedia.org/wiki/File:Marcus_Roberts_2010.jpg
+  Marian Anderson
+      matched: Marian Anderson - African-American contralto (1897–1993)
+      https://commons.wikimedia.org/wiki/File:Marian_Anderson_1951.JPG
+  Mary Martin
+      matched: Mary Martin - American actress (1913-1990)
+      https://commons.wikimedia.org/wiki/File:Mary_Martin_1.jpg
+  Mickey Gilley
+      matched: Mickey Gilley - American country music singer and musician
+      https://commons.wikimedia.org/wiki/File:Mickey_Gilley.png
+  Morgan Wade
+      matched: Morgan Wade - American singer-songwriter
+      https://commons.wikimedia.org/wiki/File:Morgan_Wade,_July_2024.jpg
+  Mos Def
+      matched: Yasiin Bey - American rapper
+      https://commons.wikimedia.org/wiki/File:Mos_Def_-_Ilosaarirock_2012.jpg
+  Nando Boom
+      matched: Nando Boom - Panamanian singer
+      https://commons.wikimedia.org/wiki/File:Nando_Boom.jpg
+  Nikki Giovanni
+      matched: Nikki Giovanni - American poet, writer and activist
+      https://commons.wikimedia.org/wiki/File:Nikki_Giovanni_1.jpg
+  Odetta
+      matched: Odetta - American singer (1930–2008)
+      https://commons.wikimedia.org/wiki/File:Odetta.jpg
+  OsamaSon
+      matched: OsamaSon - American rapper and record producer (born 2003)
+      https://commons.wikimedia.org/wiki/File:OsamaSon,_NY.jpg
+  Parannoul
+      matched: Parannoul - South Korean musician (born 2001)
+      https://commons.wikimedia.org/wiki/File:Parannoul_in_Pentaport_Rock_Festival_2024.png
+  PartyNextDoor
+      matched: PartyNextDoor - Canadian singer-songwriter and record producer (born 1993)
+      https://commons.wikimedia.org/wiki/File:PartyNextDoor_2016_press_photo.png
+  Peaches
+      matched: Peaches - Canadian electroclash musician
+      https://commons.wikimedia.org/wiki/File:Peaches,_November_16,_2009.jpg
+  Phill Niblock
+      matched: Phill Niblock - American composer (1933–2024)
+      https://commons.wikimedia.org/wiki/File:Phill_Niblock.jpg
+  Quannnic
+      matched: quannnic - American musician
+      https://commons.wikimedia.org/wiki/File:Quannnic_Live_at_the_Constellation_Room.png
+  Raulín Rodríguez
+      matched: Raulín Rodríguez - Dominican Republic singer
+      https://commons.wikimedia.org/wiki/File:Raul%C3%ADn_Rodr%C3%ADguez_-_Imagenes_Dominicanas_(Cropped).jpg
+  Ray Barretto
+      matched: Ray Barretto - American percussionist and bandleader of Puerto Rican ancestry (1929–2006)
+      https://commons.wikimedia.org/wiki/File:Ray_Barretto.jpg
+  Ritchie Valens
+      matched: Ritchie Valens - American musician (1941–1959)
+      https://commons.wikimedia.org/wiki/File:Ritchie_Valens_1959_press_photo.jpg
+  Robert Hood
+      matched: Robert Hood - American minimal techno musician
+      https://commons.wikimedia.org/wiki/File:Robert_Hood_Live_@_Kennedys,_Dublin,_Ireland_2009.JPG
+  Roland Hayes
+      matched: Roland Hayes - African American singer (1887–1977)
+      https://commons.wikimedia.org/wiki/File:Roland_Hayes_by_Van_Vechten.jpg
+  Santiago Jiménez
+      matched: Santiago Jiménez, Jr. - American musician
+      https://commons.wikimedia.org/wiki/File:Santiago_Jimenez_Jr_2000.jpg
+  Sexteto Habanero
+      matched: Sexteto Habanero - Cuban son ensemble
+      https://commons.wikimedia.org/wiki/File:S._Habanero.jpg
+  Shelly Manne
+      matched: Shelly Manne - American jazz drummer (1920–1984)
+      https://commons.wikimedia.org/wiki/File:Shelly_Manne_(Gottlieb_05991).jpg
+  Shimza
+      matched: Shimza - South African DJ and music producer
+      https://commons.wikimedia.org/wiki/File:Dj_Shimza_with_Black_Coffee_Dj.jpg
+  Smokepurpp
+      matched: Smokepurpp - American rapper (born 1997)
+      https://commons.wikimedia.org/wiki/File:Smokepurpp.jpg
+  Solange
+      matched: Solange Knowles - American singer, songwriter, and actress (born 1986)
+      https://commons.wikimedia.org/wiki/File:Solange_(220707).jpg
+  TKA
+      matched: Tkay Maidza - Australian rapper and singer-songwriter
+      https://commons.wikimedia.org/wiki/File:Tkay_Maidza_(40466681602).jpg
+  Tems
+      matched:  - Nigerian singer-songwriter (born 1995)
+      https://commons.wikimedia.org/wiki/File:Tems_on_NdaniTV_Sessions_-cropped.png
+  Thalía
+      matched: Thalía - Mexican singer and actress (born 1971)
+      https://commons.wikimedia.org/wiki/File:Thal%C3%ADa_Primera_Fila_cropped.jpg
+  The Showmen
+      matched: The Showmen - Italian band
+      https://commons.wikimedia.org/wiki/File:Gli_Showmen.jpg
+  Tomppabeats
+      matched: Tomppabeats - Finnish musician
+      https://commons.wikimedia.org/wiki/File:Tomppabeats.jpg
+  Tone Lōc
+      matched: Tone Lōc - American rapper
+      https://commons.wikimedia.org/wiki/File:Houston_Dash_90s_Bash,_2023-10-08_(53256126868)_(cropped).jpg
+  Tye Tribbett
+      matched: Tye Tribbett - American gospel artist
+      https://commons.wikimedia.org/wiki/File:Tye_Tribbett.jpg
+  Tyga
+      matched:  - American rapper
+      https://commons.wikimedia.org/wiki/File:Tyga_-_Openair_Frauenfeld_2019_02.jpg
+  Uncle Dave Macon
+      matched: Uncle Dave Macon - American musician (1870-1952)
+      https://commons.wikimedia.org/wiki/File:Uncle_Dave_Macon_Billboard.jpg
+  Vangelis
+      matched: Vangelis - Greek composer (1943-2022)
+      https://commons.wikimedia.org/wiki/File:Vangelis,_26_July_2012.jpg
+  Vicente Fernández
+      matched: Vicente Fernández - Mexican actor and ranchera singer (1940–2021)
+      https://commons.wikimedia.org/wiki/File:Vicente_Fern%C3%A1ndez_-_Pepsi_Center_-_06.11.11.jpg
+  Walter Hawkins
+      matched: Walter Hawkins - American musician (1949–2010)
+      https://commons.wikimedia.org/wiki/File:Walter_Hawkins_performs_on_stage_in_the_East_Room_of_the_White_House.jpg
+  Webb Pierce
+      matched: Webb Pierce - American country musician (1921–1991)
+      https://commons.wikimedia.org/wiki/File:Webb_Pierce.jpg
+  Wynn Stewart
+      matched: Wynn Stewart - American singer
+      https://commons.wikimedia.org/wiki/File:Wynn_Stewart.png
+  Wynonie Harris
+      matched: Wynonie Harris - American blues singer (1915–1969)
+      https://commons.wikimedia.org/wiki/File:Wynonie_Harris_publicity_photo.jpg
+  Yeat
+      matched: Yeat - American rapper, singer-songwriter, and record producer (born 2000)
+      https://commons.wikimedia.org/wiki/File:Yeat.png
+  midwxst
+      matched: Midwxst - American singer and rapper from Indiana
+      https://commons.wikimedia.org/wiki/File:Midwxst_11_12_22.png

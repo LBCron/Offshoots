@@ -382,6 +382,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
           name:a.querySelector(".lrlbl").textContent,
           role:(role(a)||[""])[0],
           glyph:!!a.querySelector(".lrico svg"),
+          photo:!!a.querySelector(".lrico img"),
           tinted:getComputedStyle(a.querySelector(".lrico")).backgroundColor,
           fill:getComputedStyle(a.querySelector(".lrico")).backgroundImage,
           ink:getComputedStyle(a.querySelector(".lrico")).color}));
@@ -392,15 +393,29 @@ const onPage=async(q,k)=>{ await until(q,k=>{
       // the colour is in the glyph, so that is where to look for it
       say("  coloured by what the act is, not all alike ("+pair.roles.length+" kinds here)",
         pair.roles.length>1 && new Set(pair.rows.map(r=>r.ink)).size>1);
-      // No disc behind it. This went round twice: a coloured glyph on neutral grey, then
-      // a filled circle with a white glyph to match the big mode circles, and now the
-      // glyph alone. At 34px a disc is mostly disc, and without one duotone draws its
-      // 20% layer in the hue straight onto the panel, which is the weight working.
-      say("  the glyph alone, with nothing behind it",
-        pair.rows.every(r=>!/gradient/.test(r.fill) && !/rgb/.test(r.tinted.replace(/rgba\(0, 0, 0, 0\)/,""))));
-      // and it is not white, which would be invisible without a disc under it
+      // Two cases, and the difference is the whole design. 520 of the key artists have a
+      // portrait and the rest never will, so the glyph is not a placeholder: it is what
+      // a row looks like when there is no face, and it has to look deliberate.
+      // Without a photo: the glyph alone. This went round twice, a coloured glyph on
+      // neutral grey and then a filled circle with a white glyph, before landing here,
+      // because at 34px a disc is mostly disc.
+      const bare=pair.rows.filter(r=>!r.photo), faced=pair.rows.filter(r=>r.photo);
+      say("  "+bare.length+" without a photo, each the glyph alone",
+        bare.length>0 && bare.every(r=>!/gradient/.test(r.fill)
+          && !/rgb/.test(r.tinted.replace(/rgba\(0, 0, 0, 0\)/,""))));
       say("  and not white, which needs a disc to sit on",
-        pair.rows.every(r=>r.ink!=="rgb(255, 255, 255)"));
+        bare.every(r=>r.ink!=="rgb(255, 255, 255)"));
+      // With one: the portrait fills the disc the glyph was drawn in, same box, so a row
+      // that mixes the two keeps one rhythm rather than reading as photos among icons.
+      if(faced.length) say("  "+faced.length+" with one, filling the same disc",
+        faced.every(r=>/rgb/.test(r.tinted)));
+
+      // Every portrait the map promises has to be on disk. PHOTO is keyed by the artist
+      // name the map already uses, so a renamed artist silently loses a face that is
+      // still sitting in the folder, and a typo points at a file nobody wrote.
+      const files=await q.evaluate(()=>Object.values(PHOTO));
+      say("  "+files.length+" portraits, every filename distinct",
+        new Set(files).size===files.length);
 
       // and the role the page gives an act is the role the row gave it
       await q.click("#panelBack"); await q.waitForTimeout(800);

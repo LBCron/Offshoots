@@ -27,7 +27,9 @@ again. Writes artists/credits.json and artists/report.txt when it finishes.
 
 import json, os, re, sys, time, unicodedata, urllib.parse, urllib.request, urllib.error
 
-UA = "Offshoots/1.0 (music lineage map; artist portraits for a non-commercial map)"
+# Wikimedia's policy asks for a contact in the User-Agent and blocks agents that do not
+# carry one. Put a real address here before a long run.
+UA = "Offshoots/1.1 (https://offshoots.netlify.app; artist portraits; contact: me@bryanbell.com)"
 WD = "https://www.wikidata.org/w/api.php"
 COMMONS = "https://commons.wikimedia.org/w/api.php"
 
@@ -35,11 +37,19 @@ SIZE = 240          # the circle is 80px at 1x, so 240 covers a 3x screen
 HEAD_BIAS = 0.14    # crop this far down from the top, not the middle: a standing shot
                     # centred on the frame cuts the head off, and most of these are
                     # standing shots rather than headshots
-PAUSE = 0.1         # polite. Wikimedia asks for a real user agent and no hammering
+PAUSE = 0.25        # four a second. 0.1 was aggressive enough to start drawing 429s
 
 
-def get(url, params, tries=4):
-    """One API call, with retries. Wikimedia 429s rather than failing, so back off."""
+# A lookup that fails is not a lookup that found nothing, and the first version of this
+# script could not tell the difference: every error path returned None, pick() passed the
+# None along, and the caller wrote "no music act with a photo on Wikidata" in the report.
+# 1,561 names were recorded that way and most of them have a photo. Joan Baez has a
+# photo. So FAILED is its own answer now, and the report counts it separately.
+FAILED = object()
+
+
+def get(url, params, tries=5):
+    """One API call. Returns the parsed body, None for a real 404, or FAILED."""
     q = url + "?" + urllib.parse.urlencode(params)
     for n in range(tries):
         try:
@@ -47,16 +57,30 @@ def get(url, params, tries=4):
             with urllib.request.urlopen(req, timeout=30) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
-            if e.code in (429, 503) and n < tries - 1:
-                time.sleep(2 ** n)
-                continue
-            return None
+            if e.code in (429, 503):
+                # they tell you how long to wait; guessing is how you get blocked
+                wait = e.headers.get("Retry-After")
+                try: wait = float(wait)
+                except (TypeError, ValueError): wait = 2 ** n
+                if n < tries - 1:
+                    time.sleep(min(wait, 60)); continue
+                return FAILED
+            if e.code in (403, 401):
+                # almost always the User-Agent. Worth stopping for rather than writing
+                # two thousand false negatives and calling it a result.
+                print("\n  BLOCKED by Wikimedia (HTTP %d). Put a real contact in UA at the\n"
+                      "  top of this file and run it again." % e.code)
+                return FAILED
+            if e.code == 404:
+                return None
+            if n < tries - 1:
+                time.sleep(1 + n); continue
+            return FAILED
         except Exception:
             if n < tries - 1:
-                time.sleep(1 + n)
-                continue
-            return None
-    return None
+                time.sleep(1 + n); continue
+            return FAILED
+    return FAILED
 
 
 def slug(name):
@@ -79,9 +103,11 @@ def slug(name):
 
 
 def candidates(name):
-    """Wikidata entities whose label or alias matches, best first."""
+    """Wikidata entities whose label or alias matches, best first. FAILED if the ask did."""
     d = get(WD, {"action": "wbsearchentities", "search": name, "language": "en",
-                 "uselang": "en", "type": "item", "limit": 7, "format": "json"})
+                 "uselang": "en", "type": "item", "limit": 10, "format": "json"})
+    if d is FAILED:
+        return FAILED
     return [h["id"] for h in (d or {}).get("search", [])]
 
 
@@ -120,11 +146,15 @@ def pick(ids, name):
     Italian film composer on top. A match like that is flagged low confidence and lands
     in review.txt rather than being quietly trusted.
     """
+    if ids is FAILED:
+        return FAILED
     if not ids:
         return None
     d = get(WD, {"action": "wbgetentities", "ids": "|".join(ids[:10]),
                  "props": "claims|labels|descriptions", "languages": "en",
                  "format": "json"})
+    if d is FAILED:
+        return FAILED
     if not d:
         return None
     best = None
@@ -176,6 +206,8 @@ def commons(fname):
     """The file at a workable width, plus who took it and under what licence."""
     d = get(COMMONS, {"action": "query", "titles": "File:" + fname, "prop": "imageinfo",
                       "iiprop": "url|extmetadata", "iiurlwidth": SIZE * 2, "format": "json"})
+    if d is FAILED:
+        return FAILED
     try:
         page = next(iter(d["query"]["pages"].values()))
         info = page["imageinfo"][0]
@@ -238,6 +270,7 @@ def main():
     cpath = os.path.join(outdir, "credits.json")
     credits = json.load(open(cpath)) if os.path.exists(cpath) else {}
     misses = []
+    failed = []
 
     for i, name in enumerate(names, 1):
         s = slug(name)
@@ -252,6 +285,11 @@ def main():
 
         hit = pick(candidates(name), name)
         time.sleep(PAUSE)
+        if hit is FAILED:
+            failed.append(name)
+            misses.append((name, "the lookup failed; run again to retry it"))
+            print(f"[{i}/{len(names)}] !! {name} (lookup failed)")
+            continue
         if not hit:
             misses.append((name, "no music act with a photo on Wikidata"))
             print(f"[{i}/{len(names)}] -- {name}")
@@ -259,6 +297,11 @@ def main():
 
         info = commons(hit["file"])
         time.sleep(PAUSE)
+        if info is FAILED:
+            failed.append(name)
+            misses.append((name, "the lookup failed; run again to retry it"))
+            print(f"[{i}/{len(names)}] !! {name} (Commons lookup failed)")
+            continue
         if not info or not info["url"]:
             misses.append((name, "Wikidata names a file Commons did not serve"))
             print(f"[{i}/{len(names)}] -- {name} (no file)")
@@ -294,7 +337,9 @@ def main():
     json.dump(credits, open(cpath, "w"), indent=1, ensure_ascii=False)
     with open(os.path.join(outdir, "report.txt"), "w") as f:
         f.write(f"{len(credits)} of {len(names)} key artists have a photo\n")
-        f.write(f"{len(misses)} did not:\n\n")
+        f.write(f"{len(misses)} did not, of which {len(failed)} were lookups that failed\n"
+                f"rather than artists without a picture. Run the script again and it\n"
+                f"will retry exactly those.\n\n")
         for n, why in misses:
             f.write(f"  {n}\n      {why}\n")
 
@@ -310,6 +355,9 @@ def main():
                     f"      {c['source']}\n")
 
     print(f"\n{len(credits)} photos, {len(misses)} without one.")
+    if failed:
+        print(f"{len(failed)} of those were failed lookups, not artists without a photo."
+              f"\nRun it again to retry them.")
     print(f"{len(unsure)} of them are worth a glance: see review.txt")
     print(f"credits.json, report.txt and review.txt are in {outdir}")
 

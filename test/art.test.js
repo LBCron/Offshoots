@@ -61,6 +61,41 @@ for(const id of covered){
 say("  every cover square", odd.length===0 ? true : odd.slice(0,6).join(", "));
 say("  and at least 300px", small.length===0 ? true : small.slice(0,6).join(", "));
 
+
+// ---- the artist portraits, same promise ----
+// PHOTO maps an artist name to a file under artists/. Both directions matter: an entry
+// with no file draws a broken image where a glyph would have been fine, and a file
+// nothing points at is weight in the folder and in every deploy that carries it.
+const PDIR=path.join(__dirname,"..","artists");
+if(fs.existsSync(PDIR)){
+  const have=new Set(fs.readdirSync(PDIR).filter(f=>f.endsWith(EXT)).map(f=>f.slice(0,-EXT.length)));
+  const want=Object.entries(D.PHOTO||{});
+  const dead=want.filter(([,f])=>!have.has(f));
+  const idle=[...have].filter(f=>!want.some(([,g])=>g===f));
+  say("artist portraits: "+want.length+" named, "+have.size+" on disk", want.length>0);
+  say("  every name pointing at a file that is there",
+    dead.length===0 ? true : dead.slice(0,5).map(([n,f])=>n+" -> "+f+EXT).join(", "));
+  say("  and nothing in the folder going unused",
+    idle.length===0 ? true : idle.slice(0,5).join(", "));
+  // A name the map no longer uses keeps its face in the folder and never draws it.
+  // Key artists come from two places, ART and the style's own note, and the note is
+  // parsed at runtime by a reader this file has no business reimplementing: a second
+  // copy of that parser would drift and start failing on notes that are perfectly fine.
+  // So the note is searched as text, which is looser than the parser and cannot be
+  // wrong in the direction that matters here.
+  const known=new Set();
+  const notes=[];
+  D.DATA.forEach(r=>{ (D.ART[r[0]]||[]).forEach(a=>known.add(a));
+    (D.ROSTER[r[0]]||[]).forEach(a=>known.add(a));
+    if(r[5]) notes.push(r[5]); });
+  const blob=notes.join(" | ");
+  const orphan=want.filter(([n])=>!known.has(n) && blob.indexOf(n)<0).map(([n])=>n);
+  say("  and every portrait belonging to an artist the map names"
+    + (orphan.length?" ("+orphan.length+" do not: "+orphan.slice(0,4).join(", ")+")":""),
+    orphan.length===0);
+  if(dead.length||idle.length||orphan.length) process.exitCode=1;
+}
+
 const fails=[dead.length,ghost.length,shared.length,other.length,odd.length,small.length]
   .reduce((a,b)=>a+b,0);
 process.exitCode = fails ? 1 : 0;
