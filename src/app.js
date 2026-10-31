@@ -550,7 +550,12 @@ function hereNow(){
   // which is why Explore scrolled halfway down, then Ways in, then a style, then back
   // used to land at the top of a list the user had already walked.
   const root = PSTACK.length ? (PSTACK[0].scroll||0) : (b?b.scrollTop:0);
-  return {sel:state.sel||null, mode:(typeof MODE!=="undefined"&&MODE)||null, scroll:root}; }
+  // Which page was open, not only what was selected. Opening a style calls resetPages(),
+  // so by the time back runs the stack is gone; without this the crumb could only ever
+  // point at the root, and leaving a mood to look at one of its styles cost you the mood.
+  const top = PSTACK.length ? PSTACK[PSTACK.length-1] : null;
+  return {sel:state.sel||null, mode:(typeof MODE!=="undefined"&&MODE)||null, scroll:root,
+    page: top ? top.key : null, pageScroll: top && b ? b.scrollTop : 0}; }
 function pushTrail(){
   const v=hereNow(), last=TRAIL[TRAIL.length-1];
   if(last && last.sel===v.sel && last.mode===v.mode) return;   // nothing actually changed
@@ -576,19 +581,42 @@ function goBack(){
   // to Explore you are arriving at the front of the app, and a front page that starts
   // halfway down looks broken rather than considerate: the heading is gone, the list
   // begins mid-sentence, and there is nothing above to explain it.
-  const b=$("panelBody"), keep=v.sel && byId[v.sel] ? (v.scroll||0) : 0;
+  //
+  // A page you had open is reopened before any of that, because it is the thing you were
+  // actually looking at and the root underneath it is not where you were.
+  let onPage=false;
+  if(v.page){ GOINGBACK=true; try{ onPage=pushPage(v.page); } finally { GOINGBACK=false; } }
+  const b=$("panelBody");
+  const keep = onPage ? (v.pageScroll||0)
+    : v.sel && byId[v.sel] ? (v.scroll||0) : 0;
   if(b){
-    const put=()=>{ b.scrollTop=keep?Math.min(keep,Math.max(0,b.scrollHeight-b.clientHeight)):0;
-      b.dispatchEvent(new Event("scroll")); };
+    let applied=-1;
+    const put=()=>{ applied = keep?Math.min(keep,Math.max(0,b.scrollHeight-b.clientHeight)):0;
+      b.scrollTop=applied; b.dispatchEvent(new Event("scroll")); };
     put(); requestAnimationFrame(put);
   }
   syncBack();
 }
 function backLabel(){
   const v=TRAIL[TRAIL.length-1]; if(!v) return "";
+  // a page is what you were looking at, so it is what the button should promise
+  if(v.page){
+    const t=pageTitleOf(v.page);
+    if(t) return "Back to "+t;
+  }
   if(!v.sel) return "Back to the map";
   const n=byId[v.sel];
   return n ? "Back to "+n.name : "Back";
+}
+// the title without building the page: modePage() and mediaPage() render their whole body
+function pageTitleOf(key){
+  if(key.indexOf("mode:")===0){
+    const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===key.slice(5));
+    return m ? m[2] : "";
+  }
+  const d=PAGES_DEF[key];
+  if(!d) return "";
+  try{ const p=d(); return p ? p.title : ""; }catch(e){ return ""; }
 }
 // back presses needed to reach the overview. The map may not be in the trail at all,
 // which happens on a shared link, and that is exactly when the shortcut earns its place.
@@ -626,9 +654,13 @@ function syncBack(){
   b.hidden=!l; if(!l) return;
   b.setAttribute("aria-label",l); b.setAttribute("title",l);
   b.classList.remove("topage");
-  const v=TRAIL[TRAIL.length-1], toMap=!(v&&v.sel&&byId[v.sel]);
+  const v=TRAIL[TRAIL.length-1];
+  // a page in the crumb is a named place, so the button names it rather than going bare:
+  // leaving a mood for one of its styles, back belongs to the mood, not to the map
+  const pt=v&&v.page ? pageTitleOf(v.page) : "";
+  const toMap=!pt && !(v&&v.sel&&byId[v.sel]);
   const t=b.querySelector(".bklbl");
-  if(t) t.textContent = toMap ? "" : byId[v.sel].name;
+  if(t) t.textContent = pt || (toMap ? "" : byId[v.sel].name);
   b.classList.toggle("tomap",toMap);
 }
 function select(id,{scroll=true,smooth=true,keepPlace=false,repaint=true}={}){
@@ -1663,7 +1695,9 @@ function pushPage(key){
     + `<div class="more pgbody">${d.html}</div>`;
   PSTACK.push({key,title:d.title,scroll:body.scrollTop});
   stack.appendChild(page);
-  if(reduce){ cur.hidden=true; page.classList.remove("pgin"); }
+  // Going back is also an instant swap. Animating it hides the outgoing page 240ms later,
+  // which takes its height out of the scroller and slides the offset we just restored.
+  if(reduce || GOINGBACK){ cur.hidden=true; page.classList.remove("pgin"); }
   else {
     cur.classList.add("pgout");
     requestAnimationFrame(()=>page.classList.remove("pgin"));

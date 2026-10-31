@@ -59,9 +59,17 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   say("label", await label(p));
   await p.click("#panelBack"); await at(p,"");
   say("back lands on the overview", (await hash(p))==="");
-  // the stack does not survive a style: back from one lands on a clean overview, with
-  // the ways in listed again rather than the page you came through
-  say("the overview is back to its own root",
+  // Back used to stop here, on a clean overview, because the crumb recorded only what was
+  // selected and opening a style wipes the page stack. That meant leaving a mood to look
+  // at one of its styles cost you the mood and your place in it, and the way out of a
+  // style was the front of the app rather than the list you were reading. The crumb
+  // carries the open page now, so the mood comes back first and the root is one more
+  // press beyond it.
+  say("the mood you came from is back, not the overview root",
+    (await p.$$(".ppage[data-p='mode:winddown']")).length===1);
+  say("so the button still has somewhere to go", await shown(p));
+  await p.click("#panelBack"); await at(p,"");
+  say("  and that press leaves it for the root",
     (await p.$$(".ppage:not([data-p='root'])")).length===0);
   say("with the ways in on the overview again", (await p.$$(".mcirc")).length>0);
   say("hidden again at the start of the trail", (await shown(p))===false);
@@ -282,7 +290,10 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   const pick2=await p.$eval(".picks .pick",e=>e.dataset.go);
   await p.click(".picks .pick"); await at(p,"#"+pick2);
   say("the next step starts a fresh trail", await label(p));
-  say("not the walk from before", (await label(p))==="Back to the map");
+  // one step, and that step is the mood just left rather than anything from the walk that
+  // home cleared. It used to read "Back to the map", which said the trail was empty but
+  // also that the mood had been forgotten on the way into one of its styles.
+  say("not the walk from before", (await label(p))==="Back to Winding down");
   say("no page errors", p._errs.length===0 ? true : p._errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);
 
   // the three pieces of map chrome sit on one line, and the search surfaces are light

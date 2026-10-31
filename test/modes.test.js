@@ -515,5 +515,41 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
     await s4.screenshot({path:__dirname+"/screens/m-modesort.png"});
     await s4.close(); }
 
+// ---- leaving a mood and coming back to it ----
+// Opening a style from a mood calls resetPages(), which wipes the page stack, and the
+// crumb only ever recorded what was SELECTED. So back rebuilt Explore and dropped you at
+// its top: the mood you were reading, and your place in it, were gone. The crumb carries
+// the open page now, and back reopens it at the offset you left.
+{ const p=await fresh(b,M);
+  await p.click('[data-mode="miles"]'); await onPage(p,"mode:miles");
+  await settle(p); await p.waitForTimeout(400);
+  const where=await p.evaluate(()=>{ const b=document.getElementById("panelBody");
+    b.scrollTop=320; return b.scrollTop; });
+  const opened=await p.evaluate(()=>{
+    const x=[...document.querySelectorAll(".ppage:not([hidden]) .pick")][1];
+    x.click(); return x.querySelector(".pknm").textContent; });
+  await p.waitForTimeout(700);
+  const onStyle=await p.evaluate(()=>({
+    lbl:(document.querySelector("#panelBack .bklbl")||{}).textContent||"",
+    aria:document.getElementById("panelBack").getAttribute("aria-label")||""}));
+  say("back out of "+opened+" is offered as the mood, not the map"
+      +(onStyle.lbl?" ("+onStyle.lbl+")":": \""+onStyle.aria+"\""),
+    /running or riding/i.test(onStyle.lbl) && /running or riding/i.test(onStyle.aria));
+  await p.click("#panelBack"); await p.waitForTimeout(900);
+  const back=await p.evaluate(()=>{
+    const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden).pop();
+    return {page:u?u.dataset.p:"(root)", scroll:document.getElementById("panelBody").scrollTop};});
+  say("  and lands back on the mood, not on Explore ("+back.page+")", back.page==="mode:miles");
+  // the offset is exact, which it was not while the push animated: hiding the outgoing
+  // page 240ms later took its height out of the scroller and slid this by 40px
+  say("  at the offset it was left at ("+back.scroll+" of "+where+")", back.scroll===where);
+  // one more press leaves the mood, so back is still a stack and not a loop
+  await p.click("#panelBack"); await p.waitForTimeout(900);
+  const out=await p.evaluate(()=>{
+    const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden).pop();
+    return u?u.dataset.p:"(root)";});
+  say("  and a second press leaves it ("+out+")", out!=="mode:miles");
+  await p.close(); }
+
   await b.close();
 })();
