@@ -166,14 +166,19 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const before=await q.evaluate(()=>({
       anchors:document.querySelectorAll(".dataurl a").length,
       navs:document.querySelectorAll('.dataline[href]').length}));
+    // The label says "Link copied" and then goes back to itself on a timer. Every way of
+    // looking at it afterwards races that timer: a fixed wait, and then a poll, both missed
+    // it on a loaded box and failed a copy that had worked. So watch instead of looking.
+    // An observer installed before the click cannot miss the word however late this gets
+    // to read the answer.
+    await q.evaluate(()=>{ window.__said=false;
+      new MutationObserver(()=>{ const e=document.querySelector(".dataline .lbl");
+        if(e && e.textContent==="Link copied") window.__said=true; })
+        .observe(document.body,{subtree:true,childList:true,characterData:true}); });
     await q.click(".dataline");
-    // The label says "Link copied" and then goes back to itself on a timer. Waiting a fixed
-    // 450ms for it meant that under load the whole window could pass before the read landed,
-    // and the check failed with the copy having worked perfectly. Catch the word instead.
-    const caught=await until(q,()=>
-      document.querySelector(".dataline .lbl").textContent==="Link copied");
-    const said=caught ? "Link copied"
-      : await q.evaluate(()=>document.querySelector(".dataline .lbl").textContent);
+    await until(q,()=>window.__said===true);
+    const said=await q.evaluate(()=>window.__said ? "Link copied"
+      : document.querySelector(".dataline .lbl").textContent);
     const clip=await q.evaluate(()=>navigator.clipboard.readText()).catch(()=>"");
     const here=q.url();
     await c.close();

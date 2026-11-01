@@ -27,7 +27,7 @@ const ART_DIR="art/", STYLE_DIR="styles/", XPLAY_DIR="xplay/", ART_EXT=".jpg";
 // hand a model a URL is almost never the server but the reader, which caps or times out
 // long before that. The artists and songs live in the app, behind the playlists.
 const CATALOG=[
-  {file:"offshoots.json", name:"offshoots.json", kb:"180 KB",
+  {file:"offshoots.json", name:"offshoots.json", kb:"190 KB",
    label:"Copy the data link", sub:"Every style, its lineage and its page"}
 ];
 // two letters for a style with no art file, so the row keeps its shape
