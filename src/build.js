@@ -17,3 +17,7 @@ const app=fs.readFileSync(path.join(SRC,"app.js"),"utf8");
 const out=head+"<script>\n"+data.trim()+"\n"+app+"\n</script>\n";
 fs.writeFileSync(path.join(ROOT,"index.html"),out);
 console.log("built index.html — "+out.length+" bytes");
+// The same contents as one JSON file, for a reader that cannot look at a picture. Built
+// here so it can never drift from the page: one command, both artefacts.
+require("child_process").execFileSync(process.execPath,
+  [path.join(SRC,"..","tools","catalog.js")],{stdio:"inherit"});

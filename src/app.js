@@ -21,6 +21,8 @@ function wiki(n){
 // Emily's own Apple Music class playlists, keyed by style id (paths are relative to music.apple.com)
 // cover art, if art/<id>.jpg is sitting next to the page; missing files remove themselves
 const ART_DIR="art/", STYLE_DIR="styles/", XPLAY_DIR="xplay/", ART_EXT=".jpg";
+// the machine-readable copy of all this, written beside the page by the build
+const CATALOG_FILE="offshoots.json", CATALOG_NAME="offshoots.json", CATALOG_KB="500 KB";
 // two letters for a style with no art file, so the row keeps its shape
 function initials(name){
   const w=String(name||"").split(/[^A-Za-z0-9]+/).filter(Boolean);
@@ -1960,6 +1962,10 @@ const PAGES_DEF={
     <p>Boundaries, dates and parentage are all contested, and a lineage is a reading rather than a fact. Take each link as the consensus view and the map as an argument you are free to disagree with.</p>
     <h4 class="subh">What it is built on</h4>
     <p>The map is one HTML file with nothing fetched at runtime, so it keeps working with no connection. Every icon is <b>Phosphor</b>, the Duotone weight, under the MIT licence, inlined as paths rather than loaded from anywhere. Playlists open in Apple Music or Spotify, which do need a connection. Everything else here was drawn or written for this map.</p>
+    <h4 class="subh">The map as data</h4>
+    <p>The same contents are published as one JSON file: every style with its year, family, lineage, description, artists, songs and playlists, plus the playlists that cross between styles. It is meant to be handed to a language model, so that someone can ask it where to go next from a record they already like and get an answer that can say <i>why</i> two things are related rather than only that they are.</p>
+    <p>It carries a short note to the reader explaining what the lineage does and does not claim, and that coverage is uneven: ${np} of ${DATA.length} styles have a playlist, and the rest have fewer artists and no songs. Absence in the file is not evidence that something does not exist.</p>
+    <a class="dataline" href="${CATALOG_FILE}" target="_blank" rel="noopener" title="Open the Offshoots data as JSON"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,64V184a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V64A16,16,0,0,1,48,48H208A16,16,0,0,1,224,64Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56V184a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40Zm0,144H48V56H208V184ZM112,96a8,8,0,0,1-8,8H88v56a8,8,0,0,1-16,0V104H56a8,8,0,0,1,0-16h48A8,8,0,0,1,112,96Zm88,64a8,8,0,0,1-8,8H160a8,8,0,0,1-8-8V96a8,8,0,0,1,16,0v56h24A8,8,0,0,1,200,160Z"/></svg><span class="dltx"><b>Open the data</b><small>${CATALOG_NAME} \u00b7 about ${CATALOG_KB}</small></span><i class="dlgo">${OPENGO}</i></a>
     <h4 class="subh">The playlists</h4>
     <p>Each playlist runs in chronological order, and the first few tracks are deliberately not the style proper. They are the records that pushed it into being, or the earliest examples of it, cut before anyone had a name for it.</p>
     <p>So a playlist starts just outside its own style and arrives at it, which is the same move the map makes. If the opening tracks sound like something else, that is the point: that is what it grew out of.</p>

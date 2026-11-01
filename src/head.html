@@ -2045,6 +2045,19 @@ span.xcov b{font:700 19px var(--f-body);color:#fff;opacity:.92}
 .pcard:not(.ovcard) .navrow{min-height:var(--tap)}
 .navgap{min-width:0}
 
+/* the row on About that hands the whole map to a machine */
+.dataline{display:flex;align-items:center;gap:12px;margin:14px 0 4px;padding:12px 14px;
+  min-height:var(--tap);box-sizing:border-box;border-radius:14px;text-decoration:none;
+  background:var(--fill2);color:var(--fg);transition:background .15s}
+.dataline:hover{background:var(--fill);color:var(--fg)}
+.dataline > svg{flex:none;width:26px;height:26px;color:var(--muted)}
+.dataline .dltx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.dataline .dltx b{font:600 var(--t-body)/var(--t-body-lh) var(--f-body)}
+.dataline .dltx small{font:400 var(--t-foot)/var(--t-foot-lh) var(--f-mono);color:var(--muted)}
+.dataline .dlgo{flex:none;display:grid;place-items:center;width:15px;height:15px;color:var(--muted)}
+.dataline .dlgo svg{width:15px;height:15px}
+.dataline:hover .dlgo{color:var(--fg)}
+
 /* ---------- what all:unset throws away ----------
    A browser's own stylesheet sets user-select:none on a button, because a control is
    something you press, not something you read. all:unset discards that along with the
