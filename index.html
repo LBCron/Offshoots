@@ -6241,13 +6241,34 @@ function pageIndex(){
   }
   return out;
 }
+// Does the query land at the START of a word in this blob, or inside one?
+//
+// Everything here is matched with a bare indexOf, which has no idea where words begin, so
+// typing "andy" hits Mandy Patinkin, Randy Stonehill, Brandy, Sandy Nelson, Randy Travis
+// and Randy Newman. Six accidents scored exactly as high as a real one and filled the
+// eight rows, which is how a playlist whose subject is Andy Shauf fell off a search for
+// "andy" and only came back at "andy s".
+//
+// A hit inside a longer word is not nothing, so it still scores; it just ranks under
+// every hit that starts a word.
+const WORDC=/[a-z0-9]/;
+function wordHit(blob,t){
+  let i=blob.indexOf(t);
+  while(i>=0){ if(i===0 || !WORDC.test(blob[i-1])) return true; i=blob.indexOf(t,i+1); }
+  return false;
+}
+// the same match, ranked by whether it began a word: MID is what a hit inside one costs
+const MID=0.9;
+const rank=(blob,t,sc)=>wordHit(blob,t) ? sc : sc+MID;
 function find(t){
   t=t.trim().toLowerCase(); if(!t) return [];
   const out=[];
   // a title match is worth less than a name, a note or an artist, and is not tried at all
   // on a short query, where a word like "you" would match most of the playlists at once
-  const score=n=>{ const nm=n.name.toLowerCase(); if(nm.startsWith(t)) return 0; if(nm.includes(t)) return 1;
-    if(n.search.includes(t)) return 2; if(t.length>=4 && n.songsearch.includes(t)) return 3; return 9; };
+  const score=n=>{ const nm=n.name.toLowerCase(); if(nm.startsWith(t)) return 0;
+    if(nm.includes(t)) return rank(nm,t,1);
+    if(n.search.includes(t)) return rank(n.search,t,2);
+    if(t.length>=4 && n.songsearch.includes(t)) return rank(n.songsearch,t,3); return 9; };
   for(const n of nodes){ const sc=score(n); if(sc<9) out.push({k:"style",sc,n,ord:n.year}); }
   for(const p of pageIndex()){
     const lb=p.label.toLowerCase();
@@ -6258,16 +6279,18 @@ function find(t){
   for(const x of xIndex()){
     // same ladder as a style: the name first, then what is in it. A track title needs
     // four letters before it counts, the way a style's songs do, or "you" lands here too.
-    const sc = x.title.startsWith(t) ? 1.1 : x.title.includes(t) ? 2.2
-      : x.who.includes(t) ? 3.5
-      : (t.length>=4 && x.what.includes(t)) ? 4.2
+    // An act on a crossing is the reason to open it, so it is worth about what a style's
+    // own artist list is worth, not a rung below everything.
+    const sc = x.title.startsWith(t) ? 1.1 : x.title.includes(t) ? rank(x.title,t,2.2)
+      : x.who.includes(t) ? rank(x.who,t,2.4)
+      : (t.length>=4 && x.what.includes(t)) ? rank(x.what,t,4.2)
       : (t.length>=4 && x.note.includes(t)) ? 6.5 : 9;
     if(sc<9) out.push({k:"cross",sc,x,ord:0});
   }
   for(const x of srcIndex()){
-    const sc = x.title.startsWith(t) ? 1.5 : x.title.includes(t) ? 4
-      : x.by.includes(t) ? 5
-      : (t.length>=3 && x.subj.includes(t)) ? 5.5
+    const sc = x.title.startsWith(t) ? 1.5 : x.title.includes(t) ? rank(x.title,t,4)
+      : x.by.includes(t) ? rank(x.by,t,5)
+      : (t.length>=3 && x.subj.includes(t)) ? rank(x.subj,t,5.5)
       : (t.length>=4 && (x.note.includes(t)||x.kind.includes(t))) ? 6 : 9;
     if(sc<9) out.push({k:"src",sc,x,ord:x.row[3]||9999});
   }

@@ -168,6 +168,27 @@ async function ask(p,t){
     await p.evaluate(()=>[...document.querySelectorAll("#res .rnm")]
       .every(x=>x.scrollWidth<=x.clientWidth+1)));
 
+  // ---------- a word start beats a hit inside a word ----------
+  // Everything is matched with a bare indexOf, which has no idea where words begin, so
+  // "andy" hits Mandy Patinkin, Randy Stonehill, Brandy, Sandy Nelson, Randy Travis and
+  // Randy Newman. Six accidents scored exactly as high as a real one and filled all eight
+  // rows, which is how the Andy Shauf playlist fell off a search for "andy" and only came
+  // back once you had typed "andy s".
+  { const r=await ask(p,"andy");
+    const names=r.map(x=>x.name);
+    const mid=["Broadway Show Tunes","Instrumental Rock","Neotraditional Country"];
+    const real=names.filter(n=>mid.indexOf(n)<0);
+    say('"andy" leads with real Andys, not Mandy and Randy ('+real.slice(0,3).join(", ")+")",
+      real.length>0 && mid.every(m=>{
+        const i=names.indexOf(m); return i<0 || i>names.indexOf(real[0]); }));
+    say("  and the playlist whose subject is one of them is in the list",
+      names.some(n=>/Someone Else/.test(n)));
+    // the accidents still rank, they just rank under: dropping them would be worse, since
+    // a half-typed name is exactly how you find someone whose spelling you are unsure of
+    const r2=await ask(p,"randy");
+    say("  while searching the longer word still finds it ("+(r2[0]||{}).name+")",
+      r2.length>0); }
+
   say("no page errors", errs.length===0 ? true : errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);
   await b.close();
 })();
