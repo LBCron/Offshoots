@@ -21,18 +21,25 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
   say("there are cross-style playlists to check ("+X.length+")", X.length>0);
 
   // ---- the data, before the page ----
-  const bad=[], thin=[], dupe=[];
+  const bad=[], thin=[], dupe=[], untracked=[];
   const seen=new Set();
   for(const x of X){
     if(seen.has(x.id)) dupe.push(x.id); else seen.add(x.id);
     (x.styles||[]).forEach(s=>{ if(!ids.has(s)) bad.push(x.id+" -> "+s); });
     if((x.styles||[]).length<2) thin.push(x.id);
     if(!x.ap && !x.sp) bad.push(x.id+" has no playlist on either service");
+    if(!(x.tracks||[]).length) untracked.push(x.id);
   }
   say("  every style named exists", bad.length===0 ? true : bad.slice(0,4).join(", "));
   say("  none of them listed twice", dupe.length===0 ? true : dupe.join(", "));
   // one style is not a span: that is just a playlist, and belongs in PLAY
   say("  and each spans at least two", thin.length===0 ? true : thin.join(", "));
+  // The acts on a crossing are in neither ROSTER nor SONGS, because they belong to no
+  // single style, so nothing else in the app will index them. A crossing added without
+  // its tracklist is invisible to a search for the one act that made you want it, and
+  // nothing would ever complain. This is the complaint.
+  say("  and each carries its tracklist, so search can see inside it",
+    untracked.length===0 ? true : untracked.join(", ")+" (see tools/xplay-tracks.js)");
 
   const b=await chromium.launch(); await skipWelcome(b);
   const ctx=await b.newContext({viewport:{width:430,height:930}});
@@ -92,6 +99,48 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
     // paintPlay rebuilds className from scratch, which quietly dropped this class and
     // sent the row back to looking like the style's own playlist
     say("  and still marked as a crossing after the switch", /\bxplay\b/.test(sp.cls));
+    await p.close(); }
+
+  // ---- and search can find it by what is in it ----
+  { const p=await ctx.newPage();
+    await p.goto(URL); await arm(p); await shown(p,"#chart .n"); await settle(p);
+    await p.$eval("#mapSearch",e=>e.click()).catch(()=>{});
+    await settle(p);
+    const type=async t=>{ await p.$eval("#q",(e,v)=>{ e.value=v;
+      e.dispatchEvent(new Event("input",{bubbles:true})); },t); await settle(p); };
+    const rows=()=>p.evaluate(()=>[...document.querySelectorAll("#res button")].map(x=>({
+      cross:/\brs-listen\b/.test(x.className),
+      nm:(x.querySelector(".rnm")||{}).textContent||"",
+      sub:(x.querySelector("small")||{}).textContent||"",
+      ext:!!x.querySelector(".rext")})));
+
+    await type(x.title.split(" ")[0]);
+    const byName=await rows();
+    say("searching its name finds it", byName.some(r=>r.cross && r.nm===x.title));
+
+    // a spread of the tracklist rather than the first few, since the first few are the
+    // ones a careless index would happen to catch
+    const acts=[...new Set(x.tracks.map(t=>String(t[0]).split(/,\s*/)[0]))];
+    const pick=[0,1,2,3,4].map(i=>acts[Math.floor(i*(acts.length-1)/4)]);
+    const missA=[];
+    for(const a of pick){ await type(a);
+      const r=await rows();
+      if(!r.some(z=>z.cross && z.nm===x.title)) missA.push(a); }
+    say("  and so does each of "+pick.length+" acts from across it",
+      missA.length===0 ? true : missA.join(", "));
+    say("  with the act named in the line, not just the playlist",
+      (await rows()).some(z=>z.cross && z.sub.indexOf(pick[pick.length-1])===0));
+
+    const songs=x.tracks.map(t=>t[1]).filter(t=>t.length>=5);
+    const picks=[0,1,2].map(i=>songs[Math.floor(i*(songs.length-1)/2)]);
+    const missS=[];
+    for(const sg of picks){ await type(sg);
+      const r=await rows();
+      if(!r.some(z=>z.cross && z.nm===x.title)) missS.push(sg); }
+    say("  and "+picks.length+" track titles from across it",
+      missS.length===0 ? true : missS.join(", "));
+    // it leaves for a service, so it carries the mark that says so
+    say("  marked as leaving the app", (await rows()).some(z=>z.cross && z.ext));
     await p.close(); }
 
   await b.close();

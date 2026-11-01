@@ -2027,6 +2027,27 @@ function srcIndex(){
   });
   return SRC;
 }
+// Every crossing, with its tracklist flattened into one blob to match against. The acts
+// on these are not in ROSTER and the titles are not in SONGS, because they belong to no
+// single style: without this index a crossing is invisible to a search for the one act
+// that made you want it.
+let XIDX=null;
+function xIndex(){
+  if(XIDX) return XIDX;
+  const X=(typeof XPLAY!=="undefined")?XPLAY:[];
+  XIDX=X.map(x=>{
+    const tr=x.tracks||[];
+    // a credit naming two acts is two names to type, so it is split rather than kept whole
+    const acts=[]; const seen=new Set();
+    for(const [a] of tr) for(const one of String(a).split(/,\s*/)){
+      const k=one.toLowerCase(); if(!k||seen.has(k)) continue; seen.add(k); acts.push(one); }
+    const songs=tr.map(t=>t[1]);
+    return {x, acts, songs,
+      title:(x.title||"").toLowerCase(), note:(x.note||"").toLowerCase(),
+      who:acts.join(" | ").toLowerCase(), what:songs.join(" | ").toLowerCase()};
+  });
+  return XIDX;
+}
 // the pages this search can land on, with the words someone would actually type for them
 function pageIndex(){
   const out=MEDIA.filter(([t])=>medCount(t)).map(([t,label,blurb])=>({
@@ -2054,6 +2075,15 @@ function find(t){
       : (t.length>=3 && p.terms.includes(t)) ? 4.5 : 9;
     if(sc<9) out.push({k:"page",sc,p,ord:0});
   }
+  for(const x of xIndex()){
+    // same ladder as a style: the name first, then what is in it. A track title needs
+    // four letters before it counts, the way a style's songs do, or "you" lands here too.
+    const sc = x.title.startsWith(t) ? 1.1 : x.title.includes(t) ? 2.2
+      : x.who.includes(t) ? 3.5
+      : (t.length>=4 && x.what.includes(t)) ? 4.2
+      : (t.length>=4 && x.note.includes(t)) ? 6.5 : 9;
+    if(sc<9) out.push({k:"cross",sc,x,ord:0});
+  }
   for(const x of srcIndex()){
     const sc = x.title.startsWith(t) ? 1.5 : x.title.includes(t) ? 4
       : x.by.includes(t) ? 5
@@ -2071,6 +2101,19 @@ function hitLine(n){ const t=q.value.trim().toLowerCase(), has=x=>x.toLowerCase(
   // nothing else matched, so it was a track title: quote it, since a bare title reads as a note
   const sg = t.length>=4 && !n.note.toLowerCase().includes(t) && n.songs.find(has);
   return sg ? "\u201c"+sg+"\u201d \u00b7 "+n.note : n.note; }
+// A crossing's second line names the act or the track that matched, the way a style's
+// does, then how far the run reaches. Without the first part the row is a playlist name
+// with no visible connection to what was typed.
+function xLine(xi){
+  const t=q.value.trim().toLowerCase(), has=v=>v.toLowerCase().includes(t);
+  const bits=[];
+  const who=xi.acts.find(has);
+  const what=!who && t.length>=4 ? xi.songs.find(has) : "";
+  if(who) bits.push(who);
+  else if(what) bits.push("\u201c"+what+"\u201d");
+  bits.push(xi.x.tracks.length+" tracks across "+xi.x.styles.length+" styles");
+  return bits.join(" \u00b7 ");
+}
 // a source's second line says what it is, who made it, and where on the map it lives, in
 // that order: the first two tell you whether you want it and the third tells you where
 // tapping it would otherwise have taken you.
@@ -2089,6 +2132,8 @@ function srcLine(x){
 // like the same thing when you get there.
 function hitMark(h){
   if(h.k==="style") return `<i class="rico rdot" style="background:${FAM[h.n.fam].c}"></i>`;
+  // a crossing wears the playlist glyph the listen rows already wear
+  if(h.k==="cross") return `<i class="rico rm-listen">${ROWICON.pl||""}</i>`;
   if(h.k==="page"){ const med=h.p.key.indexOf("med:")===0 ? h.p.key.slice(4) : "";
     return `<i class="rico ${med?"rm-"+med:"rm-picks"}">`
       + (med ? (MEDPAGEICON[med]||"") : (ROWICON.picks||"")) + `</i>`; }
@@ -2109,6 +2154,9 @@ function renderHits(){
       h.n.name, (h.n.year<1950?h.n.disp:String(h.n.year))+" \u00b7 "+hitLine(h.n), "", "");
     if(h.k==="page") return wrap("res-page",`data-page-go="${esc(h.p.key)}"`,
       h.p.label, h.p.sub, "", "");
+    if(h.k==="cross") return wrap("res-src rs-listen",`data-cross="${esc(h.x.x.id)}"`,
+      h.x.x.title, xLine(h.x), `<i class="rext">${OPENGO}</i>`,
+      h.x.x.title+", opens in "+svcName());
     // a source is somebody else's page and opens in a new tab. An arrow is the one mark
     // people already read as "this leaves", and the label names the host, because an
     // arrow alone does not say where it is about to send you.
@@ -2138,6 +2186,12 @@ function open_(h){
   if(h.k==="style") return go(h.n.id);
   clearQ();
   if(h.k==="page"){ setOpen(true); setTimeout(()=>pushPage(h.p.key),120); return; }
+  // a crossing opens on the chosen service, like the row it came from
+  if(h.k==="cross"){ const x=h.x.x;
+    const url = SVC==="spotify" ? (x.sp?"https://open.spotify.com/playlist/"+x.sp:"")
+      : SVC==="apple" ? (x.ap?"https://music.apple.com"+x.ap:"") : "";
+    if(url) window.open(url,"_blank","noopener,noreferrer");
+    return; }
   // a source is somebody else's page: new tab, and the map stays where it was
   window.open(h.x.url,"_blank","noopener,noreferrer");
 }
