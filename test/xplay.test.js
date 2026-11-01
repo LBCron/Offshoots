@@ -43,7 +43,10 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
 
   const b=await chromium.launch(); await skipWelcome(b);
   const ctx=await b.newContext({viewport:{width:430,height:930}});
-  const x=X[0];
+  // every entry, not the first: a crossing added later must be checked by having been
+  // added, not by somebody remembering to widen this
+  for(const x of X){
+  console.log("\n\u2014 "+x.title+" \u2014");
   const read=async id=>{ const p=await ctx.newPage();
     await p.goto(URL+"#"+id); await opened(p);
     const r=await p.evaluate(()=>[...document.querySelectorAll(".plrow")].map(a=>({
@@ -85,7 +88,11 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
 
   // ---- it is a real link on both services ----
   { const p=await ctx.newPage();
+    // the chosen service is remembered, so it leaks from one entry's run into the next:
+    // the second crossing was being asked for its Apple link while still on Spotify
     await p.goto(URL+"#"+x.styles[0]); await opened(p);
+    await p.selectOption("select.svcsel","apple").catch(()=>{});
+    await settle(p);
     const ap=await p.evaluate(()=>{const a=document.querySelector(".plrow.xplay");
       return {href:a.getAttribute("href")||"", cls:a.className};});
     await p.selectOption("select.svcsel","spotify").catch(()=>{});
@@ -143,5 +150,6 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
     say("  marked as leaving the app", (await rows()).some(z=>z.cross && z.ext));
     await p.close(); }
 
+  }
   await b.close();
 })();

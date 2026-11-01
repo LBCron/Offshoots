@@ -2035,7 +2035,43 @@ const XPLAY = [
      ["The Cramps","Goo Goo Muck"],
      ["The Bonzo Dog Doo-Dah Band","Look Out, There's a Monster Coming"],
      ["The Ghastly Ones","Haulin' Hearse"],
-     ["The Ghastly Ones","Ghastly Stomp"]]}
+     ["The Ghastly Ones","Ghastly Stomp"]]},
+  {id:"shauf",
+   title:"Someone Else\u2019s Story",
+   note:"Andy Shauf writes in other people\u2019s voices, and the songwriters who taught him how",
+   c:"#e2552c", art:true,
+   ap:"/playlist/pl.u-b6Wa8sy84LJ",
+   sp:"6C1F8C26qaEGjYc5U28OAx",
+   // An artist study rather than a survey, so the span is counted by who is on it, not by
+   // how many tracks each one has: 17 of the 24 are Shauf himself. The four forebears are
+   // what make it a crossing, and Indie Rock is where he sits.
+   styles:["indierock","indiefolk","singer_songwriter","folkrock","chamberpop"],
+   tracks:[
+     ["Gordon Lightfoot","If You Could Read My Mind"],
+     ["Paul Simon","Duncan"],
+     ["Randy Newman","Rednecks"],
+     ["Elliott Smith","Alameda"],
+     ["Andy Shauf","Wendell Walker"],
+     ["Andy Shauf","Hometown Hero"],
+     ["Andy Shauf","The Magician"],
+     ["Andy Shauf","Early to the Party"],
+     ["Andy Shauf","The Worst in You"],
+     ["Andy Shauf","To You"],
+     ["Andy Shauf","Martha Sways"],
+     ["Andy Shauf","Neon Skyline"],
+     ["Andy Shauf","Where Are You Judy"],
+     ["Andy Shauf","Thirteen Hours"],
+     ["Andy Shauf","Try Again"],
+     ["Andy Shauf","Things I Do"],
+     ["Andy Shauf","Wasted on You"],
+     ["Andy Shauf","Telephone"],
+     ["Andy Shauf","You Didn't See"],
+     ["Andy Shauf","Norm"],
+     ["Andy Shauf","Halloween Store"],
+     ["Faye Webster","Kingston"],
+     ["Christian Lee Hutson","Northsiders"],
+     ["Bory","Groundhog Day"]
+   ]}
 ];
 
 // ---------- untitled style art ----------

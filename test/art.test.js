@@ -96,6 +96,26 @@ if(fs.existsSync(PDIR)){
   if(dead.length||idle.length||orphan.length) process.exitCode=1;
 }
 
+// ---- art for the playlists that cross the map ----
+// A crossing asks for its file only when it says art:true, so the two have to agree:
+// art:true with no file is a torn icon, and a file nothing claims is weight in the deploy.
+{
+  const XD=path.join(__dirname,"..","xplay");
+  const X=D.XPLAY||[];
+  const have=fs.existsSync(XD)
+    ? new Set(fs.readdirSync(XD).filter(f=>f.endsWith(EXT)).map(f=>f.slice(0,-EXT.length)))
+    : new Set();
+  const want=X.filter(x=>x.art).map(x=>x.id);
+  const dead=want.filter(id=>!have.has(id));
+  const idle=[...have].filter(f=>want.indexOf(f)<0);
+  say("crossing art: "+want.length+" claimed, "+have.size+" on disk", true);
+  say("  every one claimed is there", dead.length===0 ? true : dead.join(", "));
+  say("  and nothing on disk is unclaimed"
+    + (idle.length?" (set art:true on "+idle.join(", ")+")":""),
+    idle.length===0);
+  if(dead.length||idle.length) process.exitCode=1;
+}
+
 // ---- the untitled style art ----
 // Same pictures as art/, lettering removed. STYLEART only ever draws where a row prints
 // the name itself, and it falls back to art/, so a gap here is cosmetic rather than
