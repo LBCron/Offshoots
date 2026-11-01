@@ -1330,7 +1330,17 @@ body.searching #bottomSearch{display:block}
   box-shadow:0 0 0 .5px rgb(0 0 0 / .14),0 10px 30px rgb(0 0 0 / .32)}
 #bottomSearch .search input::placeholder{color:var(--lite-mut)}
 .zoom{bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-#panelBody{max-width:720px}
+/* A measure cap, so a line of prose never runs the width of a laptop. Below 720 the sheet
+   is narrower than the cap and above 900 it is a 402px sidebar, so the cap only bites in
+   the band between: there the sheet spans the window, the handle and the background with
+   it, while the content stopped at 720 and sat against the left edge. At 899px that left
+   195px of empty sheet beside it, which reads as a broken layout rather than as a margin.
+   Centred, the cap does its job and the column sits in the middle of what holds it.
+   width:100% matters: #panelBody is a flex item in a column, so the inline axis is the
+   cross axis, and an auto margin there shrinks the item to its content instead of
+   stretching it. Without the explicit width a style panel sized itself to its widest
+   line and hung off the left of a phone screen. */
+#panelBody{width:100%;max-width:720px;margin-inline:auto}
 .about{margin-top:12px;padding-top:0}
 /* the app's own icon sits with the stats line inside About, the way it does in an
    about box, rather than taking the top of the panel */

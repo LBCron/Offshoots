@@ -515,6 +515,50 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
     say("at "+w+"px the panel scrolls down and not sideways ("+r.over+"px over)",
       r.over===0 && r.canY);
     say("  while the ways in still swipe", r.row);
+    // The same question on a style, which is the longer and denser of the two and the one
+    // that actually broke: centring the body with an auto margin made it a shrink-to-fit
+    // flex item, so it sized to its widest line and hung off the left of the screen. The
+    // overview was narrow enough to hide that.
+    await q.goto(URL+"#disco"); await shown(q,"#chart .n");
+    await q.click("#grab").catch(()=>{});
+    await settle(q); await q.waitForTimeout(300);
+    const s=await q.evaluate(()=>{
+      const pb=document.getElementById("panelBody"), c=document.querySelector(".pcard");
+      const pr=pb.getBoundingClientRect(), cr=c?c.getBoundingClientRect():null;
+      return {over:pb.scrollWidth-pb.clientWidth, w:Math.round(pr.width),
+        left:Math.round(pr.left), card:cr?Math.round(cr.left):null,
+        vw:innerWidth};});
+    say("  and a style panel stays inside the screen ("+s.w+"px at x"+s.left+")",
+      s.over===0 && s.left>=0 && s.w<=s.vw && (s.card===null || s.card>=0));
+    await nc.close();
+  }
+
+  // ---------- the content column sits in the middle of the sheet ----------
+  // #panelBody is capped at 720px so a line of prose never runs the width of a laptop.
+  // Below 720 the sheet is narrower than the cap and at 900 it becomes a 402px sidebar,
+  // so the cap only bites in the band between — and there it was left-aligned, leaving up
+  // to 195px of empty sheet down the right while the handle and the background spanned
+  // the whole window. Reported as the panel and its contents having different widths.
+  for(const w of [700,760,820,880,899,900,1100]){
+    const nc=await b.newContext({viewport:{width:w,height:900}});
+    const q=await nc.newPage();
+    await q.addInitScript(()=>{ try{ localStorage.setItem("offshoots.seen","1");
+      localStorage.setItem("offshoots.tip","1"); }catch(e){} });
+    await q.goto(URL+"#install"); await shown(q,"#chart .n"); await settle(q);
+    await q.waitForTimeout(500);
+    const r=await q.evaluate(()=>{
+      const box=s=>{const e=document.querySelector(s); if(!e) return null;
+        const t=e.getBoundingClientRect();
+        return {l:Math.round(t.left), r:Math.round(t.right), w:Math.round(t.width)};};
+      return {panel:box("#panel"), body:box("#panelBody")};});
+    if(!r.panel || !r.body){ say("at "+w+"px the content is centred in the sheet","no panel"); }
+    else {
+      const left=r.body.l-r.panel.l, right=r.panel.r-r.body.r;
+      // a pixel either way is rounding on an odd width, not a layout that is off
+      say("at "+w+"px the content is centred in the sheet ("+left+" / "+right+")",
+        Math.abs(left-right)<=1);
+      say("  and never wider than the measure cap ("+r.body.w+"px)", r.body.w<=720);
+    }
     await nc.close();
   }
 
