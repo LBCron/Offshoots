@@ -1715,6 +1715,11 @@ a.wk.sp:hover{background:color-mix(in srgb,#1db954 86%,#000)}
   body:not(.open) #panelBody .wikiline{display:none}
   body:not(.open) #panelBody .sect-listen .subh{display:none}
   body:not(.open) #panelBody .sect-listen .who{display:none}
+  /* The peek is the style's own playlist and nothing else. A crossing is worth finding
+     once you are reading the panel, but in the peek it is a second row that makes the
+     minimised sheet taller, and the map's bottom padding is measured from that: it put
+     the last lane back under the sheet, which is what the padding exists to prevent. */
+  body:not(.open) #panelBody .plrow.xplay{display:none}
 }
 /* .pcard used to wrap the header alone, so a handful of ".pcard a.wk" rules matched
    nothing. The card wraps the whole scroll content now, so they came alive and turned
@@ -1775,12 +1780,45 @@ a.wk.pl:hover,a.wk.sp:hover{background:color-mix(in srgb,var(--ink,var(--fg)) 84
 .plrow .plgo{flex:none;display:grid;place-items:center;width:15px;height:15px;color:var(--muted)}
 .plrow .plgo svg{width:15px;height:15px}
 .plrow:hover .plgo{color:var(--fg)}
+/* A playlist that crosses the map. It is the same row, because it is the same thing to
+   tap, but it is not about this style alone and the row has to say so: the note says what
+   the run is, and the span names the other styles it draws from. Set back a shade from
+   the style's own playlist, which stays the one thing on the panel that is only about it.
+   A row under another gets a gap; the first one does not, so a style with no playlist of
+   its own opens on this exactly where its own would have sat. */
+.plrow.xplay{background:color-mix(in srgb,var(--acc,var(--fg)) 8%,transparent);
+  padding:8px 16px 8px 8px;gap:10px}
+.plrow.xplay:hover{background:color-mix(in srgb,var(--acc,var(--fg)) 15%,transparent)}
+.plrow + .plrow.xplay{margin-top:8px}
+/* Smaller than the style's own playlist, which stays the thing the panel is about. The
+   art comes down hardest, since that is what the eye sizes a row by, and the title steps
+   from the heading face to body so the two do not read as equals. */
+.plrow.xplay img.pcov,.plrow.xplay .pcovph{width:46px;height:46px}
+.plrow.xplay .pcovph b{font-size:15px}
+/* --t-head and --t-body are the same size, so stepping between them changes nothing:
+   the title drops to the sub size, which is the next rung that is actually smaller. */
+.plrow.xplay .plttl{font:600 var(--t-sub)/var(--t-sub-lh) var(--f-body);letter-spacing:0;
+  -webkit-line-clamp:1}
+.plrow.xplay .plsvc{font-size:var(--t-foot);line-height:var(--t-foot-lh)}
+.plrow.xplay .plgo,.plrow.xplay .plgo svg{width:13px;height:13px}
+/* Three stacked lines that each wrap twice made the smaller row the taller one, which is
+   the opposite of what the size was for. One line each, cut with an ellipsis. */
+.plrow.xplay .plnote,.plrow.xplay .plspan{-webkit-line-clamp:1}
+.plrow.xplay .pltx{gap:2px}
+.plrow .plnote{font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted);
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.plrow .plspan{font:400 var(--t-foot)/var(--t-foot-lh) var(--f-body);color:var(--muted);
+  opacity:.85;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 /* no playlist on the chosen service yet: the row stays, muted and inert */
 .plrow.off{background:color-mix(in srgb,var(--acc,var(--fg)) 7%,transparent);cursor:default}
 .plrow.off img.pcov{opacity:.5}
 .plrow.off .plttl{opacity:.6}
 .plrow.off .plgo{display:none}
-@media (max-width:899px){ .plrow{padding:9px 16px 9px 9px;gap:13px} .plrow img.pcov,.plrow .pcovph{width:98px;height:98px} .plrow .pcovph b{font-size:32px} }
+@media (max-width:899px){ .plrow{padding:9px 16px 9px 9px;gap:13px} .plrow img.pcov,.plrow .pcovph{width:98px;height:98px} .plrow .pcovph b{font-size:32px}
+  /* the phone row is much bigger, so the crossing steps down by about the same ratio */
+  .plrow.xplay{padding:8px 14px 8px 8px;gap:11px}
+  .plrow.xplay img.pcov,.plrow.xplay .pcovph{width:62px;height:62px}
+  .plrow.xplay .pcovph b{font-size:20px} }
 
 /* the service switch fills the row beside "Listen on", three equal thirds */
 .sect-listen .secthead{gap:14px}

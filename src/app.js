@@ -20,7 +20,7 @@ function wiki(n){
 }
 // Emily's own Apple Music class playlists, keyed by style id (paths are relative to music.apple.com)
 // cover art, if art/<id>.jpg is sitting next to the page; missing files remove themselves
-const ART_DIR="art/", STYLE_DIR="styles/", ART_EXT=".jpg";
+const ART_DIR="art/", STYLE_DIR="styles/", XPLAY_DIR="xplay/", ART_EXT=".jpg";
 // two letters for a style with no art file, so the row keeps its shape
 function initials(name){
   const w=String(name||"").split(/[^A-Za-z0-9]+/).filter(Boolean);
@@ -64,6 +64,40 @@ function plist(n){
     + `<span class="pltx"><b class="plttl">${esc(t)}</b>`
     + `<span class="plline"><span class="plsvc"></span><span class="plgo">${OPENGO}</span></span></span></a>`;
 }
+// ---------- playlists that span styles ----------
+// Same row as a style's own playlist, so the two read as one list, with a line saying
+// where else it goes: a run that crosses the map is worth following precisely because it
+// does not belong to the style you found it on, and the row has to say so or it reads as
+// a second, oddly-named playlist for this style.
+const xplayFor = id => (typeof XPLAY!=="undefined" ? XPLAY : [])
+  .filter(x=>x.styles && x.styles.indexOf(id)>=0);
+function xrow(x,id){
+  // every other style it draws from, named, longest list trimmed to keep the row a row
+  const others=x.styles.filter(s=>s!==id && byId[s]).map(s=>byId[s].name);
+  // one line, so two names and a count: three names ran past the end on a phone and the
+  // ellipsis ate the count, which is the part that says how far the run reaches
+  const span = others.length
+    ? (others.length>2 ? others.slice(0,2).join(", ")+" and "+(others.length-2)+" more"
+                       : others.join(" and "))
+    : "";
+  const ini=initials(x.title);
+  // art only when there is a file to ask for. The <img> fallback exists for a file that
+  // goes missing, and it shows a torn icon and spends two requests getting there; a
+  // playlist with no art yet should just open on the tile.
+  const art = x.art
+    ? `<img class="pcov" src="${XPLAY_DIR}${encodeURIComponent(x.id)}${ART_EXT}" alt=""`
+      + ` loading="lazy" decoding="async" data-c="${esc(x.c||"")}" data-ini="${esc(ini)}">`
+    : `<span class="pcov pcovph" aria-hidden="true"${x.c?` style="--c:${esc(x.c)}"`:""}>`
+      + `<b>${esc(ini)}</b></span>`;
+  return `<a class="plrow pl xplay" target="_blank" rel="noopener"`
+    + ` data-ap="${x.ap?esc("https://music.apple.com"+x.ap):""}" data-spid="${esc(x.sp||"")}"`
+    + ` data-style="${esc(x.title)}">`
+    + art
+    + `<span class="pltx"><b class="plttl">${esc(x.title)}</b>`
+    + (x.note?`<span class="plnote">${esc(x.note)}</span>`:"")
+    + (span?`<span class="plspan">Also on ${esc(span)}</span>`:"")
+    + `<span class="plline"><span class="plsvc"></span><span class="plgo">${OPENGO}</span></span></span></a>`;
+}
 function paintPlay(){
   document.querySelectorAll("#panelBody a.plrow").forEach(a=>{
     const ap=a.dataset.ap||"", sp=a.dataset.spid||"", nm=a.dataset.style||"";
@@ -71,13 +105,18 @@ function paintPlay(){
     const url = SVC==="spotify" ? (sp?"https://open.spotify.com/playlist/"+sp:"") : SVC==="apple" ? ap : "";
     if(url){
       a.classList.remove("off"); a.removeAttribute("aria-disabled");
-      a.className="plrow "+(SVC==="spotify"?"sp":"pl");
+      // rebuilt rather than toggled, so anything else the row is has to be carried over:
+      // a cross-style row lost its own class here and went back to looking like the
+      // style's own playlist
+      const x=a.classList.contains("xplay")?" xplay":"";
+      a.className="plrow "+(SVC==="spotify"?"sp":"pl")+x;
       a.href=url; if(SVC==="spotify") a.dataset.sp=sp; else delete a.dataset.sp;
       lbl.textContent="Playlist on "+svcName();
       a.title="Open the "+nm+" playlist in "+svcName();
     } else {
       // the row stays so the section keeps its shape; it just can't be played here yet
-      a.className="plrow off"; a.removeAttribute("href"); delete a.dataset.sp;
+      a.className="plrow off"+(a.classList.contains("xplay")?" xplay":"");
+      a.removeAttribute("href"); delete a.dataset.sp;
       a.setAttribute("aria-disabled","true");
       lbl.textContent="Not on "+svcName()+" yet";
       a.title="No "+svcName()+" playlist for "+nm+" yet";
@@ -1075,17 +1114,18 @@ function artistAll(n){
 }
 function listenSect(n,who,artistsHtml){
   const pb=plist(n);
-  if(!pb && !who.length) return "";
+  const xs=xplayFor(n.id).map(x=>xrow(x,n.id)).join("");
+  if(!pb && !xs && !who.length) return "";
   // the chips used to wrap across three ragged lines, which gave the longest name the
   // widest row and left a hole beside the shortest. One line that scrolls, with the rest
   // behind the heading, the same way the ways in work on the overview.
   // every style with artists opens a page, whether or not there is a roster behind the
   // chips: the row scrolls, so the page is also the only place the whole set sits still
   const all=artistAll(n);
-  const whoHead = `<button type="button" class="subh subgo${pb?" gap":""}" data-page="artists"`
+  const whoHead = `<button type="button" class="subh subgo${(pb||xs)?" gap":""}" data-page="artists"`
       + ` aria-label="Key artists, see all ${all.length}">Key artists`
       + `<span class="subct">${all.length}</span><span class="sectcv">${GOCHEV}</span></button>`;
-  const body = (pb||"") + (who.length?whoHead+artistsHtml:"");
+  const body = (pb||"") + xs + (who.length?whoHead+artistsHtml:"");
   const head = `<div class="secthead"><h3 class="secttl">Listen on ${svcPicker("inline")}</h3></div>`;
   return `<div class="sect sect-listen">${head}<div class="secbody">${body}</div></div>`;
 }
