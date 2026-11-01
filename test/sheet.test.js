@@ -135,14 +135,14 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       await until(q,v=>{const b=document.getElementById("panelBody");
         return b.scrollTop>v || b.scrollTop+b.clientHeight>=b.scrollHeight-1;},was); }
     // the band is the band the scrolled state draws, so wait for the state
-    await until(q,()=>document.body.classList.contains("pscrolled")); await rest(q);
+    await until(q,()=>document.getElementById("panel").classList.contains("pscrolled")); await rest(q);
     const hd=await q.evaluate(()=>{
       const n=document.querySelector(".pcard .navrow");
       const cs=getComputedStyle(n), bf=getComputedStyle(n,"::before");
       const row=Math.round(n.getBoundingClientRect().height);
       const lines=[cs.boxShadow,bf.boxShadow].filter(x=>x&&x!=="none").length;
       return {row, lines, band:Math.round(parseFloat(bf.height)||0),
-        scrolled:document.body.classList.contains("pscrolled")};});
+        scrolled:document.getElementById("panel").classList.contains("pscrolled")};});
     say(name+" draws one rule under a "+hd.band+"px band", hd.scrolled && hd.lines===1);
     say("  which covers a row of "+hd.row+"px", hd.band>=hd.row && hd.band>=44);
     await q.close();
@@ -499,6 +499,35 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       const now=await q.evaluate(()=>document.getElementById("panelBody").scrollTop);
       say("a drag up from "+what+" scrolls the panel ("+(now-was)+" of "+room+"px)", now-was>20);
     }
+
+    // ---- and it scrolls smoothly, with no frame standing out near the top ----
+    // The header hands the title over about twenty pixels down. That handover set a class
+    // on <body>, and a class on the root of a document holding a 4,300-node map repainted
+    // the map: one 56ms frame, in the one place every scroll passes through, which is why
+    // it read as a hitch rather than as slowness. The classes live on the panel now.
+    { await q.goto(URL); await shown(q,"#chart .n");
+      await q.click("#grab").catch(()=>{});
+      await until(q,()=>document.body.classList.contains("open")); await settle(q);
+      const fr=await q.evaluate(async ()=>{
+        const pb=document.getElementById("panelBody");
+        const pass=async()=>{ pb.scrollTop=0;
+          await new Promise(r=>setTimeout(r,300));
+          const f=[]; let last=performance.now();
+          for(let t=0;t<=240;t+=4){ pb.scrollTop=t;
+            await new Promise(r=>requestAnimationFrame(r));
+            const n=performance.now(); f.push(n-last); last=n; }
+          f.sort((a,b)=>a-b);
+          return {worst:f[f.length-1], mid:f[f.length>>1]}; };
+        const runs=[]; for(let i=0;i<5;i++) runs.push(await pass());
+        runs.sort((a,b)=>a.worst-b.worst);
+        const m=runs[2];                       // the median run, so one stutter is not the verdict
+        return {worst:+m.worst.toFixed(1), mid:+m.mid.toFixed(1)};
+      });
+      say("no frame in the first 240px costs more than twice a median one ("
+        + fr.worst+"ms worst, "+fr.mid+"ms median)", fr.worst < fr.mid*2);
+      // the old spike was 3.3x the median; anything near that is the map being repainted
+      say("  and the handover itself is not the expensive frame",
+        fr.worst < fr.mid+20); }
 
     // and sideways from the same circle still moves the row, which is what pan-x was for
     await q.goto(URL); await shown(q,"#chart .n");

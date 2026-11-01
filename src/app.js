@@ -875,27 +875,51 @@ function setPbar(t,s){ PBAR={t:t||"",s:s||""}; const a1=$("pbarTitle"), a2=$("pb
   // the big title scrolling under the bar is what brings the compact one in, the way a
   // phone app hands a screen's name to its header. Measured rather than guessed at a
   // pixel count, since the title is one line on some pages and three on others.
-  const sync=()=>{
-    document.body.classList.toggle("pscrolled", body.scrollTop>2);
+  // Read the whole frame before writing any of it. This used to set a class on <body> and
+  // then immediately ask two elements where they were, which is a write followed by a read
+  // and forces the layout it just invalidated — on every scroll event, against a document
+  // that holds a 461-node map. The frame where the handover lands cost 56ms, which is the
+  // hitch near the top: the one place where the class actually changes.
+  let pending=0, lastTop=-1;
+  const measure=()=>{
     const pages=[...body.querySelectorAll(".ppage")].filter(x=>!x.hidden);
     const big=(pages[0]||body).querySelector(".bigttl");
     const nav=body.querySelector(".pcard .navrow");
-    // Hand over as the big title starts going under the bar, not after it has gone. Keyed
-    // on its bottom, there was a 30px band of scroll where the title was behind the bar and
-    // the compact one had not come in yet: a blank white header with nothing but a close
-    // button, which is what you saw on the way back up. Keyed on its top, the compact one
-    // arrives as the big one starts to disappear, which is the handover it was meant to be.
-    // The 6px is hysteresis, so a title resting exactly on the line cannot flicker.
-    if(big&&nav){
-      const t=big.getBoundingClientRect().top, b=nav.getBoundingClientRect().bottom;
-      const on=document.body.classList.contains("pttl");
-      document.body.classList.toggle("pttl", on ? t < b+6 : t <= b);
-    }
-    const slot=nav&&nav.querySelector(".navttl.ovttl .mn");
-    if(slot&&big){ const t=(big.querySelector(".mn")||big).textContent.trim();
+    const cls=$("panel").classList;
+    return {big, nav, top:body.scrollTop,
+      // Hand over as the big title starts going under the bar, not after it has gone.
+      // Keyed on its bottom, there was a 30px band of scroll where the title was behind
+      // the bar and the compact one had not come in yet: a blank white header with nothing
+      // but a close button. Keyed on its top, the compact one arrives as the big one
+      // starts to disappear. The 6px is hysteresis, so a title resting exactly on the
+      // line cannot flicker.
+      ttl: big&&nav ? (()=>{ const t=big.getBoundingClientRect().top,
+          b=nav.getBoundingClientRect().bottom;
+        return cls.contains("pttl") ? t < b+6 : t <= b; })() : cls.contains("pttl")};
+  };
+  const apply=m=>{
+    const cls=$("panel").classList;
+    // Only touch a class that is actually changing. Setting one that is already there is
+    // cheap, but it is not free, and neither is the style recalc it can schedule.
+    const scrolled=m.top>2;
+    if(cls.contains("pscrolled")!==scrolled) cls.toggle("pscrolled",scrolled);
+    if(cls.contains("pttl")!==m.ttl) cls.toggle("pttl",m.ttl);
+    const slot=m.nav&&m.nav.querySelector(".navttl.ovttl .mn");
+    if(slot&&m.big){ const t=(m.big.querySelector(".mn")||m.big).textContent.trim();
       if(slot.textContent!==t) slot.textContent=t; }
   };
-  body.addEventListener("scroll",sync,{passive:true});
+  const sync=()=>{ apply(measure()); };
+  // One pass per frame. A scroll fires faster than the screen repaints, and every extra
+  // pass was another forced layout for a state that had not changed yet.
+  const onScroll=()=>{
+    if(pending) return;
+    pending=requestAnimationFrame(()=>{ pending=0;
+      const t=body.scrollTop;
+      if(t===lastTop) return;
+      lastTop=t; sync();
+    });
+  };
+  body.addEventListener("scroll",onScroll,{passive:true});
   addEventListener("resize",sync);
   if(btn){
     btn.addEventListener("click",openSearch);
@@ -2550,7 +2574,8 @@ $("panelBody").addEventListener("error",e=>{
   body.addEventListener("pointerdown",e=>{ if(!e.target.closest||!e.target.closest(".mrow,.whorow")) stopGlide(); });
 })();
 
-function panelTop(){ const pb=$("panelBody"); if(!pb) return; pb.scrollTop=0; document.body.classList.remove("pscrolled"); setTimeout(()=>{ pb.scrollTop=0; document.body.classList.remove("pscrolled"); },60); }
+function panelTop(){ const pb=$("panelBody"); if(!pb) return; const cls=$("panel").classList;
+  pb.scrollTop=0; cls.remove("pscrolled"); setTimeout(()=>{ pb.scrollTop=0; cls.remove("pscrolled"); },60); }
 function qsync(){ const b=$("qclear"); if(b) b.hidden = !q.value; }
 function openSearch(){
   // iOS only raises the keyboard if focus happens inside the tap itself, so do it first and synchronously

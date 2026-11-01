@@ -525,8 +525,8 @@ body.open .pcnt{display:none}
 .navback:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
 @media (max-width:899px){ .navback{min-width:var(--tap);height:var(--tap)} .navback svg{width:20px;height:20px} .navback .bklbl{font-size:var(--t-sub)} }
 /* on the overview the row has no empty slot to hold, so the button simply goes away */
-body.pscrolled .navrow{box-shadow:0 .5px 0 var(--line);background:var(--panel)}
-body.pscrolled .pcard .navrow{border-radius:0}
+#panel.pscrolled .navrow{box-shadow:0 .5px 0 var(--line);background:var(--panel)}
+#panel.pscrolled .pcard .navrow{border-radius:0}
 @media (prefers-reduced-motion:reduce){ .navrow{transition:none} }
 .navttl{min-width:0;text-align:center;overflow:hidden}
 .navrow .navttl .mn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -561,9 +561,9 @@ body.pscrolled .pcard .navrow{border-radius:0}
    is taller than they are. A fixed 44px band drew its hairline at 44 while the row drew
    its own at 53, which is the double rule. The band takes whichever is taller and carries
    the only hairline; the row's own is turned off wherever the band paints. */
-body.pscrolled .pcard .navrow::before{content:"";position:absolute;left:0;right:0;top:0;
+#panel.pscrolled .pcard .navrow::before{content:"";position:absolute;left:0;right:0;top:0;
   height:max(var(--tap), 100%);background:var(--panel);box-shadow:0 .5px 0 var(--line);z-index:0}
-body.pscrolled .pcard .navrow{box-shadow:none}
+#panel.pscrolled .pcard .navrow{box-shadow:none}
 /* the back button and the close button are both positioned out of the grid, which leaves
    the title as the only item in flow and parks it in the first column. It spans the bar
    instead, and the side tracks keep it clear of the two buttons. */
@@ -574,11 +574,11 @@ body.pscrolled .pcard .navrow{box-shadow:none}
   transition:opacity .2s ease,transform .2s cubic-bezier(.32,.72,0,1)}
 .pcard .navrow .navttl.ovttl .mn{font:600 var(--t-head)/1.2 var(--f-body);
   letter-spacing:-.014em;color:var(--fg)}
-body.pttl .pcard .navrow .navttl.ovttl{opacity:1;transform:none}
+#panel.pttl .pcard .navrow .navttl.ovttl{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){ .pcard .navrow .navttl.ovttl{transition:none} }
 /* the back button names where it goes; once the bar carries a title too, the pair would
    crowd a phone, so the label gives way and the arrow speaks for itself */
-@media (max-width:420px){ body.pttl .ovcard .navleft .navback.topage .bklbl{display:none} }
+@media (max-width:420px){ #panel.pttl .ovcard .navleft .navback.topage .bklbl{display:none} }
 @media (max-width:899px){ .ovcard .bigttl{margin:14px 0 8px} }
 /* beside the share button there is no room for the destination's name, and the two
    glyphs already say map and back */
@@ -1496,9 +1496,14 @@ aside#panel{padding-left:0;padding-right:0}
 #pclose{right:var(--ppad)}
 @media (max-width:899px){ :root{--ppad:16px} }
 
-/* ---- scrolled state: search collapses to an icon, title stays, hairline appears ---- */
+/* ---- scrolled state: search collapses to an icon, title stays, hairline appears ----
+   These two live on the panel, not on <body>. On <body> they were a class change on the
+   root of a document holding a 4,300-node map, and the frame where either one landed cost
+   46ms against 21ms with the map hidden: the map was being repainted because the sheet's
+   header had changed. Nothing under either class is outside the panel, so neither needs
+   to be announced any wider than the panel. */
 #pbar{display:none;align-items:center;gap:10px;flex:none;padding:0 var(--ppad) 10px}
-body.pscrolled #pbar{display:none}
+#panel.pscrolled #pbar{display:none}
 
 
 #pbar[hidden]{display:none}

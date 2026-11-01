@@ -255,13 +255,13 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // background it switches on is a transition, not a swap. Waiting for the class alone
   // caught the colour in flight and read alpha 0.996 about one run in ten: opaque to look
   // at, not opaque to assert on. Wait for the class, then for the paint to stop moving.
-  await until(p,()=>document.body.classList.contains("pscrolled"));
+  await until(p,()=>document.getElementById("panel").classList.contains("pscrolled"));
   await settle(p);
   const band=await p.evaluate(()=>{ const r=document.querySelector(".navrow");
     const cs=getComputedStyle(r);
     const n=(cs.backgroundColor.match(/[\d.]+/g)||[]);
     return {bg:cs.backgroundColor, alpha:n.length>3?+n[3]:1,
-      scrolled:document.body.classList.contains("pscrolled")}; });
+      scrolled:document.getElementById("panel").classList.contains("pscrolled")}; });
   say("  and opaque under the controls while it is ("+band.bg+")", band.scrolled && band.alpha===1);
   // The fold under the name is the one disclosure left on the panel's own head, and its
   // chevron has to turn back when it shuts: closeNav used to reset only .navbtn, which
@@ -290,7 +290,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // the sticky row must not paint a ground denser than the sheet it sits on: at full
   // opacity over a 74-78% sheet it drew a lighter box across the whole header
   const hdr=await p.evaluate(()=>{const n=getComputedStyle(document.querySelector(".navrow")).backgroundColor;
-    return {row:n, scrolled:document.body.classList.contains("pscrolled")};});
+    return {row:n, scrolled:document.getElementById("panel").classList.contains("pscrolled")};});
   say("the header has no ground of its own at rest ("+hdr.row+")",
     /rgba\(0, 0, 0, 0\)|transparent/.test(hdr.row) || hdr.scrolled);
   await p.screenshot({path:__dirname+"/screens/m-sharettl.png"});
@@ -369,13 +369,13 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     await w.click("#grab").catch(()=>{}); await opened(w);
     await w.evaluate(()=>{document.getElementById("panelBody").scrollTop=260;});
     // the band is the one the scrolled state draws, so wait for the state
-    await until(w,()=>document.body.classList.contains("pscrolled")); await settle(w);
+    await until(w,()=>document.getElementById("panel").classList.contains("pscrolled")); await settle(w);
     const r=await w.evaluate(()=>{
       const row=document.querySelector(".pcard .navrow"), body=document.getElementById("panelBody");
       const rb=row.getBoundingClientRect(), bb=body.getBoundingClientRect();
       const btn=document.querySelector(".pcard .navleft")||document.querySelector(".pcard #panelBack");
       const x=document.querySelector(".pcard .pmin");
-      return {on:document.body.classList.contains("pscrolled"),
+      return {on:document.getElementById("panel").classList.contains("pscrolled"),
         dl:Math.round(rb.left-bb.left), dr:Math.round(bb.right-rb.right),
         btnL:btn?Math.round(btn.getBoundingClientRect().left-bb.left):-1,
         xR:x?Math.round(bb.right-x.getBoundingClientRect().right):-1}; });
