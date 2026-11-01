@@ -4,7 +4,14 @@ const {settle,until,shown,arm}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 const Dk={width:1280,height:900};
-const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typeof v!=="boolean"?": "+v:""));
+// Anything that is not true is a failure. A check that answered with its detail instead
+// of false used to print with no prefix at all, so the runner counted it as no check and
+// the run came back clean: a failing assertion that reported what went wrong was the one
+// kind that could not fail. Caught by a deliberately broken build printing a blank line.
+const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
+// A line that only records what happened, with no verdict in it. Keeping these out of
+// say() is what lets say() treat anything that is not true as a failure.
+const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 // one name for "the page is loaded, the map is drawn and nothing is moving". Every
 // measurement here is taken against the map, so a loaded document is not enough.
 const ready=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q); };
@@ -30,7 +37,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // ---- order on the page ----
   const order=await p.$eval("#panelBody",e=>[...e.querySelectorAll(".ovcard,.sect-feat,.sect-modes,.browse,.ovhint,.aboutwrap")]
     .map(x=>x.className.split(" ").find(c=>/ovcard|sect-feat|sect-modes|browse|ovhint|aboutwrap/.test(c))));
-  say("reading order", order.join(" → "));
+  note("reading order", order.join(" → "));
   // the panel is titled, so its sections mostly are not: the list under the title needs no
   // label, and the two folds say what they are without a heading over them saying it again.
   // Two headings are left. The chips carry one because what they sort by is not obvious
@@ -106,7 +113,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
 
   const nFams=await p.evaluate(()=>typeof FAMS!=="undefined"?FAMS.length:-1);
   // ---- 2: the title block describes the map, so it sits on the map ----
-  say("meta", await p.$eval("#maphead .mmeta",e=>e.textContent));
+  note("meta", await p.$eval("#maphead .mmeta",e=>e.textContent));
   say("playlist count is on the map", (await p.$eval("#maphead .mmeta",e=>e.textContent)).includes("playlists"));
   say("and not repeated in the panel", (await p.$$("#panelBody .mmeta, .ovcard .tag")).length===0);
   // the band is a quiet label now: no blurb, a smaller name, and both set below full strength
@@ -200,7 +207,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     const r=document.querySelector(".ovcard .navrow"), x=r.querySelector(".pmin");
     const pad=parseFloat(getComputedStyle(r).paddingRight);
     return !!x && Math.abs(r.getBoundingClientRect().right-pad-x.getBoundingClientRect().right)<=1; }));
-  say("  and it says what it does", await p.$eval(".ovcard .pmin",e=>e.getAttribute("title")));
+  note("  and it says what it does", await p.$eval(".ovcard .pmin",e=>e.getAttribute("title")));
   say("  which is close, not minimise",
     await p.$eval(".ovcard .pmin",e=>e.hasAttribute("data-dismiss")&&/close/i.test(e.getAttribute("title"))));
   // it floats over the corner rather than setting the row's height: a 44px control in the
@@ -319,7 +326,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   say("tapping it pushes the page", ab.up && ab.title==="About this map");
   say("  landing at the top rather than past the fold ("+ab.top+"px, scroll "+ab.scroll+")",
     ab.scroll===0 && ab.top<=80);
-  say("  stats line inside", ab.stats);
+  note("  stats line inside", ab.stats);
 
   // the last block used to sit flush against the panel's bottom edge
   const tail=await p.evaluate(()=>{
@@ -333,7 +340,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   await p.evaluate(()=>{document.getElementById("panelBody").scrollTop=0;});
   say("back returns to Explore",
     (await p.$eval('.ppage[data-p="root"] .bigttl .mn',e=>e.textContent))==="Explore");
-  say("families stated once", (await p.$eval("#panelBody",e=>e.textContent)).split("families").length-1);
+  note("families stated once", (await p.$eval("#panelBody",e=>e.textContent)).split("families").length-1);
 
   // ---- 6: the heading is the way to the full set ----
   // the count that used to sit beside it went when the heading became a control: the
@@ -344,7 +351,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // ---- space saved ----
   const hgt=await p.$eval("#panelBody",e=>{const a=e.querySelector(".ovcard").getBoundingClientRect(),
     z=e.querySelector(".sect-learn").getBoundingClientRect(); return Math.round(z.bottom-a.top);});
-  say("root panel height, colophon included (was 765 with About collapsed)", hgt);
+  note("root panel height, colophon included (was 765 with About collapsed)", hgt);
   await p.screenshot({path:__dirname+"/screens/r-m-root.png"});
   // the lane bands are family-coloured at two opacities; the rhythm only survives while
   // every low row stays darker than every high row, whichever families sit next to each other

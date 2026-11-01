@@ -5218,9 +5218,17 @@ function setPbar(t,s){ PBAR={t:t||"",s:s||""}; const a1=$("pbarTitle"), a2=$("pb
     const pages=[...body.querySelectorAll(".ppage")].filter(x=>!x.hidden);
     const big=(pages[0]||body).querySelector(".bigttl");
     const nav=body.querySelector(".pcard .navrow");
-    let under=false;
-    if(big&&nav) under = big.getBoundingClientRect().bottom <= nav.getBoundingClientRect().bottom + 2;
-    document.body.classList.toggle("pttl", under);
+    // Hand over as the big title starts going under the bar, not after it has gone. Keyed
+    // on its bottom, there was a 30px band of scroll where the title was behind the bar and
+    // the compact one had not come in yet: a blank white header with nothing but a close
+    // button, which is what you saw on the way back up. Keyed on its top, the compact one
+    // arrives as the big one starts to disappear, which is the handover it was meant to be.
+    // The 6px is hysteresis, so a title resting exactly on the line cannot flicker.
+    if(big&&nav){
+      const t=big.getBoundingClientRect().top, b=nav.getBoundingClientRect().bottom;
+      const on=document.body.classList.contains("pttl");
+      document.body.classList.toggle("pttl", on ? t < b+6 : t <= b);
+    }
     const slot=nav&&nav.querySelector(".navttl.ovttl .mn");
     if(slot&&big){ const t=(big.querySelector(".mn")||big).textContent.trim();
       if(slot.textContent!==t) slot.textContent=t; }

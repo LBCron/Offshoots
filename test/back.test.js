@@ -3,7 +3,14 @@ const skipWelcome=require("./_hello");
 const {settle,until,arm}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
-const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typeof v!=="boolean"?": "+v:""));
+// Anything that is not true is a failure. A check that answered with its detail instead
+// of false used to print with no prefix at all, so the runner counted it as no check and
+// the run came back clean: a failing assertion that reported what went wrong was the one
+// kind that could not fail. Caught by a deliberately broken build printing a blank line.
+const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
+// A line that only records what happened, with no verdict in it. Keeping these out of
+// say() is what lets say() treat anything that is not true as a failure.
+const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 // the map is drawn, not merely loaded: a deep link's selection lands on a node, and the
 // trail this file follows starts from whatever the map chose
 const drawn=q=>until(q,()=>!!document.querySelector("#chart .n"));
@@ -56,7 +63,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   const first=await p.$eval(".picks .pick",e=>e.dataset.go);
   await p.click(".picks .pick"); await at(p,"#"+first);
   say("appears after picking "+first, await shown(p));
-  say("label", await label(p));
+  note("label", await label(p));
   await p.click("#panelBack"); await at(p,"");
   say("back lands on the overview", (await hash(p))==="");
   // Back used to stop here, on a clean overview, because the crumb recorded only what was
@@ -90,18 +97,18 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
     await p.click(`.sect-connections .cxled[data-go="${id}"]`); await at(p,"#"+id);
     await ensureOpen(p);
   }
-  say("walked", "punk -> "+walk.join(" -> "));
-  say("button shows the previous stop", await label(p));
+  note("walked", "punk -> "+walk.join(" -> "));
+  note("button shows the previous stop", await label(p));
   const seen=[];
   // each step back is read off the hash, so wait for the hash to leave the stop it was on
   // rather than for a named destination: naming it here would be asserting the answer
   for(let i=0;i<4;i++){ const was=await hash(p);
     await p.click("#panelBack"); await moved(p,was); seen.push(await hash(p)); }
-  say("retraced", seen.join(" "));
+  note("retraced", seen.join(" "));
   const want=["#"+walk[2],"#"+walk[1],"#"+walk[0],"#punk"];
   say("retraced in reverse order", seen.join()===want.join() ? true : "wanted "+want.join(" "));
   say("a deep link still offers one step out to the map", await shown(p));
-  say("that last step says", await label(p));
+  note("that last step says", await label(p));
   // back lives in the panel now, so it is a plain arrow with the destination in its title
   say("it still says where it goes", (await label(p))==="Back to the map");
   // the map pill now shows wherever a style is selected, so a deep link offers both
@@ -142,7 +149,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   say("tapped bare map", await tapBare());
   say("which clears to the map", (await hash(p))==="");
   say("clearing to the map is a step too", await shown(p));
-  say("its label", await label(p));
+  note("its label", await label(p));
   await p.click("#panelBack"); await at(p,mid);
   say("back returns to "+mid, (await hash(p))===mid);
 
@@ -228,7 +235,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   await p.click(`.sect-connections [data-go="${hwalk[0]}"]`); await at(p,"#"+hwalk[0]);
   say("home still there two styles deep", await home(p));
   say("and back names the style it returns to", /^Back to /.test(await label(p)));
-  say("it says", await p.$eval("#mapHome",e=>e.getAttribute("title")));
+  note("it says", await p.$eval("#mapHome",e=>e.getAttribute("title")));
   const hb=await p.evaluate(()=>{const h=document.getElementById("mapHome").getBoundingClientRect(),
     s=document.getElementById("mapSearch").getBoundingClientRect();
     return [Math.round(h.width),Math.round(h.height),Math.round(h.right),Math.round(s.left)];});
@@ -309,7 +316,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   await p.click('[data-mode="winddown"]'); await onPage(p,"mode:winddown");
   const pick2=await p.$eval(".picks .pick",e=>e.dataset.go);
   await p.click(".picks .pick"); await at(p,"#"+pick2);
-  say("the next step starts a fresh trail", await label(p));
+  note("the next step starts a fresh trail", await label(p));
   // one step, and that step is the mood just left rather than anything from the walk that
   // home cleared. It used to read "Back to the map", which said the trail was empty but
   // also that the mood had been forgotten on the way into one of its styles.

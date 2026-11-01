@@ -4,7 +4,14 @@ const {settle,until,gone,shown,arm}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 const Dk={width:1280,height:900};
-const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typeof v!=="boolean"?": "+v:""));
+// Anything that is not true is a failure. A check that answered with its detail instead
+// of false used to print with no prefix at all, so the runner counted it as no check and
+// the run came back clean: a failing assertion that reported what went wrong was the one
+// kind that could not fail. Caught by a deliberately broken build printing a blank line.
+const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
+// A line that only records what happened, with no verdict in it. Keeping these out of
+// say() is what lets say() treat anything that is not true as a failure.
+const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 // The glide drives #panel with an inline height and clears it on transitionend, so an
 // inline height still on the panel means the sheet is still moving even though nothing
 // is mutating. Everything that measures a resting sheet waits for it to be gone.
@@ -99,11 +106,11 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
 
   // ---------- sharing ----------
   await d.click(".shbtn.wide"); await wrote(d,0); await settle(d);
-  say("copied the style link", await d.evaluate(()=>window.__copied[0]||""));
-  say("the button confirms", await d.$eval(".shbtn .shlbl",e=>e.textContent));
+  note("copied the style link", await d.evaluate(()=>window.__copied[0]||""));
+  note("the button confirms", await d.$eval(".shbtn .shlbl",e=>e.textContent));
   say("  and the title is left alone", await d.$eval(".pttl .ptnm",e=>e.textContent)==="Disco");
   await relabelled(d); await settle(d);
-  say("label comes back", await d.$eval(".shbtn .shlbl",e=>e.textContent));
+  note("label comes back", await d.$eval(".shbtn .shlbl",e=>e.textContent));
 
   // overview shares the map
   d=await fresh(b,Dk);
@@ -236,8 +243,11 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
       back:hit("#panelBack"), x:hit(".pmin")}; });
   say("the header holds at the top through a "+stuck.scrolled+"px scroll",
     stuck.scrolled>0 && stuck.before===0 && stuck.after===0);
-  say("  with back and the X still hittable",
-    stuck.title && stuck.back && stuck.x);
+  // This asked for stuck.title too, which the evaluate above has never returned: undefined
+  // is not true, and the check printed with no verdict rather than failing. The navrow lost
+  // its title in the restructure, so there is none to reach for. Back and the X are what
+  // has to stay hittable.
+  say("  with back and the X still hittable", stuck.back===true && stuck.x===true);
   say("  because the card wraps the content it sticks within", stuck.inCard);
   // and it is opaque while stuck: the panel is already translucent over the map, so a
   // translucent header on top of it let the card's own content read through the title
@@ -287,7 +297,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
 
   // the panel regains the space the footer took
   const gained=await p.$eval("#panel",e=>Math.round(e.getBoundingClientRect().height));
-  say("open panel height", gained);
+  note("open panel height", gained);
   // ---------- About has a URL of its own ----------
   // #about is the one hash that is not a style id, so it has to survive boot and land
   // on the open section rather than on an empty overview.
@@ -307,8 +317,8 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   say("install sits below About", await ab.$eval('[data-page="about"]',e=>
     e.compareDocumentPosition(document.querySelector('[data-page="install"]'))===Node.DOCUMENT_POSITION_FOLLOWING));
   await ab.click('[data-page="install"]'); await shown(ab,'.ppage[data-p="install"]'); await settle(ab);
-  say("its heading", await ab.$eval('.ppage[data-p="install"] .bigttl .mn',e=>e.textContent));
-  say("a section per platform", (await ab.$$eval('.ppage[data-p="install"] .subh',e=>e.map(x=>x.textContent))).join(" / "));
+  note("its heading", await ab.$eval('.ppage[data-p="install"] .bigttl .mn',e=>e.textContent));
+  note("a section per platform", (await ab.$$eval('.ppage[data-p="install"] .subh',e=>e.map(x=>x.textContent))).join(" / "));
   say("each one with numbered steps", (await ab.$$('.ppage[data-p="install"] .steps')).length>=4);
   await ab.click('.ppage[data-p="install"] [data-aboutcopy]'); await wrote(ab,1); await settle(ab);
   const icop=await ab.evaluate(()=>window.__copied.slice(-1)[0]||"");

@@ -9,7 +9,14 @@ const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
 const {settle,until,shown,arm}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
-const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typeof v!=="boolean"?": "+v:""));
+// Anything that is not true is a failure. A check that answered with its detail instead
+// of false used to print with no prefix at all, so the runner counted it as no check and
+// the run came back clean: a failing assertion that reported what went wrong was the one
+// kind that could not fail. Caught by a deliberately broken build printing a blank line.
+const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
+// A line that only records what happened, with no verdict in it. Keeping these out of
+// say() is what lets say() treat anything that is not true as a failure.
+const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 // boot runs on document.fonts.ready and draws the map before it reads the hash, so the
 // first drawn node is what says boot has got as far as choosing what to show.
 const ready=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q); };

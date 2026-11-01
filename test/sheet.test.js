@@ -14,7 +14,14 @@ const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
 const {settle,until,shown,arm}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
-const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typeof v!=="boolean"?": "+v:""));
+// Anything that is not true is a failure. A check that answered with its detail instead
+// of false used to print with no prefix at all, so the runner counted it as no check and
+// the run came back clean: a failing assertion that reported what went wrong was the one
+// kind that could not fail. Caught by a deliberately broken build printing a blank line.
+const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
+// A line that only records what happened, with no verdict in it. Keeping these out of
+// say() is what lets say() treat anything that is not true as a failure.
+const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
 (async()=>{
   const b=await chromium.launch(); skipWelcome(b);
@@ -171,8 +178,15 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
     // happens on the next frame, so asking straight after the gesture finds nothing.
     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     const started=performance.now();
-    const anim=document.getAnimations().filter(a=>a.playState==="running")
-      .sort((x,y)=>(y.effect.getTiming().duration||0)-(x.effect.getTiming().duration||0))[0];
+    // The panel's own height, by name. Picking the longest running animation on the page
+    // meant that whenever something else was animating for longer, the test paused and
+    // seeked that instead: the sheet's transition ran on undisturbed, finished inside the
+    // two frames below, and the midpoint read came back exactly at the destination. A real
+    // animation then failed the check for not animating.
+    const anim=document.getAnimations().filter(a=>a.playState==="running"
+      && a.effect && a.effect.target===el && a.effect.getKeyframes
+      && (a.transitionProperty==="height"
+        || a.effect.getKeyframes().some(k=>k.height!==undefined)))[0];
     const dur=anim ? (anim.effect.getTiming().duration||0) : 0;
     if(!dur) return {dur:0, from, mid:from, to:h()};
     // Seek it, do not sample it. Every wall-clock approach here measures the machine:
@@ -564,6 +578,40 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
     }
     await nc.close();
   }
+
+  // ---- the title handover ----
+  // Explore's name is a big heading in the sheet until it scrolls under the bar, at which
+  // point the bar takes it over. Keyed on the heading's bottom, there was a band of about
+  // thirty pixels of scroll where the heading was behind the bar and the bar had not taken
+  // it yet: a blank white header with a close button and no name, most visible scrolling
+  // back up. A name is either in the heading or in the bar at every scroll position, and
+  // there is no height at which it is in neither.
+  { const hc=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+    const h=await hc.newPage();
+    await h.goto(URL); await shown(h,"#chart .n"); await settle(h);
+    await until(h,()=>document.body.classList.contains("open")); await settle(h);
+    const look=async t=>{ await h.evaluate(v=>{document.getElementById("panelBody").scrollTop=v;},t);
+      // past the crossfade, so this reads where it lands and not where it set off from
+      await h.waitForTimeout(260);
+      return h.evaluate(()=>{
+        const body=document.getElementById("panelBody");
+        const nav=body.querySelector(".pcard .navrow").getBoundingClientRect();
+        const big=body.querySelector(".ppage:not([hidden]) .bigttl, .ovcard > .bigttl");
+        const B=big?big.getBoundingClientRect():null;
+        const slot=document.querySelector(".navttl.ovttl");
+        // readable in the bar, and readable below it: not merely present in the DOM
+        return {bar:+getComputedStyle(slot).opacity>0.5,
+          head: !!B && B.bottom>nav.bottom+10,
+          at:Math.round(body.scrollTop)};});};
+    const blank=[];
+    for(let t=0;t<=160;t+=8){ const r=await look(t); if(!r.bar && !r.head) blank.push(r.at); }
+    say("the name is never in neither the heading nor the bar (0 to 160px)",
+      blank.length===0 ? true : "blank at "+blank.join(", "));
+    // and going back up it comes back, rather than sticking in the bar
+    const bottomUp=await look(160), backTop=await look(0);
+    say("  the bar holds it when scrolled down, the heading when back at the top",
+      bottomUp.bar===true && backTop.head===true && backTop.bar===false);
+    await hc.close(); }
 
   await b.close();
 })();

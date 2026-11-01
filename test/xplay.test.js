@@ -11,7 +11,14 @@ const skipWelcome=require("./_hello");
 const {settle,until,shown,arm}=require("./_wait");
 const D=require(path.join(__dirname,"..","src","data.js"));
 const URL="file://"+path.join(__dirname,"..","index.html");
-const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typeof v!=="boolean"?": "+v:""));
+// Anything that is not true is a failure. A check that answered with its detail instead
+// of false used to print with no prefix at all, so the runner counted it as no check and
+// the run came back clean: a failing assertion that reported what went wrong was the one
+// kind that could not fail. Caught by a deliberately broken build printing a blank line.
+const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
+// A line that only records what happened, with no verdict in it. Keeping these out of
+// say() is what lets say() treat anything that is not true as a failure.
+const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q);
   await until(q,()=>document.body.classList.contains("open")); await settle(q); };
 
@@ -55,7 +62,7 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
       const go=a.querySelector(".xopen");
       return {x:true,
         t:(a.querySelector(".xttl")||{}).textContent||"",
-        span:[...a.querySelectorAll(".xgo")].map(b=>b.textContent.replace(/\u2192/g,"").trim()).join(", "),
+        span:[...a.querySelectorAll(".xgo")].map(b=>b.textContent.replace(/\u2192/g,"").trim()),
         note:(a.querySelector(".xnote")||{}).textContent||"",
         href:go?go.getAttribute("href")||"":"",
         svc:(a.querySelector(".plsvc")||{}).textContent||"",
@@ -71,11 +78,12 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
     if(!row){ miss.push(id); continue; }
     // "Also on A, B and 7 more" became a labelled list of links, so what has to be there
     // is the other styles themselves, each one a way to get to that panel
-    if(!row.span) noSpan.push(id);
+    if(!row.span.length) noSpan.push(id);
     if(row.torn) torn.push(id);
-    // the style you are on is not worth telling you about
-    if(new RegExp(D.DATA.find(r=>r[0]===id)[1].replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).test(row.span))
-      noSpan.push(id+" names itself");
+    // the style you are on is not worth telling you about. Matched as a whole name, not
+    // as a substring: Garage Rock's row rightly links Garage Rock Revival, and a regex over
+    // the joined line read that as the panel naming itself.
+    if(row.span.indexOf(D.DATA.find(r=>r[0]===id)[1])>=0) noSpan.push(id+" names itself");
   }
   say('"'+x.title+'" is on all '+x.styles.length+" styles it names",
     miss.length===0 ? true : "missing from "+miss.join(", "));

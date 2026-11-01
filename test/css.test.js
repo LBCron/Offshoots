@@ -7,7 +7,14 @@
 // So the comments are counted rather than trusted: every /* needs a */, nothing may open
 // inside a comment, and no declaration may sit between a closer and the next opener.
 const fs=require("fs"), path=require("path");
-const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typeof v!=="boolean"?": "+v:""));
+// Anything that is not true is a failure. A check that answered with its detail instead
+// of false used to print with no prefix at all, so the runner counted it as no check and
+// the run came back clean: a failing assertion that reported what went wrong was the one
+// kind that could not fail. Caught by a deliberately broken build printing a blank line.
+const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
+// A line that only records what happened, with no verdict in it. Keeping these out of
+// say() is what lets say() treat anything that is not true as a failure.
+const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 const src=fs.readFileSync(path.join(__dirname,"..","src","head.html"),"utf8");
 const css=(src.match(/<style[^>]*>([\s\S]*?)<\/style>/i)||[,src])[1];
 const lineAt=i=>css.slice(0,i).split("\n").length;
