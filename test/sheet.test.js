@@ -419,20 +419,20 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
     await q.goto(URL+"#punk"); await shown(q,"#chart .n");
     await until(q,()=>!!document.querySelector("#chart .n.cur")); await rest(q);
     const where=()=>q.evaluate(()=>{ const pa=document.getElementById("panel").getBoundingClientRect();
-      const o={}; [".sect-listen",".plrow"].forEach(s=>{ const e=document.querySelector(s);
+      const o={}; [".sthead",".sect-listen",".startrow",".plbtn"].forEach(s=>{ const e=document.querySelector(s);
         if(e) o[s]=Math.round(e.getBoundingClientRect().top-pa.top); }); return o; });
     const peek=await where();
     await q.click("#grab").catch(()=>{});
     await until(q,()=>document.body.classList.contains("open")); await rest(q);
     const open=await where();
     const moved=Object.keys(peek).filter(k=>Math.abs(peek[k]-open[k])>1);
-    say("the playlist is at "+peek[".plrow"]+"px in the peek and "+open[".plrow"]+"px open",
-      peek[".plrow"]===open[".plrow"]);
+    say("the play button is at "+peek[".plbtn"]+"px in the peek and "+open[".plbtn"]+"px open",
+      peek[".plbtn"]===open[".plbtn"]);
     say("  and nothing else shifts either"+(moved.length?" ("+moved.join(", ")+")":""), moved.length===0);
     say("  because the peek clips the card rather than hiding parts of it",
       await q.evaluate(()=>[...document.querySelectorAll(".more > *")]
         .filter(e=>getComputedStyle(e).display==="none")
-        .every(e=>/tally|shbtn|note|fold/.test(e.className))));
+        .every(e=>/tally|shbtn|note|fold|sect-(artists|across|connections|read|about)/.test(e.className))));
     await q.close(); }
 
   say("no page errors", errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);

@@ -206,7 +206,7 @@ const readRules=(p)=>p.evaluate(()=>{
     p=await ctx.newPage();
     await p.goto(URL+"#shoegaze"); await selected(p);
     if(open){ await p.click("#grab").catch(()=>{}); await opened(p); }
-    const got=await p.$eval(".pcard .mn",e=>e.textContent).catch(()=>null);
+    const got=await p.$eval(".pcard .pttl .ptnm",e=>e.textContent).catch(()=>null);
     say(name+" style panel opened on Shoegaze", got==="Shoegaze");
     if(got!=="Shoegaze") bad++;
     check(name+" style", await readType(p,"#panelBody"), await readTaps(p,"#panelBody",TIER.tap));
@@ -219,18 +219,21 @@ const readRules=(p)=>p.evaluate(()=>{
         ["desktop",{width:1440,height:900}]]){
       const p=await b.newPage({viewport:vp});
       await p.goto(URL+"#jamband"); await selected(p);
-      sizes[name]=await p.evaluate(()=>{ const e=document.querySelector(".plrow img.pcov, .plrow .pcovph");
+      sizes[name]=await p.evaluate(()=>{ const e=document.querySelector(".startrow img.pcov, .startrow .pcovph");
         return e?Math.round(e.getBoundingClientRect().width):0; });
       await p.close();
     }
-    // the cover is the one thing the pointer tier makes bigger rather than smaller, and the
-    // row stopped spending width on a 40px disc, so every tier gained
+    // The cover used to grow with the pointer tier, because the row was the cover and a
+    // title. It came down and stopped scaling when Start listening gave the title and its
+    // introduction the width instead: what the art has to do now is say which record this
+    // is, at a glance, beside words that carry the rest. Same size on every tier, so the
+    // block reads the same everywhere.
     say("playlist cover: phone "+sizes.phone+", tablet "+sizes.tablet+", desktop "+sizes.desktop,
-      sizes.phone>=76 && sizes.tablet>=76 && sizes.desktop>=110
-      && sizes.desktop>sizes.tablet && sizes.desktop>sizes.phone);
+      sizes.phone>=88 && sizes.phone<=120
+      && sizes.tablet===sizes.phone && sizes.desktop===sizes.phone);
     const dp=await b.newPage({viewport:{width:1440,height:900}});
     await dp.goto(URL+"#jamband"); await selected(dp);
-    const box=await dp.evaluate(()=>{ const b=document.querySelector(".plrow img.pcov, .plrow .pcovph").getBoundingClientRect();
+    const box=await dp.evaluate(()=>{ const b=document.querySelector(".startrow img.pcov, .startrow .pcovph").getBoundingClientRect();
       return [Math.round(b.width),Math.round(b.height)]; });
     await dp.close();
     say("  and still square at "+box.join("x"), box[0]===box[1]);

@@ -42,11 +42,16 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // ---------- the old footer is gone ----------
   let d=await fresh(b,Dk,"#disco");
   say("footer button removed", (await d.$$("#pshare, #pfoot")).length===0);
-  // the title is the lineage control: one tap, both directions, parents left and children
-  // right. Share is its own button at the foot of the card.
-  say("title opens the lineage", await d.$eval(".navttl",
-    e=>e.tagName==="BUTTON" && e.dataset.menu==="lineage" && !e.hasAttribute("data-share")));
-  say("with no share glyph on it", await d.$eval(".navttl",e=>!e.querySelector(".shg")));
+  // The title used to be the lineage control, which hid the map's own relationships in a
+  // menu and put them in the same bar as Back. The name is a heading in the body now and
+  // the lineage is a section of its own; Share stays its own button at the foot.
+  say("the name is a heading, not a control",
+    await d.$eval(".pttl", e=>e.tagName==="H1" && !e.querySelector("button")));
+  say("  with the date beside it", await d.$eval(".pttl .ptyr",e=>/\d{4}/.test(e.textContent)));
+  say("no control left in the nav row but Back and Close",
+    (await d.$$(".navrow button")).length===2);
+  say("the lineage is a section, not a menu on the title",
+    (await d.$$(".sect-connections")).length===1 && (await d.$$(".navttl")).length===0);
   const sb=await d.evaluate(()=>{ const w=document.querySelector(".shbtn.wide");
     if(!w) return null;
     const r=w.getBoundingClientRect(), body=document.getElementById("panelBody");
@@ -64,31 +69,39 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // colours, which read as app chrome dropped into the style. It now borrows --acc from
   // the family skin, and still has to out-weigh the playlist card beside it or the two
   // read as the same kind of block.
+  // The weight order changed with the restructure, and this check changed with it. Share
+  // used to have to out-weigh the playlist card beside it. The panel now opens on a solid
+  // Open playlist button that is meant to be the heaviest thing on it, so what has to
+  // hold is the other way round: play is opaque, share is a tint of the family colour.
   const sc=await d.evaluate(()=>{
     const w=document.querySelector(".shbtn.wide"), p=document.getElementById("panel");
-    const card=document.querySelector(".sect-play .listrow,.plrow,.pl");
-    const alpha=c=>{const m=c.match(/[\d.]+\s*\)\s*$/); return m?parseFloat(m[0]):1;};
+    const play=document.querySelector(".plbtn");
+    // a bare rgb() is opaque; only rgba()/color() carry a fourth value
+    const alpha=c=>{const m=/^(?:rgba|color)\(/.test(c) ? c.match(/[\d.]+\s*\)\s*$/) : null;
+      return m?parseFloat(m[0]):1;};
     return {acc:getComputedStyle(p).getPropertyValue("--acc").trim(),
       col:getComputedStyle(w).color,
-      btnA:alpha(getComputedStyle(w).backgroundColor),
-      cardA:card?alpha(getComputedStyle(card).backgroundColor):0};});
+      shareA:alpha(getComputedStyle(w).backgroundColor),
+      playA:play?alpha(getComputedStyle(play).backgroundColor):0};});
   say("  wearing the family accent, not the system blue",
     !!sc.acc && !/10,\s*132,\s*255/.test(sc.col));
-  say("  and sitting above the cards ("+sc.btnA+" vs "+sc.cardA+")", sc.btnA>sc.cardA+0.05);
+  say("  and sitting under the play button ("+sc.shareA+" vs "+sc.playA+")",
+    sc.playA===1 && sc.shareA<sc.playA);
   say("  and it is the only share control on the panel", sb.only===1);
 
-  const c=await d.$eval(".navrow",r=>{ const row=r.getBoundingClientRect();
-    const nm=r.querySelector(".navttl .mn");
-    const t=document.createRange(); t.selectNodeContents(nm);
-    const tr=t.getBoundingClientRect();
-    return Math.round(((tr.left+tr.right)/2)-((row.left+row.right)/2)); });
-  say("painted name off centre in the row by "+c+"px", Math.abs(c)<=1);
+  // the name is left-aligned under the nav row now, so what matters is that it starts at
+  // the card's own edge rather than being centred in a bar it no longer lives in
+  const c=await d.evaluate(()=>{
+    const nm=document.querySelector(".pttl .ptnm").getBoundingClientRect();
+    const card=document.querySelector(".pcard").getBoundingClientRect();
+    return Math.round(nm.left-card.left); });
+  say("the name starts at the card edge ("+c+"px in)", c>=0 && c<=24);
 
   // ---------- sharing ----------
   await d.click(".shbtn.wide"); await wrote(d,0); await settle(d);
   say("copied the style link", await d.evaluate(()=>window.__copied[0]||""));
   say("the button confirms", await d.$eval(".shbtn .shlbl",e=>e.textContent));
-  say("  and the title is left alone", await d.$eval(".navttl .mn",e=>e.textContent)==="Disco");
+  say("  and the title is left alone", await d.$eval(".pttl .ptnm",e=>e.textContent)==="Disco");
   await relabelled(d); await settle(d);
   say("label comes back", await d.$eval(".shbtn .shlbl",e=>e.textContent));
 
@@ -139,15 +152,19 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // in it, under the cover art and behind the expand chevron.
   say("  and the share button is not in the peek",
     (await p.$eval(".shbtn.wide",e=>getComputedStyle(e).display))==="none");
-  await p.click(".navttl"); await shown(p,".navmenu:not([hidden])"); await settle(p);
-  // the title is the lineage control now, so it opens its menu rather than the sheet.
-  // That is the point: the lineage is reachable from the peek, where it used to be when
-  // it was a pill in the header, and is not once it is a section in the card.
-  say("tapping the title opens the lineage from the peek",
-    (await p.$$(".navmenu:not([hidden]) .lcol")).length===2);
-  say("  without opening the sheet", (await p.$eval("body",e=>e.classList.contains("open")))===false);
+  // The peek is the shortest way to press play, so it carries the name and the whole
+  // Start listening block and nothing else. The lineage used to be reachable here through
+  // the title's menu; it is a section in the card now, which is a deliberate trade: the
+  // peek is for playing, and the map's relationships are something you open the panel for.
+  const peek=await p.evaluate(()=>{
+    const vis=s=>{const e=document.querySelector(s);
+      return !!e && getComputedStyle(e).display!=="none" && e.getBoundingClientRect().height>0;};
+    return {name:vis(".pttl"), play:vis(".plbtn"), art:vis(".startrow .pcov,.startrow .pcovph"),
+      artists:vis(".sect-artists"), links:vis(".sect-connections"), deeper:vis(".sect-read")};});
+  say("the peek carries the name and the way to play it",
+    peek.name && peek.play && peek.art);
+  say("  and nothing below it", !peek.artists && !peek.links && !peek.deeper);
   say("and shares nothing by itself", (await p.evaluate(()=>window.__copied.length))===0);
-  await p.keyboard.press("Escape"); await gone(p,".navmenu:not([hidden])"); await settle(p);
   await p.click("#grab").catch(()=>{}); await opened(p);
   await p.$eval("#panelBody .shbtn",e=>e.scrollIntoView({block:"center"})); await settle(p);
   await p.click("#panelBody .shbtn"); await wrote(p,0); await settle(p);
@@ -160,44 +177,50 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // the header is measured against the selection, so the style has to be current
   await until(p,()=>!!document.querySelector("#chart .n.cur")); await settle(p);
   await p.click("#grab").catch(()=>{}); await opened(p);
-  // the title button spans the row now, under two controls pinned to its corners, so what
-  // has to clear them is the painted name rather than the button's box
-  const gap=await p.$eval(".navrow",r=>{ const mn=r.querySelector(".navttl .mn");
-    const rg=document.createRange(); rg.selectNodeContents(mn);
-    const t=rg.getBoundingClientRect();
-    const bk=r.querySelector("#panelBack").getBoundingClientRect();
-    const x=r.querySelector(".pmin").getBoundingClientRect();
-    return [Math.round(t.left-bk.right),Math.round(x.left-t.right),mn.textContent]; });
-  say("longest title clears back by "+gap[0]+"px and the X by "+gap[1]+"px ("+gap[2]+")", gap[0]>=0&&gap[1]>=0);
-  // one menu, two columns. It was a segmented pill, then a pair of rows in the card; both
-  // spent a line of the panel on something the name can carry.
-  say("no lineage section is left in the card", (await p.$$(".sect-lineage")).length===0);
-  await p.click(".navttl"); await shown(p,".navmenu:not([hidden])"); await settle(p);
+  // The name is a heading in the body now, so nothing has to thread between the two
+  // controls pinned to the nav row's corners. What matters instead is that a long one
+  // wraps rather than running under them or off the card.
+  const gap=await p.evaluate(()=>{
+    const nm=document.querySelector(".pttl").getBoundingClientRect();
+    const card=document.querySelector(".pcard").getBoundingClientRect();
+    const bk=document.querySelector("#panelBack").getBoundingClientRect();
+    return {below:Math.round(nm.top-bk.bottom), over:Math.round(nm.right-card.right),
+      name:document.querySelector(".pttl .ptnm").textContent};});
+  say("the longest name sits clear below the controls ("+gap.below+"px, "+gap.name+")",
+    gap.below>=0);
+  say("  and inside the card ("+gap.over+"px over)", gap.over<=0);
+
+  // ---------- the lineage is a section ----------
+  // It was a segmented pill, then rows in the card, then a menu hanging off the title.
+  // The menu made the map's own relationships something you had to know was there, and
+  // put them in the same bar as Back, which means something else entirely.
   const seg=await p.evaluate(()=>{
-    const m=[...document.querySelectorAll(".navmenu")].find(x=>!x.hidden);
-    if(!m) return null;
-    const cols=[...m.querySelectorAll(".lcol")];
-    const mb=m.getBoundingClientRect(), card=document.querySelector(".pcard").getBoundingClientRect();
+    const s=document.querySelector(".sect-connections");
+    if(!s) return null;
+    const cols=[...s.querySelectorAll(".cxcol")];
     const cb=cols.map(c=>c.getBoundingClientRect());
-    return {heads:cols.map(c=>c.querySelector(".navhd").textContent.replace(/\s+/g," ").trim()),
+    return {heads:cols.map(c=>c.querySelector(".cxh").textContent.trim()),
       counts:cols.map(c=>c.querySelectorAll("[data-go]").length),
-      sideBySide:cb.length===2 && Math.abs(cb[0].top-cb[1].top)<2 && cb[1].left>=cb[0].right-1,
-      halves:cb.map(r=>Math.round(r.width)), menuW:Math.round(mb.width),
-      cardW:Math.round(card.width), dx:Math.round(mb.left-card.left),
-      divider:getComputedStyle(cols[1]).borderLeftWidth};});
-  say("the title opens both lists at once ("+seg.heads.join(" | ")+")",
-    /^Came from/.test(seg.heads[0]) && /^Led to/.test(seg.heads[1]));
-  say("  side by side, parents left and children right", seg.sideBySide);
-  say("  split by a "+seg.divider+" rule", parseFloat(seg.divider)>0);
-  say("  the menu is the card's width ("+seg.menuW+" vs "+seg.cardW+"), aligned to it",
-    seg.menuW===seg.cardW && Math.abs(seg.dx)<=1);
-  // a title with a tinted slab under it reads as a text field, so it has no ground of its
-  // own; the chevron beside the year is what says it opens
-  const look=await p.evaluate(()=>{ const t=document.querySelector(".navttl");
-    return {bg:getComputedStyle(t).backgroundColor, exp:t.getAttribute("aria-expanded"),
-      turned:getComputedStyle(t.querySelector(".lrcv")).transform}; });
-  say("the title carries no ground, even open ("+look.bg+")", /rgba\(0, 0, 0, 0\)|transparent/.test(look.bg));
-  say("  and its chevron is turned over while it is", look.exp==="true" && /-1, 0, 0, -1/.test(look.turned));
+      title:(s.querySelector(".secttl")||{}).textContent||"",
+      inFlow:getComputedStyle(s).position==="static",
+      menus:document.querySelectorAll(".navttl").length};});
+  say("both directions are on the panel (\""+seg.title+"\": "+seg.heads.join(" | ")+")",
+    !!seg && /^Before this style/.test(seg.heads[0]) && /^After this style/.test(seg.heads[1]));
+  say("  listing "+seg.counts.join(" and ")+" styles by name",
+    seg.counts[0]+seg.counts[1] > 0);
+  say("  in the flow, with no menu left on a title", seg.inFlow && seg.menus===0);
+
+  // the description sits in a fold under the name rather than in a section further down,
+  // and it is shut until asked for: the playlist is what the panel opens on
+  const fold=await p.evaluate(()=>{ const d=document.querySelector(".aboutfold");
+    if(!d) return null;
+    const sm=d.querySelector("summary");
+    return {open:d.open, label:sm.textContent.replace(/\s+/g," ").trim(),
+      tap:Math.round(sm.getBoundingClientRect().height),
+      underName:document.querySelector(".pttl").compareDocumentPosition(d)&4?true:false};});
+  say("the description is folded under the name (\""+(fold&&fold.label)+"\")",
+    !!fold && fold.open===false && /About this style/.test(fold.label) && fold.underName);
+  say("  and its control clears the tap floor ("+(fold&&fold.tap)+"px)", !!fold && fold.tap>=44);
   // the header stays put while the card scrolls under it, so the name, back and the X are
   // reachable at any scroll position. .pcard used to close right after the header, which
   // left the sticky box no room to travel.
@@ -210,10 +233,10 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
       const t=document.elementFromPoint(Math.round(r.left+r.width/2),Math.round(r.top+r.height/2));
       return !!(t && (t===e || e.contains(t) || t.closest(sel))); };
     return {before, after:at(), scrolled:pb.scrollTop, inCard:!!row.closest(".pcard"),
-      back:hit("#panelBack"), x:hit(".pmin"), title:hit(".navttl")}; });
+      back:hit("#panelBack"), x:hit(".pmin")}; });
   say("the header holds at the top through a "+stuck.scrolled+"px scroll",
     stuck.scrolled>0 && stuck.before===0 && stuck.after===0);
-  say("  with the title, back and the X all still hittable",
+  say("  with back and the X still hittable",
     stuck.title && stuck.back && stuck.x);
   say("  because the card wraps the content it sticks within", stuck.inCard);
   // and it is opaque while stuck: the panel is already translucent over the map, so a
@@ -229,14 +252,21 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     const n=(cs.backgroundColor.match(/[\d.]+/g)||[]);
     return {bg:cs.backgroundColor, alpha:n.length>3?+n[3]:1,
       scrolled:document.body.classList.contains("pscrolled")}; });
-  say("  and opaque under the title while it is ("+band.bg+")", band.scrolled && band.alpha===1);
-  await p.click(".navttl"); await gone(p,".navmenu:not([hidden])"); await settle(p);
-  const back2=await p.evaluate(()=>{ const t=document.querySelector(".navttl");
-    return {exp:t.getAttribute("aria-expanded"), turned:getComputedStyle(t.querySelector(".lrcv")).transform,
-      shut:!document.querySelector(".navmenu:not([hidden])")}; });
-  // closeNav only reset .navbtn, so the title's chevron stayed upside down after closing
-  say("closing turns the chevron back ("+back2.turned+")",
-    back2.shut && back2.exp==="false" && back2.turned==="none");
+  say("  and opaque under the controls while it is ("+band.bg+")", band.scrolled && band.alpha===1);
+  // The fold under the name is the one disclosure left on the panel's own head, and its
+  // chevron has to turn back when it shuts: closeNav used to reset only .navbtn, which
+  // left the old title's chevron upside down after closing.
+  const fold2=await p.evaluate(async()=>{
+    const d=document.querySelector(".aboutfold"); if(!d) return null;
+    const sm=d.querySelector("summary"), cv=sm.querySelector("svg");
+    sm.click(); await new Promise(z=>setTimeout(z,260));
+    const open=getComputedStyle(cv).transform;
+    sm.click(); await new Promise(z=>setTimeout(z,260));
+    return {open, shut:getComputedStyle(cv).transform, isOpen:d.open};});
+  say("opening the fold turns its chevron ("+(fold2&&fold2.open)+")",
+    !!fold2 && fold2.open!=="none");
+  say("  and closing turns it back ("+(fold2&&fold2.shut)+")",
+    !!fold2 && fold2.shut==="none" && fold2.isOpen===false);
   // back carries its destination, and gives it up rather than crowding the title
   const bk=await p.$eval("#panelBack",e=>{const l=e.querySelector(".bklbl");
     return {text:l.textContent, ellipsis:getComputedStyle(l).textOverflow};});
@@ -343,22 +373,36 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     say("and the close still inset "+r.xR+"px", r.xR===16);
     await w.close(); }
 
-  // the prose and the tally read as a named section like Listen on above them,
-  // and like the rest of the body they stay out of the peek
+  // The prose was a "What it is" section below the playlist. It is a fold under the name
+  // now, so it is the first thing after the title and the last thing in the way: shut by
+  // default, and out of the peek entirely, which is for playing.
   { const w=await b.newPage({viewport:M});
     await w.goto(URL+"#blackmetal"); await arm(w); await shown(w,"#chart .n");
     await until(w,()=>!!document.querySelector("#chart .n.cur")); await settle(w);
-    say("the prose is hidden in the peek",
-      await w.$eval(".sect-about",e=>getComputedStyle(e).display==="none"));
+    // The fold itself stays in the peek, shut: hiding it moved everything under it, and
+    // what the peek must never do is shift the button you are reaching for. What has to
+    // be true is that the prose is not showing, which being shut already gives.
+    // A closed <details> is collapsed by content-visibility rather than display, so its
+    // children still report their intrinsic size: the height that means anything is the
+    // fold's own, which is its summary and nothing else while it is shut.
+    say("the prose is not shown in the peek", await w.evaluate(()=>{
+      const d=document.querySelector(".aboutfold");
+      const sm=d.querySelector("summary");
+      return !d.open
+        && Math.abs(d.getBoundingClientRect().height - sm.getBoundingClientRect().height) <= 1;}));
     await w.click("#grab").catch(()=>{}); await opened(w);
-    const r=await w.evaluate(()=>{ const s=document.querySelector(".sect-about");
+    const r=await w.evaluate(()=>{ const s=document.querySelector(".aboutfold");
+      s.open=true;
+      const tl=document.querySelector(".sect-connections .tally");
       return {shown:getComputedStyle(s).display!=="none",
-        head:(s.querySelector(".secttl")||{}).textContent||"",
-        prose:!!s.querySelector(".wikiline"), tally:!!s.querySelector(".tally"),
+        head:(s.querySelector("summary span")||{}).textContent||"",
+        prose:!!s.querySelector(".note") && !!s.querySelector("a.wk"),
+        tally:!!tl,
         beforeShare:!!(s.compareDocumentPosition(document.querySelector("[data-share]"))&4)}; });
     say("and shown when the panel is open", r.shown);
-    say("under the heading \""+r.head+"\"", r.head==="What it is");
-    say("carrying the description and the tally", r.prose && r.tally);
+    say("under the control \""+r.head+"\"", r.head==="About this style");
+    say("carrying the description and the Wikipedia link", r.prose);
+    say("with the tally moved in with the links it counts", r.tally);
     say("and still above the share button", r.beforeShare);
     await w.close(); }
 

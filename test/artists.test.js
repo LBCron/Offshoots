@@ -154,7 +154,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
     await settle(p);
     const chipNames=await p.$$eval(".acrow .aclbl",e=>e.map(x=>x.textContent));
     const row=await p.evaluate(()=>{
-      const r=document.querySelector(".acrow"), h=document.querySelector(".subh.subgo");
+      const r=document.querySelector(".acrow"), h=document.querySelector('[data-page="artists"]');
       if(!r) return null;
       const c=[...r.querySelectorAll(".acirc")];
       return {chips:c.length, nowrap:getComputedStyle(r).flexWrap==="nowrap",
@@ -165,7 +165,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         round:c.every(x=>{const q=x.querySelector(".aco").getBoundingClientRect();
           return Math.abs(q.width-q.height)<=1 && q.width>=56;}),
         isBtn:!!h && h.tagName==="BUTTON" && h.dataset.page==="artists",
-        count:h?+(h.querySelector(".subct")||{}).textContent:0,
+        count:h?+(h.querySelector(".subct,.sectaside")||{}).textContent:0,
         // the tap floor steps down on a pointer tier, so ask the page rather than assume
         floor:parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tap"))||44,
         tap:h?Math.round(h.getBoundingClientRect().height):0};});
@@ -189,7 +189,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
     say("  with a heading that opens the rest ("+(row&&row.count)+")",
       !!row && row.isBtn && row.count>row.chips);
     say("  and that heading is "+(row&&row.tap)+"px to tap", !!row && row.tap>=row.floor);
-    await p.click(".subh.subgo"); await onPage(p,"artists");
+    await p.click('[data-page="artists"]'); await onPage(p,"artists");
     const pg=await p.evaluate(()=>{
       const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
       const rows=[...u.querySelectorAll(".amrow")];
@@ -269,11 +269,14 @@ const onPage=async(q,k)=>{ await until(q,k=>{
     // the heading is drawn by the panel the click rebuilds, so the wait belongs outside the
     // page: the map lighting the chosen node is what says that rebuild has happened
     if(plain && plain.id){
+      // the artists heading is a section heading now, not a sub-heading inside Listen
       await until(p,id=>{const n=document.querySelector("#chart .n.cur");
-        return !!n && n.dataset.id===id && !!document.querySelector(".subh");},plain.id);
+        return !!n && n.dataset.id===id
+          && !!document.querySelector(".sect-artists .secthead");},plain.id);
       await settle(p);
-      Object.assign(plain, await p.evaluate(()=>{ const h=document.querySelector(".subh");
-        return {tag:h?h.tagName:"", go:!!document.querySelector(".subh.subgo")};}));
+      Object.assign(plain, await p.evaluate(()=>{
+        const h=document.querySelector(".sect-artists .secthead");
+        return {tag:h?h.tagName:"", go:!!document.querySelector('[data-page="artists"]')};}));
     }
     if(!plain) say("every style with artists has a roster behind it", true);
     else if(plain.skip) say("the no-roster style is off the rendered map", true);
@@ -287,7 +290,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
   // now, where the links it governs are.
   { const q=await ctx.newPage();
     await q.goto(URL+"#darkwave"); await q.waitForTimeout(700);
-    const head=await q.$(".subh.subgo");
+    const head=await q.$('[data-page="artists"]');
     if(!head) say("the key artists page carries the service control", "no sub-page here");
     else {
       await head.click(); await q.waitForTimeout(900);
@@ -372,7 +375,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
   // not match and a positional check would pass on a coincidence.
   { const q=await ctx.newPage();
     await q.goto(URL+"#british_blues"); await q.waitForTimeout(700);
-    const head=await q.$(".subh.subgo");
+    const head=await q.$('[data-page="artists"]');
     if(!head) say("the key artists page carries the role circles", "no sub-page to open");
     else {
       await head.click(); await q.waitForTimeout(900);
@@ -425,7 +428,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         document.querySelectorAll(".acirc").forEach(a=>{
           const n=a.querySelector(".aclbl"); if(n) circles[n.textContent.trim()]=role(a);});
         return circles;});
-      await (await q.$(".subh.subgo")).click(); await q.waitForTimeout(900);
+      await (await q.$('[data-page="artists"]')).click(); await q.waitForTimeout(900);
       const page=await q.evaluate(()=>{
         const role=e=>(((e.className||"")+"").match(/r-[a-z]+/)||[""])[0];
         const out={};
@@ -487,7 +490,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
       await q.close(); return g; };
 
     const ways = await geom("", ".mcirc", ".mco", ".mclbl", ".mrow", ".secthead.sectgo");
-    const arts = await geom("#gospel", ".acirc", ".aco", ".aclbl", ".acrow", ".subh.subgo");
+    const arts = await geom("#gospel", ".acirc", ".aco", ".aclbl", ".acrow", '[data-page="artists"]');
     if(!ways || !arts) say("both circle rows are on screen to compare", false);
     else {
       const same=k=>String(ways[k])===String(arts[k]);
@@ -543,7 +546,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
       say("a key artist circle links to the artist, not a search ("+who+")",
         circ==="https://music.apple.com/us/artist/"+ID);
 
-      const head=await q.$(".subh.subgo");
+      const head=await q.$('[data-page="artists"]');
       if(!head) say("  and so does the row on the Key artists page","no sub-page here");
       else {
         await head.click(); await onPage(q,"artists");

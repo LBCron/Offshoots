@@ -49,15 +49,18 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
   console.log("\n\u2014 "+x.title+" \u2014");
   const read=async id=>{ const p=await ctx.newPage();
     await p.goto(URL+"#"+id); await opened(p);
-    const r=await p.evaluate(()=>[...document.querySelectorAll(".plrow")].map(a=>({
-      x:a.classList.contains("xplay"),
-      t:(a.querySelector(".plttl")||{}).textContent||"",
-      span:(a.querySelector(".plspan")||{}).textContent||"",
-      note:(a.querySelector(".plnote")||{}).textContent||"",
-      href:a.getAttribute("href")||"",
-      svc:(a.querySelector(".plsvc")||{}).textContent||"",
-      art:!!a.querySelector(".pcov"),
-      torn:[...a.querySelectorAll("img")].some(i=>i.complete&&i.naturalWidth===0)})));
+    // A crossing is a row in Across styles now, not a second playlist row under the
+    // style's own. It names the other panels it sits on instead of listing them in a line.
+    const r=await p.evaluate(()=>[...document.querySelectorAll(".xrow")].map(a=>{
+      const go=a.querySelector(".xopen");
+      return {x:true,
+        t:(a.querySelector(".xttl")||{}).textContent||"",
+        span:[...a.querySelectorAll(".xgo")].map(b=>b.textContent.replace(/\u2192/g,"").trim()).join(", "),
+        note:(a.querySelector(".xnote")||{}).textContent||"",
+        href:go?go.getAttribute("href")||"":"",
+        svc:(a.querySelector(".plsvc")||{}).textContent||"",
+        art:!!a.querySelector(".xcov"),
+        torn:[...a.querySelectorAll("img")].some(i=>i.complete&&i.naturalWidth===0)};}));
     await p.close(); return r; };
 
   // ---- on every style it names ----
@@ -66,7 +69,9 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
     const rows=await read(id);
     const row=rows.find(r=>r.x);
     if(!row){ miss.push(id); continue; }
-    if(!/Also on/.test(row.span)) noSpan.push(id);
+    // "Also on A, B and 7 more" became a labelled list of links, so what has to be there
+    // is the other styles themselves, each one a way to get to that panel
+    if(!row.span) noSpan.push(id);
     if(row.torn) torn.push(id);
     // the style you are on is not worth telling you about
     if(new RegExp(D.DATA.find(r=>r[0]===id)[1].replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).test(row.span))
@@ -74,7 +79,7 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
   }
   say('"'+x.title+'" is on all '+x.styles.length+" styles it names",
     miss.length===0 ? true : "missing from "+miss.join(", "));
-  say("  each saying where else it goes, never naming the style you are on",
+  say("  each linking everywhere else it goes, never the style you are on",
     noSpan.length===0 ? true : noSpan.slice(0,4).join(", "));
   say("  with art that is not a torn icon", torn.length===0 ? true : torn.join(", "));
 
@@ -93,19 +98,20 @@ const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q
     await p.goto(URL+"#"+x.styles[0]); await opened(p);
     await p.selectOption("select.svcsel","apple").catch(()=>{});
     await settle(p);
-    const ap=await p.evaluate(()=>{const a=document.querySelector(".plrow.xplay");
+    const ap=await p.evaluate(()=>{const a=document.querySelector(".xrow .xopen");
       return {href:a.getAttribute("href")||"", cls:a.className};});
     await p.selectOption("select.svcsel","spotify").catch(()=>{});
     await settle(p);
-    const sp=await p.evaluate(()=>{const a=document.querySelector(".plrow.xplay");
+    const sp=await p.evaluate(()=>{const a=document.querySelector(".xrow .xopen");
       return {href:a.getAttribute("href")||"", cls:a.className};});
     say("  opening on Apple Music ("+ap.href.slice(8,34)+"…)",
       /music\.apple\.com\/playlist\//.test(ap.href));
     say("  and on Spotify ("+sp.href.slice(8,32)+"…)",
       /open\.spotify\.com\/playlist\//.test(sp.href));
-    // paintPlay rebuilds className from scratch, which quietly dropped this class and
-    // sent the row back to looking like the style's own playlist
-    say("  and still marked as a crossing after the switch", /\bxplay\b/.test(sp.cls));
+    // paintPlay rebuilds className from scratch, which once quietly dropped the class that
+    // said what a row was and sent it back to looking like the style's own playlist. The
+    // crossing's opener is .xopen now, and it has to survive the same rebuild.
+    say("  and still marked as a crossing after the switch", /\bxopen\b/.test(sp.cls));
     await p.close(); }
 
   // ---- and search can find it by what is in it ----

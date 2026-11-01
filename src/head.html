@@ -1679,6 +1679,10 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
   body:not(.open) .more > .tally,
   body:not(.open) .more > .sect-about,
   body:not(.open) .more > .sect-read,
+  /* the sections the restructured panel added, none of which is what a peek is for */
+  body:not(.open) .more > .sect-artists,
+  body:not(.open) .more > .sect-across,
+  body:not(.open) .more > .sect-connections,
   /* the minimised sheet is a peek at the playlist, not a place to act from: the share
      button was showing in it, directly under the cover and behind the expand chevron */
   body:not(.open) .more > .shbtn,
@@ -1686,10 +1690,16 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
   body:not(.open) .more > .sect-fams{max-height:38px;overflow:hidden;pointer-events:none;
     -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 35%,transparent 100%);
             mask-image:linear-gradient(to bottom,#000 0,#000 35%,transparent 100%)}
-  /* the minimised sheet carries the whole playlist row, tappable, and cuts off after it */
-  body:not(.open) .more > .sect-listen{max-height:130px;overflow:hidden;
-    -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 94%,transparent 100%);
-            mask-image:linear-gradient(to bottom,#000 0,#000 94%,transparent 100%)}
+  /* The peek is the shortest way to press play, so it carries the whole Start listening
+     block: the art, what the playlist is, and the button. It used to be clamped to 130px,
+     which was the height of the old playlist row and now cuts the button in half. The
+     height is left to the content instead, and the cut-off fade goes with it: there is
+     nothing below it in the peek to suggest. */
+  /* The heading block comes with it, so the peek says which style you are about to play.
+     Nothing here may hide anything ABOVE the playlist either, margins included: the peek
+     clips the card rather than relaying it, so the button you are reaching for must not
+     move as the sheet opens under your thumb. Hiding the About fold shifted it by the
+     fold's own height, so the fold stays, shut, as part of the heading. */
 }
 
 /* a lone playlist button lines up with the cover above it (beats .sect .links a.wk.pl) */
@@ -1909,6 +1919,131 @@ a.am .amgo{display:none}
 .hascov{border-radius:50%}
 .acirc .aco.hascov{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
   0 1px 3px rgb(0 0 0 / .26)}
+
+
+/* ================= the restructured style panel =================
+   The panel opens on the style, not on a service: name and date, the description one tap
+   away, then one way into the music, then who made it, then the paths out of it. Each
+   block below is one of those steps, in that order. */
+
+/* name and date on one line, the date set back so the name still reads as the heading */
+.sthead{margin:2px 0 18px}
+.pttl{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:0 0 2px;
+  font:700 var(--t-title1)/var(--t-title1-lh) var(--f-body);letter-spacing:-.025em;color:var(--fg)}
+.pttl .ptyr{font:400 var(--t-sub)/1 var(--f-mono);color:var(--muted);letter-spacing:0}
+/* the fold sits where a subtitle would, so it reads as part of the heading block */
+.aboutfold{margin-top:0}
+.aboutfold summary{min-height:var(--tap);gap:7px;
+  font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+.aboutfold summary span{flex:0 1 auto}
+.aboutfold summary svg{width:14px;height:14px;margin-left:-2px}
+.aboutfold summary:hover{color:var(--fg)}
+.aboutfold[open] summary{color:var(--fg)}
+.aboutfold .xfoldb{padding-bottom:2px}
+.aboutfold .note{margin:2px 0 8px}
+
+/* Start listening: the art steps back so the title and the line under it have room.
+   The heading goes, since the overline says what the block is. Not on the Key artists
+   page, which reuses .sect-listen for its own header and keeps the service picker in it;
+   hiding that one took the picker off the page with it. */
+.sect-listen:not(.pagelisten) .secthead{display:none}
+.startrow{display:flex;align-items:center;gap:14px;margin:0 0 14px}
+.startrow .pcov,.startrow .pcovph{width:104px;height:104px;flex:none;border-radius:4px;
+  aspect-ratio:1;object-fit:cover;box-shadow:0 0 0 .5px var(--line),0 1px 4px rgb(0 0 0 / .26)}
+.startrow .pcovph{display:grid;place-items:center;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--c,var(--fg)) 62%,#000),color-mix(in srgb,var(--c,var(--fg)) 20%,#000));
+  box-shadow:inset 0 0 0 .5px color-mix(in srgb,#fff 16%,transparent)}
+.startrow .pcovph b{font:700 30px var(--f-body);color:#fff;opacity:.92}
+.starttx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+/* Sentence case, untracked. The wireframe drew this as START LISTENING, but the panel
+   threw out its all-caps tracked micro-labels a long time ago and type.test.js holds the
+   line; a new one would be the old habit coming back through a mockup. */
+.overline{font:600 var(--t-sub)/1.3 var(--f-body);letter-spacing:0;color:var(--muted)}
+.startttl{font:600 var(--t-head)/var(--t-head-lh) var(--f-body);letter-spacing:-.01em;color:var(--fg)}
+.startsub{font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+
+/* one button, and it says where it goes */
+.plbtn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
+  box-sizing:border-box;min-height:var(--tap);padding:13px 18px;border-radius:14px;
+  text-decoration:none;cursor:pointer;
+  background:var(--acc,var(--blue));color:var(--tint,var(--accent-fg));
+  font:600 var(--t-body)/1.2 var(--f-body);letter-spacing:-.01em;
+  transition:filter .15s}
+.plbtn:hover{filter:brightness(1.08);color:var(--tint,var(--accent-fg))}
+.plbtn:active{filter:brightness(.94)}
+.plbtn .plbgo{flex:none;display:grid;place-items:center;width:17px;height:17px}
+.plbtn .plbgo svg{width:17px;height:17px}
+.plbtn.off{background:var(--fill2);color:var(--muted);cursor:default}
+.plbtn.off .plbgo{display:none}
+/* the choice you make once, under the thing you do often */
+.svcline{display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:10px 0 2px;min-height:var(--tap)}
+.svclbl{font:400 var(--t-sub)/1 var(--f-body);color:var(--muted)}
+
+/* Across styles: a path out, not a second playlist for this style */
+.secintro{margin:0 0 12px;color:var(--muted)}
+.xrow{display:flex;gap:13px;padding:12px 0;border-top:.5px solid var(--sep)}
+.xrow:first-of-type{border-top:0;padding-top:2px}
+.xcov{width:62px;height:62px;flex:none;border-radius:5px;aspect-ratio:1;object-fit:cover;
+  box-shadow:0 0 0 .5px var(--line),0 1px 3px rgb(0 0 0 / .24)}
+span.xcov{display:grid;place-items:center;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--c,var(--fg)) 62%,#000),color-mix(in srgb,var(--c,var(--fg)) 20%,#000))}
+span.xcov b{font:700 19px var(--f-body);color:#fff;opacity:.92}
+.xtx{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.xttl{font:600 var(--t-body)/var(--t-body-lh) var(--f-body);color:var(--fg)}
+.xnote{font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+.xalso{font:600 var(--t-foot)/1.3 var(--f-body);color:var(--muted);margin-top:4px}
+.xlinks{display:flex;flex-wrap:wrap;gap:6px 10px}
+.xgo{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:4px;
+  cursor:pointer;min-height:var(--tap);color:var(--link);
+  font:400 var(--t-sub)/1.2 var(--f-body);text-decoration:underline;text-underline-offset:3px}
+.xgo:hover{color:var(--fg)}
+.xgo i{font-style:normal;opacity:.8}
+.xopen{display:inline-flex;align-items:center;gap:6px;min-height:var(--tap);
+  color:var(--link);text-decoration:underline;text-underline-offset:3px;
+  font:400 var(--t-sub)/1.2 var(--f-body)}
+.xopen:hover{color:var(--fg)}
+.xopen .xgoi{display:grid;place-items:center;width:14px;height:14px}
+.xopen .xgoi svg{width:14px;height:14px}
+.xopen.off{color:var(--muted);text-decoration:none;cursor:default}
+.xopen.off .xgoi{display:none}
+
+/* Explore the connections: the map's own relationships, out of the title menu */
+.cxwrap{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:560px){ .cxwrap{grid-template-columns:1fr 1fr;gap:20px} }
+.cxh{margin:0 0 8px;font:600 var(--t-sub)/1.3 var(--f-body);color:var(--muted);
+  letter-spacing:0;text-transform:none}
+.cxlist{display:flex;flex-direction:column;gap:2px}
+.cxgo{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:9px;width:100%;
+  cursor:pointer;min-height:var(--tap);padding:0 10px;border-radius:10px;color:var(--fg);
+  font:400 var(--t-body)/var(--t-body-lh) var(--f-body);transition:background .15s}
+.cxgo:hover{background:var(--fill2)}
+.cxgo .dot{flex:none;width:9px;height:9px;border-radius:50%}
+.cxgo .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cxgo small{flex:none;font:500 var(--t-foot) var(--f-mono);color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.cxwrap + .tally{margin:14px 0 0}
+.cxnone{margin:0;padding:0 10px;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+
+/* Go deeper, by format */
+.deepfold{margin-top:0;border-top:.5px solid var(--sep)}
+.deepfold:first-of-type{border-top:0}
+.deepfold summary{min-height:var(--tap);gap:8px;
+  font:400 var(--t-body)/var(--t-body-lh) var(--f-body);color:var(--fg)}
+.deepfold summary .dgl{flex:none;font-weight:600}
+.deepfold summary .dgs{flex:1;min-width:0;color:var(--muted);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.deepfold summary .dgn{flex:none;font:500 var(--t-foot) var(--f-mono);color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.deepfold summary .dgs::before{content:"\00b7";margin-right:7px}
+.deepfold .reads{margin-top:0}
+
+/* The nav row keeps Back and Close; the name is a heading in the body now. Both of those
+   controls are positioned out of the grid, so the title was the only thing in flow giving
+   the row its height. Without it the row collapsed to its padding and the buttons sat on
+   top of the heading below, so the height is stated rather than inherited from a child. */
+.pcard:not(.ovcard) .navrow{min-height:var(--tap)}
+.navgap{min-width:0}
 
 /* ---------- what all:unset throws away ----------
    A browser's own stylesheet sets user-select:none on a button, because a control is

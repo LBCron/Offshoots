@@ -99,7 +99,7 @@ function xrow(x,id){
     + `<span class="plline"><span class="plsvc"></span><span class="plgo">${OPENGO}</span></span></span></a>`;
 }
 function paintPlay(){
-  document.querySelectorAll("#panelBody a.plrow").forEach(a=>{
+  document.querySelectorAll("#panelBody a.plrow, #panelBody a.plbtn, #panelBody a.xopen").forEach(a=>{
     const ap=a.dataset.ap||"", sp=a.dataset.spid||"", nm=a.dataset.style||"";
     const lbl=a.querySelector(".plsvc"); if(!lbl) return;
     const url = SVC==="spotify" ? (sp?"https://open.spotify.com/playlist/"+sp:"") : SVC==="apple" ? ap : "";
@@ -108,14 +108,20 @@ function paintPlay(){
       // rebuilt rather than toggled, so anything else the row is has to be carried over:
       // a cross-style row lost its own class here and went back to looking like the
       // style's own playlist
-      const x=a.classList.contains("xplay")?" xplay":"";
-      a.className="plrow "+(SVC==="spotify"?"sp":"pl")+x;
+      const base=a.classList.contains("plbtn")?"plbtn"
+        : a.classList.contains("xopen")?"xopen"
+        : "plrow"+(a.classList.contains("xplay")?" xplay":"");
+      a.className=base+" "+(SVC==="spotify"?"sp":"pl");
       a.href=url; if(SVC==="spotify") a.dataset.sp=sp; else delete a.dataset.sp;
-      lbl.textContent="Playlist on "+svcName();
+      // the button says where it is going; a row says what it is
+      lbl.textContent=(a.dataset.lbl||"Playlist on")+" "+svcName();
       a.title="Open the "+nm+" playlist in "+svcName();
     } else {
       // the row stays so the section keeps its shape; it just can't be played here yet
-      a.className="plrow off"+(a.classList.contains("xplay")?" xplay":"");
+      const base2=a.classList.contains("plbtn")?"plbtn"
+        : a.classList.contains("xopen")?"xopen"
+        : "plrow"+(a.classList.contains("xplay")?" xplay":"");
+      a.className=base2+" off";
       a.removeAttribute("href"); delete a.dataset.sp;
       a.setAttribute("aria-disabled","true");
       lbl.textContent="Not on "+svcName()+" yet";
@@ -760,7 +766,7 @@ function select(id,{scroll=true,smooth=true,keepPlace=false,repaint=true}={}){
     + `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg>`
     + `<span class="bklbl"></span>`
     + `<svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.6 7.4 3.6v10.8l-4.6 2z"/><path d="M7.4 3.6 12.6 5.6v10.8L7.4 14.4z"/><path d="M12.6 5.6 17.2 3.6v10.8l-4.6 2z"/></svg></button>`
-    + lineageTitle(n)
+    + `<span class="navgap"></span>`
     + CLOSEBTN
     + `</div>`;                       // .pcard stays open: .more goes inside it, so the
                                       // sticky header has the whole card to stick within
@@ -1135,17 +1141,145 @@ function shareBtn(n){
   return `<button type="button" class="shbtn wide" data-share aria-label="Share ${esc(n.name)}" title="Share ${esc(n.name)}">`
     + SHAREGLYPH + `<svg class="tick" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 10.5l3.6 3.6L15.5 6.6"/></svg><span class="shlbl">Share this style</span></button>`;
 }
-function panel(n,anc,desc){
+// ---------- the style panel ----------
+// The panel used to open on "Listen on <service>" with the description below the fold and
+// the lineage hidden inside the title. It opens on the style now: name, date, and the
+// description one tap away, then one unmistakable way into the music, then who made it,
+// then the playlists that cross out of it, then where it sits on the map.
+
+// The name carries the date beside it rather than under it, so the two read as one line
+// and the About fold sits directly beneath where a subtitle would have been.
+function styleHead(n){
+  return `<div class="sthead">`
+    + `<h1 class="pttl"><span class="ptnm">${esc(n.name)}</span>`
+    + `<span class="ptyr">${n.year<1950?esc(n.disp):"c. "+n.year}</span></h1>`
+    + aboutFold(n) + `</div>`;
+}
+// Collapsed, because the description is what you read once and the playlist is what you
+// came for. Open, it is the description and the one link that goes deeper on the style
+// itself rather than on anything in it.
+function aboutFold(n){
+  const txt=about(n);
+  if(!txt) return "";
+  return `<details class="xfold aboutfold"><summary><span>About this style</span>${GOCHEV}</summary>`
+    + `<div class="xfoldb"><p class="note">${esc(txt)}</p>`
+    + wiki(n).replace(">Learn more on Wikipedia<",">Read more on Wikipedia<")
+    + `</div></details>`;
+}
+// One button, saying where it goes, instead of a service name in a heading and another in
+// a row. The selector sits under it, because you choose a service once and open playlists
+// many times.
+function startSect(n){
+  const ap=(typeof PLAY!=="undefined"&&PLAY[n.id])||"";
+  const sp=(typeof SPLAY!=="undefined"&&SPLAY[n.id])||"";
+  if(!ap && !sp) return "";
+  const open=`<a class="plbtn pl" target="_blank" rel="noopener" data-lbl="Open playlist in"`
+    + ` data-ap="${ap?esc("https://music.apple.com"+ap):""}" data-spid="${esc(sp)}"`
+    + ` data-style="${esc(n.name)}">`
+    + `<i class="plbgo" aria-hidden="true">${OPENGO}</i><span class="plsvc"></span></a>`;
+  return sect("listen","",
+    `<div class="startrow">${cover(n.id,n)}`
+    + `<span class="starttx"><span class="overline">Start listening</span>`
+    + `<b class="startttl">The essential ${esc(n.name)} playlist</b>`
+    + `<span class="startsub">Meet the style through its defining songs.</span></span></div>`
+    + open
+    + `<div class="svcline"><span class="svclbl">Your music service</span>${svcPicker("inline")}</div>`);
+}
+// Key artists, with the style in the heading so the row says whose list this is when you
+// have scrolled past the name.
+function artistsSect(n,who,artistsHtml){
+  if(!who.length) return "";
+  const all=artistAll(n);
+  return sect("artists","Key "+n.name+" artists", artistsHtml,
+    `<span class="sectaside">${all.length}</span>`, "artists");
+}
+// ---------- Across styles ----------
+// A crossing is a listening path, not a second playlist for this style, so it says what
+// it is and then names the other panels it sits on. Those names are the point: they are
+// where the path goes next.
+function acrossSect(n){
+  const xs=xplayFor(n.id);
+  if(!xs.length) return "";
+  const rows=xs.map(x=>{
+    const others=x.styles.filter(s=>s!==n.id && byId[s]);
+    const links=others.map(s=>`<button type="button" class="xgo" data-go="${esc(s)}">`
+      + `${esc(byId[s].name)}<i aria-hidden="true">\u2192</i></button>`).join("");
+    const ini=initials(x.title);
+    const art = x.art
+      ? `<img class="xcov" src="${XPLAY_DIR}${encodeURIComponent(x.id)}${ART_EXT}" alt=""`
+        + ` loading="lazy" decoding="async" data-c="${esc(x.c||"")}" data-ini="${esc(ini)}">`
+      : `<span class="xcov pcovph" aria-hidden="true"${x.c?` style="--c:${esc(x.c)}"`:""}>`
+        + `<b>${esc(ini)}</b></span>`;
+    return `<div class="xrow">${art}<div class="xtx">`
+      + `<b class="xttl">${esc(x.title)}</b>`
+      + (x.note?`<span class="xnote">${esc(x.note)}</span>`:"")
+      + (links?`<span class="xalso">Also featured in</span><span class="xlinks">${links}</span>`:"")
+      + `<a class="xopen pl" target="_blank" rel="noopener" data-lbl="Open in"`
+      + ` data-ap="${x.ap?esc("https://music.apple.com"+x.ap):""}" data-spid="${esc(x.sp||"")}"`
+      + ` data-style="${esc(x.title)}"><span class="plsvc"></span>`
+      + `<i class="xgoi" aria-hidden="true">${OPENGO}</i></a>`
+      + `</div></div>`;
+  }).join("");
+  return sect("across","Across styles",
+    `<p class="note secintro">Playlists that connect ${esc(n.name)} with other sounds.</p>${rows}`);
+}
+// ---------- Explore the connections ----------
+// The lineage was inside the title, which made the map's own relationships a menu you had
+// to know was there, and put them in the same control as Back. They are a section now,
+// and Back is left to mean only where you have been.
+function linksSect(n,anc,desc){
+  const from=[...n.parents].sort(byYear), led=[...n.children].sort(byYear);
+  if(!from.length && !led.length) return "";
+  // the reach of the style, which used to sit under the description: it belongs with the
+  // links it counts rather than with the prose
   const dfams=new Set([...desc.keys()].map(k=>byId[k].fam));
+  const tally=`<p class="tally">${anc.size} ancestor styles \u00b7 ${desc.size} descendant styles`
+    + `${desc.size?` across ${dfams.size} ${dfams.size===1?"family":"families"}`:""}</p>`;
+  const col=(cls,label,ids)=>`<div class="cxcol"><h4 class="cxh">${esc(label)}</h4>`
+    + (ids.length
+      ? `<div class="cxlist">${ids.map(i=>`<button type="button" class="cxgo ${cls}" data-go="${esc(i)}">`
+          + `<i class="dot" style="background:${FAM[byId[i].fam].c}"></i>`
+          + `<span class="nm">${esc(byId[i].name)}</span>`
+          + `<small>${byId[i].year<1950?esc(byId[i].disp):byId[i].year}</small></button>`).join("")}</div>`
+      : `<p class="cxnone">Nothing on the map yet.</p>`)
+    + `</div>`;
+  return sect("connections","Explore the connections",
+    `<div class="cxwrap">${col("cxfrom","Before this style",from)}`
+    + `${col("cxled","After this style",led)}</div>${tally}`);
+}
+// ---------- Go deeper, grouped by what it is ----------
+// One list of mixed media made you read every row to find the podcast. Grouped and
+// folded, the format is the first thing you choose and the shelf stays short.
+const DEEPGRP=[
+  ["read","Read","Articles and books",["read","book"]],
+  ["watch","Watch","Videos",["watch","look"]],
+  ["listen","Listen","Podcasts",["listen"]]
+];
+function deepSect(n){
+  const rows=(typeof READ!=="undefined" && READ[n.id]) || [];
+  if(!rows.length) return "";
+  const folds=DEEPGRP.map(([k,label,sub,types])=>{
+    const mine=rows.filter(r=>types.indexOf(r[7])>=0);
+    if(!mine.length) return "";
+    return `<details class="xfold deepfold"><summary><span class="dgl">${esc(label)}</span>`
+      + `<span class="dgs">${esc(sub)}</span><span class="dgn">${mine.length}</span>${GOCHEV}</summary>`
+      + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
+  }).join("");
+  if(!folds) return "";
+  return sect("read","Go deeper", folds,
+    `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
+}
+function panel(n,anc,desc){
   const who=n.whoList||[];
   const artistsHtml = `<div class="whorow acrow">${who.map(amCirc).join("")}</div>`;
   resetPages();
   $("panelBody").innerHTML = PHEAD + `<div class="more">
-    ${listenSect(n,who,artistsHtml)}
-    ${sect("about","What it is",
-      `<p class="note lede wikiline">${about(n)?esc(about(n))+" ":""}${wikiTxt(n)}</p>`
-      + `<p class="tally">${anc.size} ancestor styles · ${desc.size} descendant styles${desc.size?` across ${dfams.size} ${dfams.size===1?"family":"families"}`:""}</p>`)}
-    ${readSect(n)}
+    ${styleHead(n)}
+    ${startSect(n)}
+    ${artistsSect(n,who,artistsHtml)}
+    ${acrossSect(n)}
+    ${linksSect(n,anc,desc)}
+    ${deepSect(n)}
     ${shareBtn(n)}</div></div>`;
   wrapStack(panelCard());
   paintPlay();

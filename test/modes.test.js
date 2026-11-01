@@ -381,7 +381,7 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
   await until(p,t=>location.hash==="#"+t && !!document.querySelector("#chart .n.cur"),target);
   await settle(p);
   say("a pick selects "+target, (await p.evaluate(()=>location.hash))==="#"+target);
-  say("  and the panel shows it", (await p.$eval(".pcard .mn",e=>e.textContent)).length>0);
+  say("  and the panel shows it", (await p.$eval(".pcard .pttl .ptnm",e=>e.textContent)).length>0);
   say("  with the map node lit", (await p.$$eval("#chart .n.cur",e=>e.length))===1);
   say("  from a clean stack", (await p.$$('.ppage[data-p^="mode:"]')).length===0);
 

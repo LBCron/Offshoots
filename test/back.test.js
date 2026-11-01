@@ -78,9 +78,17 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   p=await fresh(b,M,"#punk");
   // a chain where every stop still leads somewhere, so the Led to button is never disabled
   const walk=["hardcore","thrash","deathmetal","blackmetal"];
+  // The lineage used to be a menu on the title, which opened straight from the peek. It
+  // is a section in the card now, so the sheet has to be open to walk it: that is the
+  // trade the restructure made, the peek being for playing rather than for navigating.
+  const ensureOpen=async q=>{ if(!(await q.evaluate(()=>document.body.classList.contains("open"))))
+    await q.click("#grab").catch(()=>{}); await opened(q); };
+  await ensureOpen(p);
   for(const id of walk){
-    await p.click('.navttl'); await menu(p);
-    await p.click(`.navmenu:not([hidden]) .lcol-led [data-go="${id}"]`); await at(p,"#"+id);
+    await p.$eval(`.sect-connections .cxled[data-go="${id}"]`,e=>e.scrollIntoView({block:"center"}));
+    await settle(p);
+    await p.click(`.sect-connections .cxled[data-go="${id}"]`); await at(p,"#"+id);
+    await ensureOpen(p);
   }
   say("walked", "punk -> "+walk.join(" -> "));
   say("button shows the previous stop", await label(p));
@@ -106,8 +114,10 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
 
   // the trail survives a browse-menu jump too, and empty-space taps
   p=await fresh(b,M,"#disco");
-  await p.click('.navttl'); await menu(p);
-  await p.click(".navmenu:not([hidden]) .lcol-from [data-go]"); await moved(p,"#disco");
+  await ensureOpen(p);
+  await p.$eval(".sect-connections .cxfrom[data-go]",e=>e.scrollIntoView({block:"center"}));
+  await settle(p);
+  await p.click(".sect-connections .cxfrom[data-go]"); await moved(p,"#disco");
   const mid=await hash(p);
   // an empty-map tap. Not an offset inside #chart: that element is 3000px wide and
   // scrolled, so an offset into it lands off-screen and Playwright scrolls the map to
@@ -121,9 +131,14 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
     } return null; });
   const tapBare=async()=>{ const pt=await bare(); if(!pt) return false;
     await p.mouse.click(pt[0],pt[1]); await at(p,""); return true; };
-  // the lineage menu opens from the peek, so the sheet was never opened here and a tap on
-  // bare map clears straight away. With the sheet open it would close that first.
-  say("the sheet is still at its peek", (await p.evaluate(()=>document.body.classList.contains("open")))===false);
+  // The lineage menu used to open from the peek, so the sheet was never opened here and a
+  // tap on bare map cleared straight away. The lineage is a section in the card now, so
+  // the sheet is open by the time the jump is made, and a first tap closes it: that is
+  // the behaviour being walked, so the test closes it rather than pretending otherwise.
+  say("the sheet is open, since the lineage lives in the card",
+    (await p.evaluate(()=>document.body.classList.contains("open")))===true);
+  await p.click("#grab").catch(()=>{});
+  await until(p,()=>!document.body.classList.contains("open")); await settle(p);
   say("tapped bare map", await tapBare());
   say("which clears to the map", (await hash(p))==="");
   say("clearing to the map is a step too", await shown(p));
@@ -131,26 +146,29 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   await p.click("#panelBack"); await at(p,mid);
   say("back returns to "+mid, (await hash(p))===mid);
 
-  // the row reads back | title | minimise. The lineage pair left it for the card below.
+  // The row read back | title | minimise. The title left it for the body below, so the
+  // row is the two controls and the space between them, and the name is a heading under
+  // it rather than a thing they have to clear.
   const boxes=await p.evaluate(()=>{const r=document.querySelector(".navrow").getBoundingClientRect();
     const g=sel=>{const e=document.querySelector(sel); if(!e) return null;
       const b=e.getBoundingClientRect();
       return [Math.round(b.left-r.left),Math.round(b.right-r.left),Math.round(b.top-r.top)];};
-    const mn=document.querySelector(".navttl .mn");
-    const rg=document.createRange(); rg.selectNodeContents(mn);
-    const nb=rg.getBoundingClientRect();
-    return {back:g("#panelBack"), title:g(".navttl"), x:g(".pmin"),
-      name:[Math.round(nb.left-r.left),Math.round(nb.right-r.left)],
+    const nm=document.querySelector(".pttl").getBoundingClientRect();
+    return {back:g("#panelBack"), x:g(".pmin"),
+      nameBelow:Math.round(nm.top-r.bottom),
+      titles:document.querySelectorAll(".navrow .navttl").length,
       backPos:getComputedStyle(document.querySelector("#panelBack")).position,
       xPos:getComputedStyle(document.querySelector(".pmin")).position,
       pad:Math.round(parseFloat(getComputedStyle(document.querySelector(".pcard .navrow")).paddingRight)),
       width:Math.round(r.width)};});
-  // the title spans the row under both controls, so compare against the painted name
-  say("back is left of the name", boxes.back[1]<=boxes.name[0]);
+  say("back is left of the close control", boxes.back[1]<=boxes.x[0]);
+  say("  with no title left between them", boxes.titles===0);
   // the band bleeds to the card's edges, so the row's own box is wider than the content
   // column: the X sits at the content edge, which is the row's edge less its padding
-  say("the X is right of it, at the content edge", boxes.x[0]>=boxes.name[1]-1
-    && Math.abs(boxes.width-boxes.pad-boxes.x[1])<=1);
+  say("the X sits at the content edge",
+    Math.abs(boxes.width-boxes.pad-boxes.x[1])<=1);
+  say("and the name sits below the row, not in it ("+boxes.nameBelow+"px)",
+    boxes.nameBelow>=0);
   say("and both are pinned to the corners, not laid out in it",
     boxes.backPos==="absolute" && boxes.xPos==="absolute" && boxes.back[2]===0 && boxes.x[2]===0);
   say("back tap target "+(await p.$eval("#panelBack",e=>Math.round(e.getBoundingClientRect().height)))+"px",
@@ -204,8 +222,10 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   say("home shown one step out", await home(p));
   const hwalk=["hardcore","thrash"];
   p=await fresh(b,M,"#punk");
-  await p.click('.navttl'); await menu(p);
-  await p.click(`.navmenu:not([hidden]) [data-go="${hwalk[0]}"]`); await at(p,"#"+hwalk[0]);
+  await ensureOpen(p);
+  await p.$eval(`.sect-connections [data-go="${hwalk[0]}"]`,e=>e.scrollIntoView({block:"center"}));
+  await settle(p);
+  await p.click(`.sect-connections [data-go="${hwalk[0]}"]`); await at(p,"#"+hwalk[0]);
   say("home still there two styles deep", await home(p));
   say("and back names the style it returns to", /^Back to /.test(await label(p)));
   say("it says", await p.$eval("#mapHome",e=>e.getAttribute("title")));
@@ -249,7 +269,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
     await q.click("#grab").catch(()=>{});
     await until(q,()=>document.body.classList.contains("open"));
     await settle(q);
-    const pushed=await q.$(".subh.subgo");
+    const pushed=await q.$('[data-page="artists"]');
     if(pushed){ await pushed.click();
       await until(q,()=>[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)
         .some(x=>x.dataset.p!=="root"));
