@@ -895,7 +895,7 @@ function setPbar(t,s){ PBAR={t:t||"",s:s||""}; const a1=$("pbarTitle"), a2=$("pb
       // line cannot flicker.
       ttl: big&&nav ? (()=>{ const t=big.getBoundingClientRect().top,
           b=nav.getBoundingClientRect().bottom;
-        return cls.contains("pttl") ? t < b+6 : t <= b; })() : cls.contains("pttl")};
+        return cls.contains("barttl") ? t < b+6 : t <= b; })() : cls.contains("barttl")};
   };
   const apply=m=>{
     const cls=$("panel").classList;
@@ -903,7 +903,7 @@ function setPbar(t,s){ PBAR={t:t||"",s:s||""}; const a1=$("pbarTitle"), a2=$("pb
     // cheap, but it is not free, and neither is the style recalc it can schedule.
     const scrolled=m.top>2;
     if(cls.contains("pscrolled")!==scrolled) cls.toggle("pscrolled",scrolled);
-    if(cls.contains("pttl")!==m.ttl) cls.toggle("pttl",m.ttl);
+    if(cls.contains("barttl")!==m.ttl) cls.toggle("barttl",m.ttl);
     const slot=m.nav&&m.nav.querySelector(".navttl.ovttl .mn");
     if(slot&&m.big){ const t=(m.big.querySelector(".mn")||m.big).textContent.trim();
       if(slot.textContent!==t) slot.textContent=t; }

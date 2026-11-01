@@ -500,6 +500,37 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       say("a drag up from "+what+" scrolls the panel ("+(now-was)+" of "+room+"px)", now-was>20);
     }
 
+    // ---- scrolling must not move the panel sideways ----
+    // The two classes the header sets live on the panel now rather than on <body>, which
+    // means every rule anywhere that matches a bare class name is suddenly a rule about
+    // the sheet. One of them was: pttl is the class on a style panel's own <h1>, and on
+    // the panel it made the sheet a baseline-aligned flex container and shoved its
+    // contents 48px to the right the first time anyone scrolled. Nothing the header does
+    // may move the panel's contents across the screen.
+    { await q.goto(URL); await shown(q,"#chart .n");
+      await q.click("#grab").catch(()=>{});
+      await until(q,()=>document.body.classList.contains("open")); await settle(q);
+      const across=()=>q.evaluate(()=>{
+        const pb=document.getElementById("panelBody"), pn=document.getElementById("panel");
+        const c=pb.querySelector(".pcard");
+        const b=pb.getBoundingClientRect(), p=pn.getBoundingClientRect();
+        return {body:Math.round(b.left-p.left), bodyW:Math.round(b.width),
+          card:c?Math.round(c.getBoundingClientRect().left-p.left):null,
+          panelW:Math.round(p.width)};});
+      const was=await across();
+      // every state the header passes through: the top, past the handover, and back
+      const seen=[was];
+      for(const t of [40,200,0]){
+        await q.evaluate(v=>{document.getElementById("panelBody").scrollTop=v;},t);
+        await settle(q); seen.push(await across());
+      }
+      const drift=seen.filter(s2=>s2.body!==was.body || s2.card!==was.card);
+      say("scrolling never moves the panel sideways ("
+        + seen.map(s2=>s2.body).join(", ")+"px from the panel's own edge)",
+        drift.length===0 ? true : JSON.stringify(drift[0]));
+      say("  and its contents stay inside it ("+was.bodyW+" of "+was.panelW+"px)",
+        seen.every(s2=>s2.bodyW<=s2.panelW && s2.body>=0)); }
+
     // ---- and it scrolls smoothly, with no frame standing out near the top ----
     // The header hands the title over about twenty pixels down. That handover set a class
     // on <body>, and a class on the root of a document holding a 4,300-node map repainted

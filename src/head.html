@@ -574,11 +574,11 @@ body.open .pcnt{display:none}
   transition:opacity .2s ease,transform .2s cubic-bezier(.32,.72,0,1)}
 .pcard .navrow .navttl.ovttl .mn{font:600 var(--t-head)/1.2 var(--f-body);
   letter-spacing:-.014em;color:var(--fg)}
-#panel.pttl .pcard .navrow .navttl.ovttl{opacity:1;transform:none}
+#panel.barttl .pcard .navrow .navttl.ovttl{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){ .pcard .navrow .navttl.ovttl{transition:none} }
 /* the back button names where it goes; once the bar carries a title too, the pair would
    crowd a phone, so the label gives way and the arrow speaks for itself */
-@media (max-width:420px){ #panel.pttl .ovcard .navleft .navback.topage .bklbl{display:none} }
+@media (max-width:420px){ #panel.barttl .ovcard .navleft .navback.topage .bklbl{display:none} }
 @media (max-width:899px){ .ovcard .bigttl{margin:14px 0 8px} }
 /* beside the share button there is no room for the destination's name, and the two
    glyphs already say map and back */
@@ -1497,7 +1497,10 @@ aside#panel{padding-left:0;padding-right:0}
 @media (max-width:899px){ :root{--ppad:16px} }
 
 /* ---- scrolled state: search collapses to an icon, title stays, hairline appears ----
-   These two live on the panel, not on <body>. On <body> they were a class change on the
+   These two live on the panel, not on <body>. The title one is called barttl and not
+   pttl, which is already the class on a style panel's own <h1>: on the panel it turned
+   the sheet into a baseline-aligned flex container and shoved its contents 48px sideways
+   the first time anyone scrolled. On <body> they were a class change on the
    root of a document holding a 4,300-node map, and the frame where either one landed cost
    46ms against 21ms with the map hidden: the map was being repainted because the sheet's
    header had changed. Nothing under either class is outside the panel, so neither needs
