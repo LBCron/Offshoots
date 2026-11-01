@@ -28,12 +28,14 @@ const all=fs.readdirSync(__dirname).filter(f=>f.endsWith(".test.js")).sort();
 const files=only.length ? all.filter(f=>only.some(o=>f===o||f===o+".test.js")) : all;
 if(!files.length){ console.error("no suites matched "+only.join(" ")); process.exit(2); }
 
-// Nothing needs to run on its own any more. sheet.test.js used to, because it proved the
-// sheet animates by counting frames, and four Chromiums on two cores starve frames: it
-// reported the machine rather than the code. It now pauses the transition and seeks it,
-// which reads the same whatever else is running, so it goes back in the pool with the
-// rest and the suite stops paying for a serial tail.
-const SOLO=[];
+// sheet.test.js runs on its own. Its frame-counting is gone, but it still proves the drag
+// and the flick by moving a real mouse in real time: the app tells a drag from a flick by
+// how far the pointer went in how long, so the gesture cannot be seeked or faked without
+// testing something other than the thing. Four Chromiums on two cores stretch those steps,
+// a slow drag arrives as a flick and a flick as a drag, and the suite reports the machine.
+// Twice in one sitting it failed in the pool on a gesture and passed alone, with different
+// checks each time. The serial tail is about eighty seconds and buys a run you can believe.
+const SOLO=["sheet.test.js"];
 
 const run=f=>new Promise(res=>{
   const t0=Date.now();

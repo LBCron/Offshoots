@@ -185,7 +185,10 @@ const say=(k,v)=>console.log((v===true?"PASS ":v===false?"FAIL ":"     ")+k+(typ
     // so by the halfway mark it has covered 96% of the distance and sits a pixel off its
     // destination. A quarter in, any easing still leaves it plainly in between.
     anim.currentTime = dur/4;
-    await new Promise(r=>requestAnimationFrame(()=>r()));
+    // Two frames, not one. A seek is committed on the next frame, but the height read back
+    // on that same frame can still be the one already applied: once in a long run this read
+    // came back exactly at the destination and the check called a real animation a snap.
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>r())));
     const mid=h();
     // then let it finish, so the sheet is at rest for whatever the suite checks next
     anim.play();

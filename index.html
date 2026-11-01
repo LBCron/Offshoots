@@ -2057,6 +2057,20 @@ span.xcov b{font:700 19px var(--f-body);color:#fff;opacity:.92}
 .dataline .dlgo{flex:none;display:grid;place-items:center;width:15px;height:15px;color:var(--muted)}
 .dataline .dlgo svg{width:15px;height:15px}
 .dataline:hover .dlgo{color:var(--fg)}
+.dataline{all:unset;box-sizing:border-box;cursor:pointer;width:100%;
+  display:flex;align-items:center;gap:12px;margin:14px 0 4px;padding:12px 14px;
+  min-height:var(--tap);border-radius:14px;background:var(--fill2);color:var(--fg);
+  transition:background .15s}
+.dataline.done{background:color-mix(in srgb,var(--ok) 18%,var(--fill2))}
+.dataline.done .dlgo{color:var(--ok)}
+.dataline:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+/* the address itself, printed so it can be read and selected by hand when there is no
+   chrome to open it with */
+.dataurl{margin:0 0 6px;padding:0 14px;overflow-wrap:anywhere;
+  font:400 var(--t-foot)/var(--t-foot-lh) var(--f-mono);color:var(--muted)}
+.dataurl a{color:var(--link);text-decoration:underline;text-underline-offset:3px}
+.dataurl a:hover{color:var(--fg)}
+.dataurl span{-webkit-user-select:text;user-select:text}
 
 /* ---------- what all:unset throws away ----------
    A browser's own stylesheet sets user-select:none on a button, because a control is
@@ -4350,7 +4364,14 @@ function wiki(n){
 // cover art, if art/<id>.jpg is sitting next to the page; missing files remove themselves
 const ART_DIR="art/", STYLE_DIR="styles/", XPLAY_DIR="xplay/", ART_EXT=".jpg";
 // the machine-readable copy of all this, written beside the page by the build
-const CATALOG_FILE="offshoots.json", CATALOG_NAME="offshoots.json", CATALOG_KB="500 KB";
+// One file: the structure of the map and what each style is. It carried every artist and
+// every song title once, which made it half a megabyte, and the thing that fails when you
+// hand a model a URL is almost never the server but the reader, which caps or times out
+// long before that. The artists and songs live in the app, behind the playlists.
+const CATALOG=[
+  {file:"offshoots.json", name:"offshoots.json", kb:"180 KB",
+   label:"Copy the data link", sub:"Every style, its lineage and its page"}
+];
 // two letters for a style with no art file, so the row keeps its shape
 function initials(name){
   const w=String(name||"").split(/[^A-Za-z0-9]+/).filter(Boolean);
@@ -5737,6 +5758,8 @@ $("panel").addEventListener("click",e=>{
   if(!OPEN && OVERLAY){ if(!e.target.closest("a")) setOpen(true); return; }   // only the minimised sheet is tap-to-open
   { const ac=e.target.closest("[data-aboutcopy]");
     if(ac){ copyAbout(ac); return; } }
+  { const dc=e.target.closest("[data-datacopy]");
+    if(dc){ copyData(dc); return; } }
   { const ss=e.target.closest("[data-sharesheet]");
     if(ss){ openShareSheet(ss); return; } }
   if(e.target.closest("[data-share]")){ shareSel(); return; }
@@ -5835,6 +5858,54 @@ function setHash(id){
   if((location.hash||"") === want) return;
   // replace, not push: selecting styles shouldn't fill the back button
   try{ history.replaceState(null,"",want || location.pathname+location.search); }catch(e){ if(id) location.hash=want; }
+}
+// The row that hands the file over.
+//
+// It used to be a link that opened the JSON. Installed to a home screen there is no
+// browser chrome and no back: opening half a megabyte of JSON in the app's own window
+// trapped you in it. And it was the wrong thing to offer anyway. Nobody wants to read
+// 496 KB of JSON; they want its address, to give to a model. So the row copies the URL,
+// which is the same useful act in both cases, and the address is printed under it: a
+// link when there is somewhere to come back from, plain selectable text when there is not.
+// the same link glyph the About copy control wears, so the two read as one action
+const COPYGLYPH="<svg viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8.4 11.6a3.2 3.2 0 0 0 4.6 0l2.6-2.6a3.2 3.2 0 0 0-4.6-4.6l-1 1\"/><path d=\"M11.6 8.4a3.2 3.2 0 0 0-4.6 0L4.4 11a3.2 3.2 0 0 0 4.6 4.6l1-1\"/></svg>";
+const DATAICON="<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,64V184a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V64A16,16,0,0,1,48,48H208A16,16,0,0,1,224,64Z\" opacity=\"0.2\"/><path d=\"M208,40H48A16,16,0,0,0,32,56V184a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40Zm0,144H48V56H208V184ZM112,96a8,8,0,0,1-8,8H88v56a8,8,0,0,1-16,0V104H56a8,8,0,0,1,0-16h48A8,8,0,0,1,112,96Zm88,64a8,8,0,0,1-8,8H160a8,8,0,0,1-8-8V96a8,8,0,0,1,16,0v56h24A8,8,0,0,1,200,160Z\"/></svg>";
+function catalogURL(file){
+  try{ return new URL(file, location.href).href; }
+  catch(e){ return file; }
+}
+function dataRow(){
+  return CATALOG.map(c=>{
+    const u=catalogURL(c.file), shown=u.replace(/^https?:\/\//,"");
+    // file:// has no address worth handing to anyone, so the row only copies
+    const openable=/^https?:/.test(u) && !installed();
+    return `<button type="button" class="dataline" data-datacopy="${esc(c.file)}"`
+      + ` aria-label="Copy the link to ${esc(c.name)}">`
+      + DATAICON
+      + `<span class="dltx"><b class="lbl">${esc(c.label)}</b>`
+      + `<small>${esc(c.sub)} \u00b7 ${esc(c.kb)}</small></span>`
+      + `<i class="dlgo">${COPYGLYPH}</i></button>`
+      + `<p class="dataurl">`
+      + (openable
+          ? `<a href="${esc(c.file)}" target="_blank" rel="noopener">${esc(shown)}</a>`
+          : `<span>${esc(shown)}</span>`)
+      + `</p>`;
+  }).join("");
+}
+function copyData(btn){
+  const url=catalogURL(btn.dataset.datacopy||CATALOG[0].file), lbl=btn.querySelector(".lbl");
+  const flash=t=>{ if(!lbl) return; if(btn._was==null) btn._was=lbl.textContent;
+    btn.classList.add("done"); lbl.textContent=t;
+    clearTimeout(btn._t); btn._t=setTimeout(()=>{ btn.classList.remove("done");
+      if(btn._was!=null){ lbl.textContent=btn._was; btn._was=null; } },1600); };
+  const fallback=()=>{ const ta=document.createElement("textarea"); ta.value=url;
+    ta.setAttribute("readonly",""); ta.style.cssText="position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); flash("Link copied"); }catch(e){ flash("Copy failed"); }
+    ta.remove(); };
+  if(navigator.clipboard&&navigator.clipboard.writeText)
+    navigator.clipboard.writeText(url).then(()=>flash("Link copied"),fallback);
+  else fallback();
 }
 function copyAbout(btn){
   const url=foldURL(btn.dataset.aboutcopy||ABOUT_HASH), lbl=btn.querySelector(".lbl");
@@ -6291,9 +6362,10 @@ const PAGES_DEF={
     <h4 class="subh">What it is built on</h4>
     <p>The map is one HTML file with nothing fetched at runtime, so it keeps working with no connection. Every icon is <b>Phosphor</b>, the Duotone weight, under the MIT licence, inlined as paths rather than loaded from anywhere. Playlists open in Apple Music or Spotify, which do need a connection. Everything else here was drawn or written for this map.</p>
     <h4 class="subh">The map as data</h4>
-    <p>The same contents are published as one JSON file: every style with its year, family, lineage, description, artists, songs and playlists, plus the playlists that cross between styles. It is meant to be handed to a language model, so that someone can ask it where to go next from a record they already like and get an answer that can say <i>why</i> two things are related rather than only that they are.</p>
-    <p>It carries a short note to the reader explaining what the lineage does and does not claim, and that coverage is uneven: ${np} of ${DATA.length} styles have a playlist, and the rest have fewer artists and no songs. Absence in the file is not evidence that something does not exist.</p>
-    <a class="dataline" href="${CATALOG_FILE}" target="_blank" rel="noopener" title="Open the Offshoots data as JSON"><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,64V184a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V64A16,16,0,0,1,48,48H208A16,16,0,0,1,224,64Z" opacity="0.2"/><path d="M208,40H48A16,16,0,0,0,32,56V184a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V56A16,16,0,0,0,208,40Zm0,144H48V56H208V184ZM112,96a8,8,0,0,1-8,8H88v56a8,8,0,0,1-16,0V104H56a8,8,0,0,1,0-16h48A8,8,0,0,1,112,96Zm88,64a8,8,0,0,1-8,8H160a8,8,0,0,1-8-8V96a8,8,0,0,1,16,0v56h24A8,8,0,0,1,200,160Z"/></svg><span class="dltx"><b>Open the data</b><small>${CATALOG_NAME} \u00b7 about ${CATALOG_KB}</small></span><i class="dlgo">${OPENGO}</i></a>
+    <p>The shape of the map is published as JSON, to be handed to a language model: ask it where to go next from something you already like, and the lineage lets it say <i>why</i> two things are related rather than only that they are. Every style in it carries the address of its own panel here, so an answer can link to the thing it names.</p>
+    <p>It is the structure and the descriptions, not a catalogue of recordings. There are no artist lists and no song titles: those are most of the bytes, they are already in the app behind each playlist, and a file too big to fetch is no use to anyone.</p>
+    <p>It carries a note to its reader explaining what the lineage does and does not claim, and that coverage is uneven: ${np} of ${DATA.length} styles have a playlist. Absence in the file is not evidence that something does not exist.</p>
+    ${dataRow()}
     <h4 class="subh">The playlists</h4>
     <p>Each playlist runs in chronological order, and the first few tracks are deliberately not the style proper. They are the records that pushed it into being, or the earliest examples of it, cut before anyone had a name for it.</p>
     <p>So a playlist starts just outside its own style and arrives at it, which is the same move the map makes. If the opening tracks sound like something else, that is the point: that is what it grew out of.</p>
