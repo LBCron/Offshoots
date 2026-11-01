@@ -1660,11 +1660,16 @@ function syncShare(){
 }
 
 // the panel takes a wash of the family's cover-art ground; strength lives in CSS
+// A skin is two trios: the family's cover-art ground for dark mode, and a pale wash of
+// the same hue for light. Both are put on the panel and the stylesheet picks, the way
+// every other pair of palettes in this file is picked, so following the system theme
+// needs no listener and changing it mid-session cannot leave a panel on the wrong one.
 function setTint(fam){
   const s=(typeof FAMSKIN!=="undefined"&&FAMSKIN[fam])||null;
   const el=$("panel"); if(!el) return;
-  if(s){ el.style.setProperty("--tint",s[0]); el.style.setProperty("--ink",s[1]); el.style.setProperty("--acc",s[2]); }
-  else { el.style.removeProperty("--tint"); el.style.removeProperty("--ink"); el.style.removeProperty("--acc"); }
+  const names=["--tint-d","--ink-d","--acc-d","--tint-l","--ink-l","--acc-l"];
+  if(s) names.forEach((n,i)=>el.style.setProperty(n, s[i] || s[i-3] || s[0]));
+  else names.forEach(n=>el.style.removeProperty(n));
   el.classList.toggle("tinted",!!s);
 }
 // ---------- listening modes ----------

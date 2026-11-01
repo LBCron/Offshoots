@@ -1410,16 +1410,33 @@ aside#panel{position:relative;z-index:30;flex:0 0 var(--sidew);width:var(--sidew
 /* a wash of the family's cover-art ground; --tint is set per selection.
    the muted ink is darkened/brightened to hold contrast over the wash. */
 aside#panel{transition:background .25s}
-/* the panel becomes the shelf's field, the same in light and dark:
-   --tint is the ground, --ink the type, --acc the link colour; the rest is derived */
+/* The panel takes the shelf's field, and which field depends on the mode. It used to be
+   the one deep ground in both, which is right over a black map and wrong over a near-white
+   one: the darkest families read as a slab dropped on the page, and the five that are
+   near-black by design read as the heaviest slab of all. Light mode gets a pale wash of
+   the same hue instead, deep type on it, and an accent dark enough to hold. Every ground
+   now lands between 1.11 and 1.13 against white where they used to run 9.2 to 19.4, so no
+   family is heavier than another. The pair is chosen here rather than in script, like
+   every other palette in this file. */
+aside#panel.tinted{ --tint:var(--tint-l); --ink:var(--ink-l); --acc:var(--acc-l); }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) aside#panel.tinted{
+    --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d); } }
+:root[data-theme="dark"] aside#panel.tinted{
+  --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d); }
+/* --tint is the ground, --ink the type, --acc the link colour; the rest is derived */
 aside#panel.tinted{
   --panel:var(--tint); --fg:var(--ink); --accent:var(--acc); --accent-fg:var(--tint);
   --muted:color-mix(in srgb,var(--ink) 72%,var(--tint));
   --line:color-mix(in srgb,var(--ink) 30%,var(--tint));
   --sep:color-mix(in srgb,var(--ink) 16%,transparent);
   --sectline:color-mix(in srgb,var(--ink) 38%,var(--tint)); --sectw:1px;
-  --fill:color-mix(in srgb,var(--acc) 20%,var(--tint));
-  --fill2:color-mix(in srgb,var(--acc) 13%,var(--tint));
+  /* 16 and 11, not 20 and 13. On the families whose accent is the cream type itself,
+     a fill of a fifth of it lifted the ground far enough that a link in that same cream
+     came out at 4.48 against it, which is AA by eye and not by the number. Nothing was
+     measuring the tinted panels until now. */
+  --fill:color-mix(in srgb,var(--acc) 16%,var(--tint));
+  --fill2:color-mix(in srgb,var(--acc) 11%,var(--tint));
   background:var(--tint);color:var(--ink)}
 body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
 #panelBody{flex:1 1 auto;min-height:0}

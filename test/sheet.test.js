@@ -171,13 +171,21 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const el=document.getElementById("panel");
     const h=()=>Math.round(el.getBoundingClientRect().height);
     const from=h();
+    // Catch the transition as it starts rather than looking for it two frames later.
+    // Looking found it most of the time and sometimes found it already finished, and a
+    // finished animation does not move when you seek it: the midpoint then read exactly
+    // at the destination and a real animation failed the check for snapping. The event
+    // fires once, at time zero, whatever the frame clock is doing.
+    const caught=new Promise(res=>{
+      const on=e=>{ if(e.propertyName!=="height") return;
+        el.removeEventListener("transitionrun",on); res(); };
+      el.addEventListener("transitionrun",on);
+      setTimeout(()=>{ el.removeEventListener("transitionrun",on); res(); },1200);
+    });
     if(act==="grab"){ const g=document.getElementById("grab");
       g.dispatchEvent(new PointerEvent("pointerdown",{bubbles:true,clientY:0,pointerId:1}));
       g.dispatchEvent(new PointerEvent("pointerup",{bubbles:true,clientY:0,pointerId:1})); }
-    // A transition does not exist until the style change has been recalculated, which
-    // happens on the next frame, so asking straight after the gesture finds nothing.
-    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-    const started=performance.now();
+    await caught;
     // The panel's own height, by name. Picking the longest running animation on the page
     // meant that whenever something else was animating for longer, the test paused and
     // seeked that instead: the sheet's transition ran on undisturbed, finished inside the
@@ -386,8 +394,15 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   const tint=await tp.evaluate(()=>{const el=document.getElementById("panel"), cs=getComputedStyle(el);
     return {tinted:el.classList.contains("tinted"), bg:cs.backgroundColor,
       bf:cs.backdropFilter||cs.webkitBackdropFilter||"none",
-      ground:el.style.getPropertyValue("--tint").trim()};});   // set inline, per selection
+      // A skin is two trios now, a deep ground for dark and a pale wash for light. Both
+      // go on inline and the stylesheet picks, so the one in use is the resolved value
+      // rather than either of the inline ones, which is what the panel is painted with.
+      ground:cs.getPropertyValue("--tint").trim(),
+      pair:["--tint-d","--tint-l"].map(n=>el.style.getPropertyValue(n).trim())};});
   say("the style panel is tinted ("+tint.ground+")", tint.tinted && !!tint.ground);
+  say("  carrying a ground for either palette ("+tint.pair.join(", ")+")",
+    tint.pair.every(v=>/^#[0-9a-f]{6}$/i.test(v)) && tint.pair[0]!==tint.pair[1]);
+  say("  and using one of them", tint.pair.indexOf(tint.ground)>=0);
   say("and frosted over it", /blur/.test(tint.bf) && /rgba|\/ 0\./.test(tint.bg));
   await tp.close();
   // 1. a style chosen with the sheet open must land in the band still showing
