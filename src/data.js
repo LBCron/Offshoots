@@ -1977,7 +1977,7 @@ const XPLAY = [
   {id:"halloween",
    title:"Halloween for the Weirdos",
    note:"Ninety years of monster records, from séance swing to the Cramps",
-   c:"#e06a1f",
+   c:"#e06a1f", art:true,
    ap:"/playlist/pl.u-YGAq0tPEVxr",
    sp:"3fVgbcIBodORqUbj2JWWf6",
    styles:["swing","doowop","rocknroll","rockabilly","rnb","instro","surf",
