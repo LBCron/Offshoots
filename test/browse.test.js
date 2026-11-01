@@ -64,30 +64,37 @@ const state=p=>p.evaluate(()=>{
 
   // ---------- mobile ----------
   let p=await fresh(b,M);
-  const rows=await p.$$eval(".sect-browse .listgrp .listrow .lrlbl",e=>e.map(x=>x.textContent));
-  say("three ways in: "+rows.join(" / "),
-    rows.join("/")==="Roots/Most influential/Surprise me");
-  const col=await p.$$eval(".sect-learn [data-page] .lrlbl",e=>e.map(x=>x.textContent));
-  say("and a colophon of two: "+col.join(" / "), col.join("/")==="About this map/How to install it");
+  const rows=await p.$$eval(".sect-onmap .listgrp .listrow .lrlbl",e=>e.map(x=>x.textContent));
+  say("two ways in: "+rows.join(" / "),
+    rows.join("/")==="Most influential/Surprise me");
+  // About moved into a fold under the title and Install into the footer, so the two that
+  // were a colophon at the foot are now in two different places and neither is a row
+  const col=await p.evaluate(()=>({
+    about:!!document.querySelector('.ovfold [data-page="about"]'),
+    install:!!document.querySelector('.sect-appset [data-page="install"]'),
+    old:document.querySelectorAll(".sect-learn").length}));
+  say("About is in the fold and Install in the footer",
+    col.about && col.install && col.old===0);
   say("nothing is pushed at rest", (await state(p)).pages===1);
   say("and no menu is left over from the old build", (await p.$$(".navmenu .brmenu, [data-menu='roots']")).length===0);
 
-  await p.click('[data-page="roots"]'); await onPage(p,"roots");
+  await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
   let st=await state(p);
-  say("Roots pushes a page ("+st.title+")", st.key==="roots" && st.title==="Roots");
+  say("Most influential pushes a page ("+st.title+")",
+    st.key==="top" && st.title==="Most influential");
   say("  two pages exist but only one is shown", st.pages===2 && st.shown===1);
   say("  back appears, naming where it goes ("+st.backLbl+")", st.back && st.backLbl==="Explore");
   say("  and the name is actually painted",
     await p.evaluate(()=>{const l=document.querySelector("#panelBack .bklbl");
       return getComputedStyle(l).display!=="none" && l.getBoundingClientRect().width>20;}));
   say("  it starts at the top", st.scroll===0);
-  const n=await p.$$eval('.ppage[data-p="roots"] .listrow',e=>e.length);
-  say("  listing "+n+" styles", n===17);
+  const n=await p.$$eval('.ppage[data-p="top"] .listrow',e=>e.length);
+  say("  listing "+n+" styles", n===24);
   say("  each row points the way it goes",
-    await p.$$eval('.ppage[data-p="roots"] .listrow .lrcv',e=>e.length>0 && e.every(x=>x.classList.contains("lrgov"))));
+    await p.$$eval('.ppage[data-p="top"] .listrow .lrcv',e=>e.length>0 && e.every(x=>x.classList.contains("lrgov"))));
 
   // pushing the same page twice would stack it on itself
-  await p.evaluate(()=>{const r=document.querySelector('[data-page="roots"]'); if(r) r.click();});
+  await p.evaluate(()=>{const r=document.querySelector('.sect-onmap [data-page="top"]'); if(r) r.click();});
   // nothing should come of that tap, so the wait is for the page to stop changing rather
   // than for an arrival that must not happen
   await settle(p);
@@ -99,9 +106,7 @@ const state=p=>p.evaluate(()=>{
   say("  and takes the back button with it", st.back===false);
 
   // Escape unwinds before it closes the panel
-  await p.click('[data-page="top"]'); await onPage(p,"top");
-  const top=await p.$$eval('.ppage[data-p="top"] .listrow',e=>e.length);
-  say("Most influential pushes "+top+" styles", top===24);
+  await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
   say("  with a count on every row",
     await p.$$eval('.ppage[data-p="top"] .lrct',e=>e.length===24 && e.every(x=>/^\d+$/.test(x.textContent))));
   await p.keyboard.press("Escape"); await onPage(p,"root");
@@ -110,25 +115,26 @@ const state=p=>p.evaluate(()=>{
     st.pages===1 && (await p.$eval("body",e=>e.classList.contains("open")))===true);
 
   // picking a style leaves the stack behind
-  await p.click('[data-page="roots"]'); await onPage(p,"roots");
-  await p.click('.ppage[data-p="roots"] [data-go]'); await moved(p,"");
+  await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
+  await p.click('.ppage[data-p="top"] [data-go]'); await moved(p,"");
   const hash=await p.evaluate(()=>location.hash);
   say("picking from a page selects it ("+hash+")", hash.length>1);
   say("  and the style panel starts from a clean stack",
-    (await p.$$(".ppage")).length<=1 && (await p.$$('.ppage[data-p="roots"]')).length===0);
+    (await p.$$(".ppage")).length<=1 && (await p.$$('.ppage[data-p="top"]')).length===0);
   say("no page errors", p._errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);
   await p.close();
 
   // ---------- the colophon ----------
   p=await fresh(b,M);
-  await p.click('[data-page="install"]'); await onPage(p,"install");
+  await p.click('.sect-appset [data-page="install"]'); await onPage(p,"install");
   st=await state(p);
   say("How to install pushes its own page ("+st.title+")", st.key==="install");
   say("  with the platform sections on it",
     (await p.$$eval('.ppage[data-p="install"] .subh',e=>e.length))>=4);
   say("  and About is not pushed with it", (await p.$$('.ppage[data-p="about"]')).length===0);
   await p.click("#panelBack"); await onPage(p,"root");
-  await p.click('[data-page="about"]'); await onPage(p,"about");
+  await p.$eval(".ovfold summary",e=>e.click()); await settle(p);
+  await p.click('.ovfold [data-page="about"]'); await onPage(p,"about");
   say("About pushes its own", (await state(p)).key==="about");
   say("  carrying the app icon and the stats line",
     (await p.$$('.ppage[data-p="about"] .abouthd .appicon')).length===1
@@ -138,12 +144,12 @@ const state=p=>p.evaluate(()=>{
 
   // ---------- desktop ----------
   p=await fresh(b,Dk);
-  await p.click('[data-page="roots"]'); await onPage(p,"roots");
+  await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
   st=await state(p);
-  say("the sidebar pushes pages the same way", st.key==="roots" && st.shown===1);
+  say("the sidebar pushes pages the same way", st.key==="top" && st.shown===1);
   say("  and the back button is there too", st.back && st.backLbl==="Explore");
   const fits=await p.evaluate(()=>{
-    const pg=document.querySelector('.ppage[data-p="roots"]'), b=document.getElementById("panelBody");
+    const pg=document.querySelector('.ppage[data-p="top"]'), b=document.getElementById("panelBody");
     return Math.round(pg.getBoundingClientRect().width)<=Math.round(b.getBoundingClientRect().width);});
   say("  the page stays inside the panel", fits);
   await p.click("#panelBack"); await onPage(p,"root");
@@ -153,7 +159,10 @@ const state=p=>p.evaluate(()=>{
   // ---------- a deep link lands on the page itself ----------
   // the mode count comes off the data, so adding a way in is not a test failure
   const MODECOUNT=await p.evaluate(()=>MODES.length);
-  for(const [hash,key,rows] of [["#install","install",0],["#about","about",0],["#modes","modes",MODECOUNT]]){
+  // #roots and #top are in this list because the panel no longer carries a row to either:
+  // the map took that job back, and the address is the only way left in.
+  for(const [hash,key,rows] of [["#install","install",0],["#about","about",0],
+      ["#modes","modes",MODECOUNT],["#roots","roots",17],["#top","top",24]]){
     const dl=await fresh(b,M,hash);
     const d=await state(dl);
     say(hash+" lands on its own page", d.key===key);

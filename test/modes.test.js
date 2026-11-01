@@ -71,7 +71,11 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const c=r[0].querySelector(".mco").getBoundingClientRect();
     return {scrolls:row.scrollWidth>row.clientWidth+1, vis:vis.length,
       round:Math.abs(c.width-c.height)<=1 && c.width>=52,
-      caseish:c.width>=c.height && c.width-c.height<=10 && c.height>=52,
+      // a sleeve now rather than a jewel case: square, and with no spine down its left
+      // edge, which is what made it read as another book beside the actual books below
+      sleeve:Math.abs(c.width-c.height)<=2 && c.height>=52,
+      spine:getComputedStyle(r[0].querySelector(".mco"),"::before").content!=="none",
+      dims:Math.round(c.width)+"x"+Math.round(c.height),
       clipped:r.filter(x=>{const l=x.querySelector(".mclbl"); return l.scrollHeight>l.clientHeight+1;})
                .map(x=>x.querySelector(".mclbl").textContent),
       tap:Math.min(...r.map(x=>Math.round(x.getBoundingClientRect().height)))};});
@@ -90,7 +94,9 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // Phosphor is MIT, which wants its notice carried with the work. The map is one file
   // that anyone can save, so the notice lives on the About page inside it.
   say("  and the set it came from is credited", await (async()=>{
-    await p.click('[data-page="about"]'); await onPage(p,"about");
+    await p.$eval(".ovfold summary",e=>{ if(!e.parentElement.open) e.click(); });
+    await settle(p);
+    await p.click('.ovfold [data-page="about"]'); await onPage(p,"about");
     const t=await p.evaluate(()=>(document.querySelector(".ppage:not([hidden])")||{}).textContent||"");
     const ok=/Phosphor/.test(t) && /MIT/.test(t);
     await p.click("#panelBack"); await onPage(p,"root");
@@ -124,8 +130,12 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   await p.evaluate(()=>{document.querySelector(".mrow").scrollLeft=0;});
   await settle(p);
   say("  with "+lay.vis+" in reach before it does", lay.vis>=3);
-  // a jewel case now, so square-ish rather than round, and still big enough to hit
-  say("  each a case of "+Math.round(lay.tap)+"px", lay.caseish && lay.tap>=44);
+  // a record sleeve now, so square rather than round, and still big enough to hit
+  say("  each a square sleeve of "+lay.dims+", in a "+Math.round(lay.tap)+"px target",
+    lay.sleeve && lay.tap>=44);
+  // the hinge went with the case. A spine is what the eye uses to call something a book,
+  // and the Go deeper list two sections down is full of actual books.
+  say("  with no spine down its edge", lay.spine===false);
   // Each case leans a little, and the lean is derived from the mode's own id rather than
   // rolled. Two things would break if it were Math.random() or keyed to position: the
   // row rebuilds on a resize and on every return to Explore, so the shelf would twitch
@@ -139,10 +149,14 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // all one angle is not a lean, it is a slope
   say("  at "+new Set(vals).size+" different angles", new Set(vals).size>=6);
   {
-    const q=await fresh(b,M);
-    await q.evaluate(()=>{try{localStorage.setItem("offshoots.modeuse",
-      JSON.stringify({workout:9,party:5}));}catch(e){}});
-    await q.reload(); await ready(q);
+    // Seeded through an init script, not written and reloaded: Chromium's localStorage
+    // under file:// does not reliably survive a reload, which the block further down
+    // already knew. Written this way it was a coin toss, and it came up tails silently
+    // for as long as a non-boolean verdict printed as no verdict at all.
+    const q=await b.newPage({viewport:M});
+    await q.addInitScript(()=>{ try{ localStorage.setItem("offshoots.modeuse",
+      JSON.stringify({workout:9,party:5})); }catch(e){} });
+    await q.goto(URL); await ready(q);
     await q.click("#grab").catch(()=>{}); await opened(q);
     const after=await q.evaluate(()=>Object.fromEntries([...document.querySelectorAll(".mcirc")]
       .map(x=>[x.dataset.mode, x.style.getPropertyValue("--tilt")])));

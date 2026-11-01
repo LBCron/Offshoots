@@ -124,29 +124,44 @@ const onPage=async(q,k)=>{ await until(q,k=>{
   await p.goto(URL); await ready(p);
   await p.click("#grab").catch(()=>{}); await settle(p);
   const sect=await p.evaluate(()=>{
-    const d=document.querySelector(".sect-deeper"), br=document.querySelector(".sect-browse");
+    const d=document.querySelector(".sect-deeper"), br=document.querySelector(".sect-modes");
     if(!d||!br) return null;
     return {head:(d.querySelector(".secttl")||{}).textContent||"",
       below:d.getBoundingClientRect().top > br.getBoundingClientRect().bottom,
       rows:[...d.querySelectorAll(".listrow")].map(x=>({
         key:x.dataset.page, lbl:(x.querySelector(".lrlbl")||{}).textContent,
         ct:(x.querySelector(".lrct")||{}).textContent, ico:!!x.querySelector(".lrico svg")})),
-      inBrowse:!!br.querySelector('[data-page="picks"]')};});
+      inBrowse:!!br.querySelector('[data-page="picks"]'),
+      lede:(d.querySelector(".sectlede")||{}).textContent||""};});
   say("its own section, headed "+JSON.stringify(sect&&sect.head), !!sect && sect.head==="Go deeper");
-  say("  below the browse lists rather than inside them",
+  say("  below the collections rather than inside them",
     !!sect && sect.below && sect.inBrowse===false);
+  say("  with a line saying what is in it ("+(sect&&sect.lede)+")",
+    !!sect && sect.lede==="Stories and context behind the music.");
   say("  the guest first, then the whole library by medium ("
     + sect.rows.map(r=>r.lbl).join(" / ") + ")",
     sect.rows[0].key==="picks" &&
     sect.rows.slice(1).map(r=>r.key).join("/")==="med:read/med:book/med:listen/med:watch/med:look");
-  say("  every row counted and iconed",
-    sect.rows.every(r=>r.ico && /^\d+$/.test(r.ct)));
-  say("  the guest row counting his picks ("+sect.rows[0].ct+")",
-    sect.rows[0].ct===String(mine.length));
-  // the counts are works, not rows: a book on seven styles is one book here
+  // The counts came off the panel. Five numbers stacked down its edge read as a
+  // scoreboard, and the number only matters once you are inside the thing counting.
+  say("  every row iconed", sect.rows.every(r=>r.ico));
+  say("  and none of them counted here", sect.rows.every(r=>!r.ct));
+  // the counts are works, not rows: a book on seven styles is one book here. The panel
+  // no longer states them, so the claim moves to the pages, which still do.
   const uniq=t=>new Set(Object.values(D.READ).flat().filter(r=>r[7]===t).map(r=>r[0])).size;
-  say("  counting works and not rows",
-    sect.rows.slice(1).every(r=>r.ct===String(uniq(r.key.slice(4)))));
+  const said=[];
+  for(const [key,t] of [["med:read","read"],["med:book","book"],["med:listen","listen"]]){
+    await p.click('[data-page="'+key+'"]'); await onPage(p,key);
+    const lede=await p.evaluate(()=>{const u=[...document.querySelectorAll(".ppage")]
+      .filter(x=>!x.hidden)[0]; return (u.querySelector(".pglede")||{}).textContent||"";});
+    // "N of them", not the first number in the line: the Books blurb ends "and 33 1/3s"
+    const n=(lede.match(/(\d+) of them/)||[])[1];
+    said.push(t+": "+(n||"none")+" of "+uniq(t));
+    if(n!==String(uniq(t))) said.push("MISMATCH "+t);
+    await p.click("#panelBack"); await settle(p);
+  }
+  say("  each page counting works and not rows ("+said.join(", ")+")",
+    !said.some(x=>/MISMATCH/.test(x)));
   await p.click('[data-page="picks"]'); await onPage(p,"picks");
   say("  and the guest row opens his page", true);
 

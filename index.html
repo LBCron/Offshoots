@@ -490,6 +490,16 @@ body.open .pcnt{display:none}
 /* the one row that is a destination rather than a list keeps the count as a word and
    drops the chevron, since nothing opens */
 .listrow.lrgo .lrct{font-family:var(--f-body);font-size:var(--t-sub)}
+/* A row that gives its label a second line. The count used to carry that job on its own,
+   which told you how many of a thing there were but never what the thing was. These two
+   go to places the map cannot show you, so they say so in words and keep the number as
+   the smaller fact. No icon: the pair sits directly under the heading that names them. */
+.listrow.lrtwo{min-height:64px;align-items:center;gap:10px}
+.listrow .lrtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left}
+.listrow .lrtx .lrlbl{flex:none}
+.listrow .lrsub{display:block;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);
+  color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.listrow.lrtwo .lrct{align-self:center}
 @media (min-width:900px) and (hover:hover) and (pointer:fine){
   .listgrp{--lrlead:51px}
   .listrow{min-height:46px;padding:0 12px;gap:11px}
@@ -841,49 +851,30 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 .acirc .aco.hasimg{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
   0 1px 3px rgb(0 0 0 / .26)}
 
-/* ---------- the ways in, as jewel cases ----------
-   A circle said "category". A case says "there is a record in here", which is nearer
-   what the row does: every one of these opens a dozen styles with playlists behind them.
-   Built from the same two things the circle had, the level colour and the white glyph,
-   so a mode's identity does not change, only its frame.
-   Three layers make it read as plastic rather than a rounded square. The sleeve is the
-   colour. ::before is the hinge strip down the left, which is the detail your eye
-   actually uses to tell a CD case from a book. ::after is one specular band across the
-   front, kept to a few percent of white, because the thing that makes fake plastic look
-   fake is a highlight you can see on purpose. */
-.mcirc .mco{position:relative;width:84px;height:80px;border-radius:3px;overflow:hidden;
+/* ---------- the collections, as record sleeves ----------
+   These were jewel cases: a hinge strip down the left edge and a portrait format. At
+   this size that reads as a book, and the panel already has a shelf of actual books two
+   sections below under Go deeper. Two things that are not the same should not look the
+   same, and the one with a real spine should be the one with a spine drawn on it.
+   So: square, flat, no hinge. A sleeve rather than a case. It keeps the level colour,
+   the white glyph and the small lean, so a collection is still the same collection, and
+   it loses the one detail that made it a book. */
+.mcirc .mco{position:relative;width:84px;height:84px;border-radius:4px;overflow:hidden;
   transform:rotate(var(--tilt,0deg));
-  padding-left:7px;                       /* the art sits right of the hinge */
-  background:linear-gradient(160deg,color-mix(in srgb,var(--lvc) 80%,#fff) 0%,
-    var(--lvc) 55%,color-mix(in srgb,var(--lvc) 74%,#000) 100%);
-  box-shadow:0 1px 1px rgb(0 0 0 / .34), 0 3px 5px rgb(0 0 0 / .26),
-    0 8px 18px rgb(0 0 0 / .30),
-    inset 0 .5px 0 rgb(255 255 255 / .38),
-    inset 0 -.5px 0 rgb(0 0 0 / .22),
-    inset 0 0 0 .5px rgb(255 255 255 / .14)}
-/* The hinge, which is the detail that actually says CD case: a strip of clear plastic
-   over the left edge with the two bright lines its moulding catches. It has to be
-   LIGHTER than the sleeve, not darker. Dark reads as a shadow and turns the whole thing
-   into a book. */
-.mcirc .mco::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;
-  background:
-    linear-gradient(90deg,
-      rgb(255 255 255 / .40) 0 1px,
-      rgb(255 255 255 / .13) 1px 3px,
-      rgb(255 255 255 / .30) 3px 4px,
-      rgb(255 255 255 / .07) 4px 7px,
-      rgb(0 0 0 / .14) 7px 8px);
-  pointer-events:none}
-/* The glint. One short highlight in the top-left, where a case picks up the light above
-   it, rather than a band ruled corner to corner. A reflection you can follow from end to
-   end is the thing that makes plastic look painted on. */
+  background:linear-gradient(160deg,color-mix(in srgb,var(--lvc) 82%,#fff) 0%,
+    var(--lvc) 58%,color-mix(in srgb,var(--lvc) 76%,#000) 100%);
+  box-shadow:0 1px 1px rgb(0 0 0 / .26), 0 3px 6px rgb(0 0 0 / .20),
+    0 8px 18px rgb(0 0 0 / .22),
+    inset 0 0 0 .5px rgb(255 255 255 / .16)}
+/* One soft corner highlight, the way card stock catches the light above it, kept well
+   under what the plastic had: paper does not glint. */
 .mcirc .mco::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:
     linear-gradient(128deg,
-      rgb(255 255 255 / .20) 0%, rgb(255 255 255 / .07) 13%,
-      rgb(255 255 255 / 0) 30%),
+      rgb(255 255 255 / .13) 0%, rgb(255 255 255 / .05) 16%,
+      rgb(255 255 255 / 0) 34%),
     linear-gradient(0deg,
-      rgb(0 0 0 / .13) 0%, rgb(0 0 0 / 0) 22%)}
+      rgb(0 0 0 / .10) 0%, rgb(0 0 0 / 0) 24%)}
 .mcirc .mco svg,.acirc .aco svg{width:41px;height:41px;display:block}
 .acirc:hover .aco,.acirc:focus-visible .aco{transform:scale(1.045)}
 .acirc:active .aco{transform:scale(.95)}
@@ -1541,6 +1532,17 @@ a.wk span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:899px){ #qclear{width:30px;height:30px} #qclear svg{width:12px;height:12px} }
 
 /* ---- key artists: caption beside the heading, chips in a box, switch on its edge ---- */
+/* One line under a heading, saying what the section is for. It belongs to the heading,
+   so the gap closes up between them and opens again before the content. */
+.sectlede{margin:0 0 12px;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+.sect.haslede .secthead{margin-bottom:3px}
+/* "See all" says what the chevron meant. Only where there is a fuller version to see. */
+.secthead.sectgo .seeall{font:400 var(--t-sub)/1 var(--f-body);color:var(--muted)}
+/* one line, whatever the heading beside it is called: "Listening collections" is long
+   enough to squeeze this into two, with the chevron stranded under the words */
+.secthead.sectgo .sectcv{gap:5px;flex:none;white-space:nowrap}
+.secthead.sectgo .seeall{white-space:nowrap}
+.secthead:not(.sectgo) .sectcv{display:none}
 .secthead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px}
 .secthead .secttl{margin:0}
 .sectnote{flex:0 1 auto;min-width:0;font:400 var(--t-foot)/var(--t-foot-lh) var(--f-body);color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1618,7 +1620,42 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
    --acc, the accent a family skin sets, and falls back to blue on the unskinned panels
    where there is no family to borrow from. The shape still says button; the colour now
    says it belongs to this style rather than to the app. */
-.sect-learn .listgrp{margin-top:2px}
+/* The app's own two settings, at the foot where you set them once: where playlists open,
+   and how to keep the map to hand. Quiet, because neither is why anyone opened this. */
+.sect-appset{margin-top:26px}
+.sect-appset .svcline{justify-content:space-between;margin:0}
+.sect-appset .svclbl{font-size:var(--t-body)}
+.instlink{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;
+  gap:6px;min-height:var(--tap);color:var(--muted);
+  font:400 var(--t-sub)/1 var(--f-body);text-decoration:underline;
+  text-underline-offset:3px;text-decoration-thickness:.5px}
+.instlink svg{width:14px;height:14px}
+.instlink:hover{color:var(--fg)}
+.instlink:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent);
+  border-radius:6px}
+/* The full library, two across: five single-word labels in one column is a lot of empty
+   line beside a lot of white space. It rules its own grid rather than taking .sep, which
+   draws one hairline across every child after the first. Down a column that is a row
+   divider; across a grid it is a line over the top of the right-hand cell. */
+.medgrp{margin-top:10px}
+.medgrp > *{position:relative}
+.medgrp > :nth-child(n+3)::before{content:"";position:absolute;left:12px;right:12px;top:0;
+  height:.5px;background:var(--sep)}
+.medgrp > :nth-child(2n)::after{content:"";position:absolute;left:0;top:9px;bottom:9px;
+  width:.5px;background:var(--sep)}
+/* no icon on these two, so the hairline runs under the text rather than clear of a glyph */
+.lrtwo + .lrtwo::before{left:14px}
+/* Explore has four sections where a style panel has six, and they are all lists rather
+   than prose, so they sit a little closer than the panel's default rhythm. Close enough
+   that the collections are in view, or nearly, before anyone scrolls. */
+.ovcard .sect{margin-top:26px}
+/* the fold under Explore sits tight to the title, like a style's own description */
+.ovfold{margin-top:2px;margin-bottom:4px}
+.ovfold .abmore{min-height:var(--tap);padding:0;gap:6px;color:var(--muted);
+  font-size:var(--t-sub)}
+.ovfold .abmore .lrlbl{flex:0 1 auto;font-size:var(--t-sub)}
+.ovfold .abmore:hover{background:transparent;color:var(--fg)}
+.ovfold .abmore svg{width:14px;height:14px}
 /* Two colours, not one. The ground used to be a tint of the label's own colour, which
    makes the contrast between them chase itself: lighten the text to pass AA and the
    ground lightens with it, so the ratio barely moves. --shg is the fill and --shc is the
@@ -4914,17 +4951,21 @@ function readSect(n){
     `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 
-function sect(key,label,html,aside,page){
+function sect(key,label,html,aside,page,lede,seeall){
   // a heading that opens a fuller version of what is under it becomes the control that
   // opens it, chevron and all, rather than sitting beside a separate row that does
   const inner = `<h3 class="secttl">${esc(label)}</h3>${aside||""}`
-    + (page?`<span class="sectcv">${GOCHEV}</span>`:"");
+    + (page?`<span class="sectcv">${seeall?`<b class="seeall">See all</b>`:""}${GOCHEV}</span>`:"");
   const head = label
     ? (page ? `<button type="button" class="secthead sectgo" data-page="${esc(page)}"
          aria-label="${esc(label)}, see all">${inner}</button>`
              : `<div class="secthead">${inner}</div>`)
     : "";
-  return `<div class="sect sect-${key}${label?"":" nohead"}">${head}<div class="secbody">${html}</div></div>`;
+  // One line under the heading saying what the section is for. It reads as part of the
+  // heading rather than as content, so the heading tightens up to meet it.
+  const sub = lede ? `<p class="sectlede">${esc(lede)}</p>` : "";
+  return `<div class="sect sect-${key}${label?"":" nohead"}${lede?" haslede":""}">`
+    + head + sub + `<div class="secbody">${html}</div></div>`;
 }
 const HOPS=2; // generations of lineage drawn on the map
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -5884,8 +5925,12 @@ function openShareSheet(btn){
 function styleURL(id){ return location.origin + location.pathname + location.search + "#" + encodeURIComponent(id); }
 // "about" is the one hash that is not a style id
 const ABOUT_HASH="about", INSTALL_HASH="install", MODES_HASH="modes", PICKS_HASH="picks";
+// The hashes that open a page rather than select a style. Roots and Most influential are
+// in it because the Explore panel no longer carries a row to either: the map took that
+// job back, and a page nothing links to is a page nobody can reach. The values are the
+// selectors these were back when they were folds, and nothing reads them any more.
 const FOLDS={[ABOUT_HASH]:".aboutwrap", [INSTALL_HASH]:".installwrap", [MODES_HASH]:".modelist",
-  [PICKS_HASH]:".picklist"};
+  [PICKS_HASH]:".picklist", roots:".plist", top:".plist"};
 function foldURL(hash){ return location.origin + location.pathname + location.search + "#" + hash; }
 function openAbout(scroll,hash){
   // these two used to be folds on the root panel; they are pages now, so the hash that
@@ -6060,6 +6105,13 @@ document.addEventListener("toggle",e=>{
 // Families and influence as menus rather than two walls of chips. Same navwrap/navmenu
 // machinery as the From and Led to buttons, so they portal, flip and close identically.
 const TOPN=24;
+// One list, so the number on the row is the number of rows on the page it opens. It was
+// the constant before, which is the same number right up until the selection changes
+// under it and the row keeps saying 24.
+function topIds(){
+  return [...nodes].sort((a,b)=>b.children.length-a.children.length||a.year-b.year)
+    .slice(0,TOPN).map(x=>x.id);
+}
 function famCount(k){ return nodes.filter(n=>n.fam===k).length; }
 function famMenuHtml(){
   const rows=[...FAMS].sort((x,y)=>famCount(y[0])-famCount(x[0])).map(([k,name])=>
@@ -6111,27 +6163,9 @@ const rowIcon = k => {
   return `<i class="lrico mi lr-${esc(med?"med-"+med:k)}">`
     + (med ? (MEDPAGEICON[med]||"") : (ROWICON[k]||"")) + `</i>`;
 };
-function browseBtn(key,label,count,title,inner){
-  return `<div class="navwrap nav-br">`
-    + `<button type="button" class="listrow" data-menu="${key}" aria-haspopup="menu" aria-expanded="false" title="${esc(title)}" aria-label="${esc(title)}">`
-    + rowIcon(key)
-    + `<span class="lrlbl">${esc(label)}</span><em class="lrct">${count}</em>${LRCHEV}</button>`
-    + `<div class="navmenu brmenu" role="menu" data-br="${key}" hidden>${inner}</div></div>`;
-}
-function rootsRow(){
-  const ids=firstLevel(), n=ids.length;
-  const items=ids.map(id=>{ const x=byId[id];
-    return `<button type="button" role="menuitem" data-go="${x.id}"><i class="dot" style="background:${FAM[x.fam].c}"></i><span class="nm">${esc(x.name)}</span><small>${x.year<1950?esc(x.disp):x.year}</small></button>`; }).join("");
-  // no heading on the menu: the row it opens from is directly above it and says Roots
-  return browseBtn("roots","Roots",n,`Roots: ${n} styles with nothing before them here`,items);
-}
-// not a collection to open but a place to go, so it carries no count and no chevron
-function randomRow(){
-  return `<div class="navwrap nav-br">`
-    + `<button type="button" class="listrow lrgo" data-random title="Open any style, chosen at random" aria-label="Open any style, chosen at random">`
-    + rowIcon("random")
-    + `<span class="lrlbl">Surprise me</span><em class="lrct">any of ${nodes.length}</em></button></div>`;
-}
+// The roots menu, the roots row and the random row all lived here. Roots came off the
+// Explore panel when the map took that job back, and Surprise me is now one of the two
+// rows in On the map, written there rather than built by a helper of its own.
 // Share is the one thing on either panel that acts rather than opens, so it is the one
 // thing shaped like a button and the only thing in blue, under the list on the overview
 // and under the text on a style.
@@ -6140,13 +6174,30 @@ function appShareBtn(){
   return `<button type="button" class="shbtn wide" data-share aria-label="Share this app" title="Share this app">`
     + SHAREGLYPH + TICKGLYPH + `<span class="shlbl">Share this app</span></button>`;
 }
-function browseRow(){
-  const nr=firstLevel().length;
-  return sect("browse","",`<div class="listgrp sep">`
-    + pageRow("roots","Roots",nr,`Roots: ${nr} styles with nothing before them here`)
-    + pageRow("top","Most influential",TOPN,`The ${TOPN} styles that led to the most`)
-
-    + randomRow()+`</div>`);
+// Two shortcuts into the map, not a second way to browse it: the map itself is the
+// browser, and a list of 461 names repeated under it would be a worse one. Each row says
+// where it goes and, underneath, what you get for going there, which the bare count never
+// did. Roots is not among them any more. It was a third list of styles competing with the
+// map directly above it; the roots are all still on the map, still marked, and the page
+// itself is still at #roots for anyone who had it.
+function onMapSect(){
+  const top=topIds();
+  return sect("onmap","On the map",
+    `<div class="listgrp sep">`
+    + goRow("top","Most influential","Explore musical crossroads",top.length,
+        ` data-page="top"`,`The ${top.length} styles that led to the most`)
+    + goRow("random","Surprise me","Jump somewhere unexpected",null,
+        ` data-random`,"Open any style, chosen at random")
+    + `</div>`,
+    "", "", "Choose a style to hear its essential playlist.");
+}
+function goRow(key,label,sub,count,attr,title){
+  return `<button type="button" class="listrow lrtwo"${attr||""}`
+    + ` title="${esc(title||label)}" aria-label="${esc(title||label)}">`
+    + `<span class="lrtx"><b class="lrlbl">${esc(label)}</b>`
+    + `<small class="lrsub">${esc(sub)}</small></span>`
+    + (count!=null?`<em class="lrct">${count}</em>`:"")
+    + GOCHEV + `</button>`;
 }
 // Phosphor Icons, the Duotone weight, MIT. Inlined as paths so the map stays one
 // offline file. Chosen per mode for what the mode means rather than the nearest word:
@@ -6251,9 +6302,9 @@ function modeSect(){
     + ` style="--tilt:${tiltOf(m[0])}deg">`
     + `<i class="mco mi">${MODEICON[m[0]]||""}</i>`
     + `<span class="mclbl">${esc(m[1])}</span></button>`).join("");
-  return sect("modes","Browse by mood, place or task",
+  return sect("modes","Listening collections",
     `<div class="mrow" role="list">${circles}</div>`,
-    "", "modes");
+    "", "modes", "By mood, place or task.", true);
 }
 // the same twenty-six as a page you can read down, which is what the row's heading opens
 function modeListHtml(){
@@ -6385,8 +6436,7 @@ const PAGES_DEF={
     html:styleRows(firstLevel(),x=>x.year<1950?x.disp:x.year)}),
   top:()=>({title:"Most influential",
     lede:"The styles that led to the most, counted by what came directly out of them.",
-    html:styleRows([...nodes].sort((a,b)=>b.children.length-a.children.length||a.year-b.year)
-      .slice(0,TOPN).map(x=>x.id), x=>x.children.length)}),
+    html:styleRows(topIds(), x=>x.children.length)}),
   about:()=>{ const np=playable().length,
       withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
     return {title:"About this map", html:`
@@ -6524,19 +6574,55 @@ function mediaPage(t){
 // the section under the browse list: a person's shelf first, then the whole library by
 // medium. Separate from Explore above it, which is about styles rather than sources.
 function deeperSect(){
-  const rows=(pickCount("pete")
-      ? pageRow("picks","Pete\u2019s Picks",pickCount("pete"),
-          "Pete\u2019s Picks: sources chosen by a guest")
-      : "")
-    + MEDIA.map(([t,label,blurb])=>medCount(t)
-        ? pageRow("med:"+t,label,medCount(t),label+": "+blurb)
-        : "").join("");
-  return sect("deeper","Go deeper",`<div class="listgrp sep">${rows}</div>`);
+  // Pete's Picks is a person's shelf and the rest is the library by medium, so they are
+  // two groups rather than one list of six. The counts came off: five numbers stacked
+  // down the edge of a panel read as a scoreboard, and the number only matters once you
+  // are inside the thing counting. Each page still says how many it holds.
+  const pete=pickCount("pete")
+    ? `<div class="listgrp sep">`
+      + pageRow("picks","Pete\u2019s Picks",null,"Pete\u2019s Picks: sources chosen by a guest")
+      + `</div>` : "";
+  const med=MEDIA.map(([t,label,blurb])=>medCount(t)
+      ? pageRow("med:"+t,label,null,label+": "+blurb)
+      : "").join("");
+  return sect("deeper","Go deeper",
+    pete + `<div class="listgrp two medgrp">${med}</div>`,
+    "", "", "Stories and context behind the music.");
 }
 function pageRow(key,label,count,title){
   return `<button type="button" class="listrow" data-page="${key}"${title?` title="${esc(title)}" aria-label="${esc(title)}"`:""}>`
     + rowIcon(key)
     + `<span class="lrlbl">${esc(label)}</span>${count!=null?`<em class="lrct">${count}</em>`:""}${GOCHEV}</button>`;
+}
+// What the map is, folded shut under its own title, the way a style's description sits
+// under its name. It was a row at the foot of the panel before, which is the last place
+// anyone looks for the thing that explains the first screen they saw. Short on purpose:
+// the full page is one tap further on, and it still holds the sources, the colophon and
+// the data link.
+function aboutMapFold(){
+  const np=playable().length;
+  return `<details class="xfold aboutfold ovfold"><summary><span>About this map</span>${GOCHEV}</summary>`
+    + `<div class="xfoldb"><p class="note">`
+    + esc(DATA.length+" styles of North American music, each placed at the year it cohered "
+      + "into a named, recorded scene and joined to the styles it grew out of, so following "
+      + "a line backwards shows you what a sound is made of. "
+      + np+" of them carry an essential playlist, and each one starts just outside its own "
+      + "style, with the records that pushed it into being, and arrives at it.")
+    + `</p>`
+    + `<button type="button" class="listrow lrgo abmore" data-page="about"`
+    + ` aria-label="More about this map">`
+    + `<span class="lrlbl">More about this map</span>${GOCHEV}</button>`
+    + `</div></details>`;
+}
+// The two settings that belong to the whole app rather than to any style: where playlists
+// open, and how to keep the map to hand. Compact and at the foot, because you set the
+// service once and install once.
+function ovFooter(){
+  return `<div class="sect sect-appset nohead"><div class="secbody">`
+    + `<div class="svcline"><span class="svclbl">Music service</span>${svcPicker("inline")}</div>`
+    + `<button type="button" class="instlink" data-page="install"`
+    + ` aria-label="How to install Offshoots">Install Offshoots${GOCHEV}</button>`
+    + `</div></div>`;
 }
 function emptyPanel(){
   setTint("");
@@ -6548,14 +6634,12 @@ function emptyPanel(){
   const np=playable().length;
   const withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
   resetPages();
-  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Explore</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Explore</span></h1><div class="more">
-    ${browseRow()}
+  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Explore</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Explore</span></h1>${aboutMapFold()}<div class="more">
+    ${onMapSect()}
     ${modeSect()}
     ${deeperSect()}
-    <div class="sect sect-learn nohead"><div class="secbody"><div class="listgrp sep">
-    ${pageRow("about","About this map")}
-    ${pageRow("install","How to install it")}
-    </div>${appShareBtn()}</div></div></div>`;
+    ${ovFooter()}
+    ${appShareBtn()}</div></div>`;
   wrapStack(panelCard());
 }
 

@@ -541,17 +541,21 @@ function readSect(n){
     `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 
-function sect(key,label,html,aside,page){
+function sect(key,label,html,aside,page,lede,seeall){
   // a heading that opens a fuller version of what is under it becomes the control that
   // opens it, chevron and all, rather than sitting beside a separate row that does
   const inner = `<h3 class="secttl">${esc(label)}</h3>${aside||""}`
-    + (page?`<span class="sectcv">${GOCHEV}</span>`:"");
+    + (page?`<span class="sectcv">${seeall?`<b class="seeall">See all</b>`:""}${GOCHEV}</span>`:"");
   const head = label
     ? (page ? `<button type="button" class="secthead sectgo" data-page="${esc(page)}"
          aria-label="${esc(label)}, see all">${inner}</button>`
              : `<div class="secthead">${inner}</div>`)
     : "";
-  return `<div class="sect sect-${key}${label?"":" nohead"}">${head}<div class="secbody">${html}</div></div>`;
+  // One line under the heading saying what the section is for. It reads as part of the
+  // heading rather than as content, so the heading tightens up to meet it.
+  const sub = lede ? `<p class="sectlede">${esc(lede)}</p>` : "";
+  return `<div class="sect sect-${key}${label?"":" nohead"}${lede?" haslede":""}">`
+    + head + sub + `<div class="secbody">${html}</div></div>`;
 }
 const HOPS=2; // generations of lineage drawn on the map
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -1511,8 +1515,12 @@ function openShareSheet(btn){
 function styleURL(id){ return location.origin + location.pathname + location.search + "#" + encodeURIComponent(id); }
 // "about" is the one hash that is not a style id
 const ABOUT_HASH="about", INSTALL_HASH="install", MODES_HASH="modes", PICKS_HASH="picks";
+// The hashes that open a page rather than select a style. Roots and Most influential are
+// in it because the Explore panel no longer carries a row to either: the map took that
+// job back, and a page nothing links to is a page nobody can reach. The values are the
+// selectors these were back when they were folds, and nothing reads them any more.
 const FOLDS={[ABOUT_HASH]:".aboutwrap", [INSTALL_HASH]:".installwrap", [MODES_HASH]:".modelist",
-  [PICKS_HASH]:".picklist"};
+  [PICKS_HASH]:".picklist", roots:".plist", top:".plist"};
 function foldURL(hash){ return location.origin + location.pathname + location.search + "#" + hash; }
 function openAbout(scroll,hash){
   // these two used to be folds on the root panel; they are pages now, so the hash that
@@ -1687,6 +1695,13 @@ document.addEventListener("toggle",e=>{
 // Families and influence as menus rather than two walls of chips. Same navwrap/navmenu
 // machinery as the From and Led to buttons, so they portal, flip and close identically.
 const TOPN=24;
+// One list, so the number on the row is the number of rows on the page it opens. It was
+// the constant before, which is the same number right up until the selection changes
+// under it and the row keeps saying 24.
+function topIds(){
+  return [...nodes].sort((a,b)=>b.children.length-a.children.length||a.year-b.year)
+    .slice(0,TOPN).map(x=>x.id);
+}
 function famCount(k){ return nodes.filter(n=>n.fam===k).length; }
 function famMenuHtml(){
   const rows=[...FAMS].sort((x,y)=>famCount(y[0])-famCount(x[0])).map(([k,name])=>
@@ -1738,27 +1753,9 @@ const rowIcon = k => {
   return `<i class="lrico mi lr-${esc(med?"med-"+med:k)}">`
     + (med ? (MEDPAGEICON[med]||"") : (ROWICON[k]||"")) + `</i>`;
 };
-function browseBtn(key,label,count,title,inner){
-  return `<div class="navwrap nav-br">`
-    + `<button type="button" class="listrow" data-menu="${key}" aria-haspopup="menu" aria-expanded="false" title="${esc(title)}" aria-label="${esc(title)}">`
-    + rowIcon(key)
-    + `<span class="lrlbl">${esc(label)}</span><em class="lrct">${count}</em>${LRCHEV}</button>`
-    + `<div class="navmenu brmenu" role="menu" data-br="${key}" hidden>${inner}</div></div>`;
-}
-function rootsRow(){
-  const ids=firstLevel(), n=ids.length;
-  const items=ids.map(id=>{ const x=byId[id];
-    return `<button type="button" role="menuitem" data-go="${x.id}"><i class="dot" style="background:${FAM[x.fam].c}"></i><span class="nm">${esc(x.name)}</span><small>${x.year<1950?esc(x.disp):x.year}</small></button>`; }).join("");
-  // no heading on the menu: the row it opens from is directly above it and says Roots
-  return browseBtn("roots","Roots",n,`Roots: ${n} styles with nothing before them here`,items);
-}
-// not a collection to open but a place to go, so it carries no count and no chevron
-function randomRow(){
-  return `<div class="navwrap nav-br">`
-    + `<button type="button" class="listrow lrgo" data-random title="Open any style, chosen at random" aria-label="Open any style, chosen at random">`
-    + rowIcon("random")
-    + `<span class="lrlbl">Surprise me</span><em class="lrct">any of ${nodes.length}</em></button></div>`;
-}
+// The roots menu, the roots row and the random row all lived here. Roots came off the
+// Explore panel when the map took that job back, and Surprise me is now one of the two
+// rows in On the map, written there rather than built by a helper of its own.
 // Share is the one thing on either panel that acts rather than opens, so it is the one
 // thing shaped like a button and the only thing in blue, under the list on the overview
 // and under the text on a style.
@@ -1767,13 +1764,30 @@ function appShareBtn(){
   return `<button type="button" class="shbtn wide" data-share aria-label="Share this app" title="Share this app">`
     + SHAREGLYPH + TICKGLYPH + `<span class="shlbl">Share this app</span></button>`;
 }
-function browseRow(){
-  const nr=firstLevel().length;
-  return sect("browse","",`<div class="listgrp sep">`
-    + pageRow("roots","Roots",nr,`Roots: ${nr} styles with nothing before them here`)
-    + pageRow("top","Most influential",TOPN,`The ${TOPN} styles that led to the most`)
-
-    + randomRow()+`</div>`);
+// Two shortcuts into the map, not a second way to browse it: the map itself is the
+// browser, and a list of 461 names repeated under it would be a worse one. Each row says
+// where it goes and, underneath, what you get for going there, which the bare count never
+// did. Roots is not among them any more. It was a third list of styles competing with the
+// map directly above it; the roots are all still on the map, still marked, and the page
+// itself is still at #roots for anyone who had it.
+function onMapSect(){
+  const top=topIds();
+  return sect("onmap","On the map",
+    `<div class="listgrp sep">`
+    + goRow("top","Most influential","Explore musical crossroads",top.length,
+        ` data-page="top"`,`The ${top.length} styles that led to the most`)
+    + goRow("random","Surprise me","Jump somewhere unexpected",null,
+        ` data-random`,"Open any style, chosen at random")
+    + `</div>`,
+    "", "", "Choose a style to hear its essential playlist.");
+}
+function goRow(key,label,sub,count,attr,title){
+  return `<button type="button" class="listrow lrtwo"${attr||""}`
+    + ` title="${esc(title||label)}" aria-label="${esc(title||label)}">`
+    + `<span class="lrtx"><b class="lrlbl">${esc(label)}</b>`
+    + `<small class="lrsub">${esc(sub)}</small></span>`
+    + (count!=null?`<em class="lrct">${count}</em>`:"")
+    + GOCHEV + `</button>`;
 }
 // Phosphor Icons, the Duotone weight, MIT. Inlined as paths so the map stays one
 // offline file. Chosen per mode for what the mode means rather than the nearest word:
@@ -1878,9 +1892,9 @@ function modeSect(){
     + ` style="--tilt:${tiltOf(m[0])}deg">`
     + `<i class="mco mi">${MODEICON[m[0]]||""}</i>`
     + `<span class="mclbl">${esc(m[1])}</span></button>`).join("");
-  return sect("modes","Browse by mood, place or task",
+  return sect("modes","Listening collections",
     `<div class="mrow" role="list">${circles}</div>`,
-    "", "modes");
+    "", "modes", "By mood, place or task.", true);
 }
 // the same twenty-six as a page you can read down, which is what the row's heading opens
 function modeListHtml(){
@@ -2012,8 +2026,7 @@ const PAGES_DEF={
     html:styleRows(firstLevel(),x=>x.year<1950?x.disp:x.year)}),
   top:()=>({title:"Most influential",
     lede:"The styles that led to the most, counted by what came directly out of them.",
-    html:styleRows([...nodes].sort((a,b)=>b.children.length-a.children.length||a.year-b.year)
-      .slice(0,TOPN).map(x=>x.id), x=>x.children.length)}),
+    html:styleRows(topIds(), x=>x.children.length)}),
   about:()=>{ const np=playable().length,
       withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
     return {title:"About this map", html:`
@@ -2151,19 +2164,55 @@ function mediaPage(t){
 // the section under the browse list: a person's shelf first, then the whole library by
 // medium. Separate from Explore above it, which is about styles rather than sources.
 function deeperSect(){
-  const rows=(pickCount("pete")
-      ? pageRow("picks","Pete\u2019s Picks",pickCount("pete"),
-          "Pete\u2019s Picks: sources chosen by a guest")
-      : "")
-    + MEDIA.map(([t,label,blurb])=>medCount(t)
-        ? pageRow("med:"+t,label,medCount(t),label+": "+blurb)
-        : "").join("");
-  return sect("deeper","Go deeper",`<div class="listgrp sep">${rows}</div>`);
+  // Pete's Picks is a person's shelf and the rest is the library by medium, so they are
+  // two groups rather than one list of six. The counts came off: five numbers stacked
+  // down the edge of a panel read as a scoreboard, and the number only matters once you
+  // are inside the thing counting. Each page still says how many it holds.
+  const pete=pickCount("pete")
+    ? `<div class="listgrp sep">`
+      + pageRow("picks","Pete\u2019s Picks",null,"Pete\u2019s Picks: sources chosen by a guest")
+      + `</div>` : "";
+  const med=MEDIA.map(([t,label,blurb])=>medCount(t)
+      ? pageRow("med:"+t,label,null,label+": "+blurb)
+      : "").join("");
+  return sect("deeper","Go deeper",
+    pete + `<div class="listgrp two medgrp">${med}</div>`,
+    "", "", "Stories and context behind the music.");
 }
 function pageRow(key,label,count,title){
   return `<button type="button" class="listrow" data-page="${key}"${title?` title="${esc(title)}" aria-label="${esc(title)}"`:""}>`
     + rowIcon(key)
     + `<span class="lrlbl">${esc(label)}</span>${count!=null?`<em class="lrct">${count}</em>`:""}${GOCHEV}</button>`;
+}
+// What the map is, folded shut under its own title, the way a style's description sits
+// under its name. It was a row at the foot of the panel before, which is the last place
+// anyone looks for the thing that explains the first screen they saw. Short on purpose:
+// the full page is one tap further on, and it still holds the sources, the colophon and
+// the data link.
+function aboutMapFold(){
+  const np=playable().length;
+  return `<details class="xfold aboutfold ovfold"><summary><span>About this map</span>${GOCHEV}</summary>`
+    + `<div class="xfoldb"><p class="note">`
+    + esc(DATA.length+" styles of North American music, each placed at the year it cohered "
+      + "into a named, recorded scene and joined to the styles it grew out of, so following "
+      + "a line backwards shows you what a sound is made of. "
+      + np+" of them carry an essential playlist, and each one starts just outside its own "
+      + "style, with the records that pushed it into being, and arrives at it.")
+    + `</p>`
+    + `<button type="button" class="listrow lrgo abmore" data-page="about"`
+    + ` aria-label="More about this map">`
+    + `<span class="lrlbl">More about this map</span>${GOCHEV}</button>`
+    + `</div></details>`;
+}
+// The two settings that belong to the whole app rather than to any style: where playlists
+// open, and how to keep the map to hand. Compact and at the foot, because you set the
+// service once and install once.
+function ovFooter(){
+  return `<div class="sect sect-appset nohead"><div class="secbody">`
+    + `<div class="svcline"><span class="svclbl">Music service</span>${svcPicker("inline")}</div>`
+    + `<button type="button" class="instlink" data-page="install"`
+    + ` aria-label="How to install Offshoots">Install Offshoots${GOCHEV}</button>`
+    + `</div></div>`;
 }
 function emptyPanel(){
   setTint("");
@@ -2175,14 +2224,12 @@ function emptyPanel(){
   const np=playable().length;
   const withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
   resetPages();
-  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Explore</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Explore</span></h1><div class="more">
-    ${browseRow()}
+  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Explore</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Explore</span></h1>${aboutMapFold()}<div class="more">
+    ${onMapSect()}
     ${modeSect()}
     ${deeperSect()}
-    <div class="sect sect-learn nohead"><div class="secbody"><div class="listgrp sep">
-    ${pageRow("about","About this map")}
-    ${pageRow("install","How to install it")}
-    </div>${appShareBtn()}</div></div></div>`;
+    ${ovFooter()}
+    ${appShareBtn()}</div></div>`;
   wrapStack(panelCard());
 }
 

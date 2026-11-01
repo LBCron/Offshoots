@@ -490,6 +490,16 @@ body.open .pcnt{display:none}
 /* the one row that is a destination rather than a list keeps the count as a word and
    drops the chevron, since nothing opens */
 .listrow.lrgo .lrct{font-family:var(--f-body);font-size:var(--t-sub)}
+/* A row that gives its label a second line. The count used to carry that job on its own,
+   which told you how many of a thing there were but never what the thing was. These two
+   go to places the map cannot show you, so they say so in words and keep the number as
+   the smaller fact. No icon: the pair sits directly under the heading that names them. */
+.listrow.lrtwo{min-height:64px;align-items:center;gap:10px}
+.listrow .lrtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left}
+.listrow .lrtx .lrlbl{flex:none}
+.listrow .lrsub{display:block;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);
+  color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.listrow.lrtwo .lrct{align-self:center}
 @media (min-width:900px) and (hover:hover) and (pointer:fine){
   .listgrp{--lrlead:51px}
   .listrow{min-height:46px;padding:0 12px;gap:11px}
@@ -841,49 +851,30 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 .acirc .aco.hasimg{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
   0 1px 3px rgb(0 0 0 / .26)}
 
-/* ---------- the ways in, as jewel cases ----------
-   A circle said "category". A case says "there is a record in here", which is nearer
-   what the row does: every one of these opens a dozen styles with playlists behind them.
-   Built from the same two things the circle had, the level colour and the white glyph,
-   so a mode's identity does not change, only its frame.
-   Three layers make it read as plastic rather than a rounded square. The sleeve is the
-   colour. ::before is the hinge strip down the left, which is the detail your eye
-   actually uses to tell a CD case from a book. ::after is one specular band across the
-   front, kept to a few percent of white, because the thing that makes fake plastic look
-   fake is a highlight you can see on purpose. */
-.mcirc .mco{position:relative;width:84px;height:80px;border-radius:3px;overflow:hidden;
+/* ---------- the collections, as record sleeves ----------
+   These were jewel cases: a hinge strip down the left edge and a portrait format. At
+   this size that reads as a book, and the panel already has a shelf of actual books two
+   sections below under Go deeper. Two things that are not the same should not look the
+   same, and the one with a real spine should be the one with a spine drawn on it.
+   So: square, flat, no hinge. A sleeve rather than a case. It keeps the level colour,
+   the white glyph and the small lean, so a collection is still the same collection, and
+   it loses the one detail that made it a book. */
+.mcirc .mco{position:relative;width:84px;height:84px;border-radius:4px;overflow:hidden;
   transform:rotate(var(--tilt,0deg));
-  padding-left:7px;                       /* the art sits right of the hinge */
-  background:linear-gradient(160deg,color-mix(in srgb,var(--lvc) 80%,#fff) 0%,
-    var(--lvc) 55%,color-mix(in srgb,var(--lvc) 74%,#000) 100%);
-  box-shadow:0 1px 1px rgb(0 0 0 / .34), 0 3px 5px rgb(0 0 0 / .26),
-    0 8px 18px rgb(0 0 0 / .30),
-    inset 0 .5px 0 rgb(255 255 255 / .38),
-    inset 0 -.5px 0 rgb(0 0 0 / .22),
-    inset 0 0 0 .5px rgb(255 255 255 / .14)}
-/* The hinge, which is the detail that actually says CD case: a strip of clear plastic
-   over the left edge with the two bright lines its moulding catches. It has to be
-   LIGHTER than the sleeve, not darker. Dark reads as a shadow and turns the whole thing
-   into a book. */
-.mcirc .mco::before{content:"";position:absolute;left:0;top:0;bottom:0;width:8px;
-  background:
-    linear-gradient(90deg,
-      rgb(255 255 255 / .40) 0 1px,
-      rgb(255 255 255 / .13) 1px 3px,
-      rgb(255 255 255 / .30) 3px 4px,
-      rgb(255 255 255 / .07) 4px 7px,
-      rgb(0 0 0 / .14) 7px 8px);
-  pointer-events:none}
-/* The glint. One short highlight in the top-left, where a case picks up the light above
-   it, rather than a band ruled corner to corner. A reflection you can follow from end to
-   end is the thing that makes plastic look painted on. */
+  background:linear-gradient(160deg,color-mix(in srgb,var(--lvc) 82%,#fff) 0%,
+    var(--lvc) 58%,color-mix(in srgb,var(--lvc) 76%,#000) 100%);
+  box-shadow:0 1px 1px rgb(0 0 0 / .26), 0 3px 6px rgb(0 0 0 / .20),
+    0 8px 18px rgb(0 0 0 / .22),
+    inset 0 0 0 .5px rgb(255 255 255 / .16)}
+/* One soft corner highlight, the way card stock catches the light above it, kept well
+   under what the plastic had: paper does not glint. */
 .mcirc .mco::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:
     linear-gradient(128deg,
-      rgb(255 255 255 / .20) 0%, rgb(255 255 255 / .07) 13%,
-      rgb(255 255 255 / 0) 30%),
+      rgb(255 255 255 / .13) 0%, rgb(255 255 255 / .05) 16%,
+      rgb(255 255 255 / 0) 34%),
     linear-gradient(0deg,
-      rgb(0 0 0 / .13) 0%, rgb(0 0 0 / 0) 22%)}
+      rgb(0 0 0 / .10) 0%, rgb(0 0 0 / 0) 24%)}
 .mcirc .mco svg,.acirc .aco svg{width:41px;height:41px;display:block}
 .acirc:hover .aco,.acirc:focus-visible .aco{transform:scale(1.045)}
 .acirc:active .aco{transform:scale(.95)}
@@ -1541,6 +1532,17 @@ a.wk span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:899px){ #qclear{width:30px;height:30px} #qclear svg{width:12px;height:12px} }
 
 /* ---- key artists: caption beside the heading, chips in a box, switch on its edge ---- */
+/* One line under a heading, saying what the section is for. It belongs to the heading,
+   so the gap closes up between them and opens again before the content. */
+.sectlede{margin:0 0 12px;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+.sect.haslede .secthead{margin-bottom:3px}
+/* "See all" says what the chevron meant. Only where there is a fuller version to see. */
+.secthead.sectgo .seeall{font:400 var(--t-sub)/1 var(--f-body);color:var(--muted)}
+/* one line, whatever the heading beside it is called: "Listening collections" is long
+   enough to squeeze this into two, with the chevron stranded under the words */
+.secthead.sectgo .sectcv{gap:5px;flex:none;white-space:nowrap}
+.secthead.sectgo .seeall{white-space:nowrap}
+.secthead:not(.sectgo) .sectcv{display:none}
 .secthead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px}
 .secthead .secttl{margin:0}
 .sectnote{flex:0 1 auto;min-width:0;font:400 var(--t-foot)/var(--t-foot-lh) var(--f-body);color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1618,7 +1620,42 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
    --acc, the accent a family skin sets, and falls back to blue on the unskinned panels
    where there is no family to borrow from. The shape still says button; the colour now
    says it belongs to this style rather than to the app. */
-.sect-learn .listgrp{margin-top:2px}
+/* The app's own two settings, at the foot where you set them once: where playlists open,
+   and how to keep the map to hand. Quiet, because neither is why anyone opened this. */
+.sect-appset{margin-top:26px}
+.sect-appset .svcline{justify-content:space-between;margin:0}
+.sect-appset .svclbl{font-size:var(--t-body)}
+.instlink{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;
+  gap:6px;min-height:var(--tap);color:var(--muted);
+  font:400 var(--t-sub)/1 var(--f-body);text-decoration:underline;
+  text-underline-offset:3px;text-decoration-thickness:.5px}
+.instlink svg{width:14px;height:14px}
+.instlink:hover{color:var(--fg)}
+.instlink:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent);
+  border-radius:6px}
+/* The full library, two across: five single-word labels in one column is a lot of empty
+   line beside a lot of white space. It rules its own grid rather than taking .sep, which
+   draws one hairline across every child after the first. Down a column that is a row
+   divider; across a grid it is a line over the top of the right-hand cell. */
+.medgrp{margin-top:10px}
+.medgrp > *{position:relative}
+.medgrp > :nth-child(n+3)::before{content:"";position:absolute;left:12px;right:12px;top:0;
+  height:.5px;background:var(--sep)}
+.medgrp > :nth-child(2n)::after{content:"";position:absolute;left:0;top:9px;bottom:9px;
+  width:.5px;background:var(--sep)}
+/* no icon on these two, so the hairline runs under the text rather than clear of a glyph */
+.lrtwo + .lrtwo::before{left:14px}
+/* Explore has four sections where a style panel has six, and they are all lists rather
+   than prose, so they sit a little closer than the panel's default rhythm. Close enough
+   that the collections are in view, or nearly, before anyone scrolls. */
+.ovcard .sect{margin-top:26px}
+/* the fold under Explore sits tight to the title, like a style's own description */
+.ovfold{margin-top:2px;margin-bottom:4px}
+.ovfold .abmore{min-height:var(--tap);padding:0;gap:6px;color:var(--muted);
+  font-size:var(--t-sub)}
+.ovfold .abmore .lrlbl{flex:0 1 auto;font-size:var(--t-sub)}
+.ovfold .abmore:hover{background:transparent;color:var(--fg)}
+.ovfold .abmore svg{width:14px;height:14px}
 /* Two colours, not one. The ground used to be a tint of the label's own colour, which
    makes the contrast between them chase itself: lighten the text to pass AA and the
    ground lightens with it, so the ratio barely moves. --shg is the fill and --shc is the

@@ -480,9 +480,17 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       await q.click("#grab").catch(()=>{});
       await q.waitForSelector(sel,{state:"attached",timeout:8000}).catch(()=>{});
       await settle(q);
-      const at=await q.evaluate(s=>{ const e=document.querySelector(s); if(!e) return null;
-        const r=e.getBoundingClientRect();
-        return {x:Math.round(r.left+r.width/2), y:Math.round(r.top+r.height/2)};},sel);
+      // the first one that is actually in the sheet, not the first in the document. The
+      // panel was restructured under this check and the first list row moved below the
+      // fold, so the drag started on the map and the panel rightly did not move.
+      const at=await q.evaluate(s=>{ const pb=document.getElementById("panelBody");
+        const box=pb.getBoundingClientRect();
+        for(const e of document.querySelectorAll(s)){
+          const r=e.getBoundingClientRect();
+          if(r.height>0 && r.top>=box.top+8 && r.bottom<=box.bottom-8)
+            return {x:Math.round(r.left+r.width/2), y:Math.round(r.top+r.height/2)};
+        }
+        return null;},sel);
       const room=await q.evaluate(()=>{ const pb=document.getElementById("panelBody");
         return pb.scrollHeight-pb.clientHeight;});
       if(!at || room<40){ say("a drag up from "+what+" scrolls the panel", "no room to test"); continue; }

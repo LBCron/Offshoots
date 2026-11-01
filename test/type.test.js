@@ -201,7 +201,13 @@ const readRules=(p)=>p.evaluate(()=>{
     // pushed page too, so it has to be popped before the row under it can be reached.
     await p.click("#panelBack").catch(()=>{});
     await onPage(p,"root");
-    await p.click('[data-page="roots"]').catch(()=>{});
+    // Roots came off the Explore panel with the restructure, so it is reached the way
+    // anyone who kept the address reaches it: on a fresh load, since changing the hash of
+    // a document that is already up is a same-document navigation the app does not act on.
+    await p.close();
+    p=await ctx.newPage();
+    await p.goto(URL+"#roots"); await ready(p);
+    if(open){ await p.click("#grab").catch(()=>{}); await opened(p); }
     await onPage(p,"roots");
     const pg=await p.$('.ppage[data-p="roots"]');
     if(pg){
