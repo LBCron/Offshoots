@@ -1974,25 +1974,26 @@ a.am .amgo{display:none}
 .listrow .lrico.hasimg{border-radius:50%}
 
 /* And where there is no record either, a silhouette: one of 144 anonymous figures, drawn
-   cream on transparent. Cream needs something to sit on, and the thing it already sits on
-   everywhere else in this app is the family's deep cover-art ground, so the disc takes
-   that. In dark mode that is the panel's own ground and the disc melts into it, which is
-   why it carries the same faint ring a sleeve does; in light mode it is a small deep
-   circle on a pale panel, which is what a record looks like there too.
+   cream on transparent and recoloured here to the panel's own muted ink, so a figure sits
+   on a style's page the way the glyph it replaces did rather than as a tan cut-out.
 
-   The alternative was to mask the PNG and let it take the panel's colour, which is what
-   the artwork was cut for. It is refused from a file:// URL: the browser will load the
-   same file as an image and not as a mask, and this map is opened from a folder on a disk
-   often enough that a thing which only works when served is not a thing that works. */
-/* The ground has to be stated at every specificity the lifted photo ground is, which is
-   .acirc .aco.hasimg for the circles and .hasimg on its own elsewhere. Beaten by the
-   first of those, a cream figure in light mode went onto a pale disc and vanished. */
+   The recolouring is an SVG filter and not a CSS mask, which is what the artwork was cut
+   for. A mask is refused from a file:// URL: the browser loads the same file as an image
+   and not as a mask, and this map is opened from a folder on a disk often enough that a
+   thing which only works when served is not a thing that works. The filter floods a
+   colour and keeps it only where the PNG has alpha, which is a mask in all but name, and
+   it works from a disk. It lives inside #panel so flood-color can read the panel's own
+   custom properties, which is how it follows a family skin and both palettes with no
+   script: one filter, repainted by the cascade. */
+#fbtint{position:absolute;width:0;height:0;overflow:hidden}
+#fbtint feFlood{flood-color:var(--fbink,var(--muted))}
+.hasfb img{filter:url(#fbink)}
+/* the disc is the panel's own raised ground, the same one a photo gets, so the gaps the
+   artwork leaves between an arm and a body show the page through */
 .hasimg.hasfb,
 .acirc .aco.hasfb,
-.listrow .lrico.hasfb{background:var(--tint-d,#2b2b2f)}
+.listrow .lrico.hasfb{background:var(--fill2)}
 .acirc .aco.hasfb,.listrow .lrico.hasfb{border-radius:50%}
-.acirc .aco.hasfb{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
-  0 1px 3px rgb(0 0 0 / .26)}
 /* square art in a square box, so cover crops nothing but the corners the disc takes */
 
 /* Where an artist has no portrait, one of their records stands in. It is drawn in the
@@ -2230,6 +2231,10 @@ button,[role="button"]{-webkit-user-select:none; user-select:none}
   <button id="sheetpull" type="button" aria-label="Show the map details" hidden><svg class="pchev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10L8 5.5l4.5 4.5"/></svg><span class="plbl"></span></button>
   <aside id="panel" aria-live="polite"><div id="grab" role="button" tabindex="0" aria-label="Expand details" aria-expanded="false"></div>
   <button id="pclose" data-close aria-label="Collapse details"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l5-5 5 5"/></svg></button>  <div id="pbar"><div id="pbarTxt"><span id="pbarTitle"></span><span id="pbarSub"></span></div></div>
+  <svg id="fbtint" width="0" height="0" aria-hidden="true" focusable="false"><defs>
+    <filter id="fbink" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feFlood result="ink"/><feComposite in="ink" in2="SourceGraphic" operator="in"/>
+    </filter></defs></svg>
   <div id="panelBody"></div><div id="ptoggle"><button id="expand" aria-label="Show details" aria-expanded="false"><span class="lbl">Details</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l5 5 5-5"/></svg></button></div></aside>
 </div>
 <div id="hello" hidden>
