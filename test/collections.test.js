@@ -61,7 +61,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
     const look=()=>p.evaluate(()=>{
       const pg=document.querySelector('.ppage[data-p="mode:dinner"]');
-      const btn=pg.querySelector("[data-pickany]"), seg=pg.querySelector(".psortwrap");
+      const btn=pg.querySelector("[data-pickany]"), seg=pg.querySelector(".segctl.segicon");
       const lede=pg.querySelector(".pglede"), list=pg.querySelector(".picks");
       const r=x=>x?x.getBoundingClientRect():null;
       return {names:[...pg.querySelectorAll(".pknm")].map(x=>x.textContent),
@@ -73,8 +73,20 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
         aboveList: btn&&list ? r(btn).bottom<=r(list).top : null,
         belowLede: btn&&lede ? r(btn).top>=r(lede).top : null,
         spill: seg ? Math.round(r(seg).right-r(pg).right) : null,
+        head: pg.querySelector(".secthead.picksort .secttl"),
+        headTx: (pg.querySelector(".secthead.picksort .secttl")||{}).textContent||"",
+        headLines: (()=>{ const h=pg.querySelector(".secthead.picksort .secttl");
+          return h ? Math.round(r(h).height/parseFloat(getComputedStyle(h).lineHeight)) : 0; })(),
+        onOneLine: (()=>{ const h=pg.querySelector(".secthead.picksort .secttl");
+          return h&&seg ? Math.abs(r(h).top-r(seg).top)<r(h).height : null; })(),
+        segW: seg?Math.round(r(seg).width):null,
+        aboveFirst: seg&&list ? r(seg).bottom<=r(list).top+1 : null,
+        tabTap: Math.min(...[...pg.querySelectorAll("[data-psort]")]
+          .map(x=>Math.round(r(x).height))),
+        worded:[...pg.querySelectorAll("[data-psort]")].filter(x=>x.textContent.trim()).length,
         sorts:[...pg.querySelectorAll("[data-psort]")].map(x=>
-          x.textContent+(x.getAttribute("aria-selected")==="true"?"*":""))};
+          (x.getAttribute("aria-label")||"").split(".")[0]
+          +(x.getAttribute("aria-selected")==="true"?"*":""))};
     });
     const v=await look();
     const dinner=D.MODES.find(m=>m[0]==="dinner");
@@ -92,6 +104,17 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("  and the three orders, relevance first and selected",
       JSON.stringify(v.sorts)===JSON.stringify(["Relevance*","A–Z","Most used"]));
     say("  with the sort inside the page ("+v.spill+"px)", v.spill<=0);
+    // Three words were wider than the panel, so the control scrolled and the third order
+    // sat off the edge where nobody would find it. Icons, and no wider than their targets.
+    say("  as icons, with no word left in the control ("+v.segW+"px wide)",
+      v.worded===0 && v.segW<=150);
+    say("    each still a tap target ("+v.tabTap+"px)", v.tabTap>=36);
+    say("    and each still named for anyone who needs the word",
+      JSON.stringify(v.sorts)===JSON.stringify(["Relevance*","A\u2013Z","Most used"]));
+    // the sort is the order of the list, so it belongs on the list's heading, not adrift
+    // under the lede where it read as another fact about the collection
+    say("  on one line with a heading for the list (\""+v.headTx+"\")",
+      v.headTx.length>0 && v.onOneLine===true && v.headLines===1 && v.aboveFirst===true);
 
     // relevance is the written order, which is the collection's own argument
     say("  relevance is the order the collection was written in",

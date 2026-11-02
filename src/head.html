@@ -939,11 +939,22 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 @media (prefers-reduced-motion:reduce){ .segopt{transition:none} }
 /* the sort sits above the list it acts on */
 .segwrap.msortwrap{margin-bottom:14px}
-/* The two controls that act on a whole collection, between the lede and the list: the
-   shortcut past it, drawn as the same row it is on the Explore panel, and then the order
-   the list is in. */
-.modetop{margin:2px 0 12px}
-.segwrap.psortwrap{margin:0 0 14px}
+/* A collection, between its lede and its list: the shortcut past the list, drawn as the
+   same row it is on the Explore panel, then a heading over the list with the order of it
+   on the same line. */
+.modetop{margin:2px 0 16px}
+.secthead.picksort{margin:0 0 10px}
+/* Three words did not fit the panel, so the control scrolled and the third order sat off
+   the edge. Icon-only, it is as narrow as three tap targets, which is narrow enough to sit
+   beside the heading instead of taking a line of its own. */
+.secthead.picksort .secttl{white-space:nowrap}
+/* min-width:100% is for the scrolling word version, which has to fill the panel before it
+   scrolls. This one is as wide as its three targets and no wider, so it can sit on the
+   heading's line. The height stays a tap target: narrow is about width. */
+.segctl.segicon{flex:none;gap:0;padding:2px;min-width:0}
+.segopt.segi{flex:none;width:42px;padding:0}
+.segopt.segi svg{width:18px;height:18px}
+@media (max-width:420px){ .segopt.segi{width:40px} }
 .modelist.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .modelist.two .listrow{padding:0 14px;gap:10px;min-height:52px;position:relative}
 .modelist.two .listrow .lrcv{display:none}
