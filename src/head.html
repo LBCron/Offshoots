@@ -947,7 +947,8 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 /* Three words did not fit the panel, so the control scrolled and the third order sat off
    the edge. Icon-only, it is as narrow as three tap targets, which is narrow enough to sit
    beside the heading instead of taking a line of its own. */
-.secthead.picksort .secttl{white-space:nowrap}
+.secthead.picksort .secttl{white-space:nowrap;min-width:0;overflow:hidden;
+  text-overflow:ellipsis}
 /* min-width:100% is for the scrolling word version, which has to fill the panel before it
    scrolls. This one is as wide as its three targets and no wider, so it can sit on the
    heading's line. The height stays a tap target: narrow is about width. */
@@ -955,6 +956,9 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 .segopt.segi{flex:none;width:42px;padding:0}
 .segopt.segi svg{width:18px;height:18px}
 @media (max-width:420px){ .segopt.segi{width:40px} }
+/* four of them on a 320px phone is the tightest this gets, and the heading beside them
+   has to keep its one line */
+@media (max-width:360px){ .segopt.segi{width:37px} }
 .modelist.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .modelist.two .listrow{padding:0 14px;gap:10px;min-height:52px;position:relative}
 .modelist.two .listrow .lrcv{display:none}

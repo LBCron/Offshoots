@@ -947,7 +947,8 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 /* Three words did not fit the panel, so the control scrolled and the third order sat off
    the edge. Icon-only, it is as narrow as three tap targets, which is narrow enough to sit
    beside the heading instead of taking a line of its own. */
-.secthead.picksort .secttl{white-space:nowrap}
+.secthead.picksort .secttl{white-space:nowrap;min-width:0;overflow:hidden;
+  text-overflow:ellipsis}
 /* min-width:100% is for the scrolling word version, which has to fill the panel before it
    scrolls. This one is as wide as its three targets and no wider, so it can sit on the
    heading's line. The height stays a tap target: narrow is about width. */
@@ -955,6 +956,9 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 .segopt.segi{flex:none;width:42px;padding:0}
 .segopt.segi svg{width:18px;height:18px}
 @media (max-width:420px){ .segopt.segi{width:40px} }
+/* four of them on a 320px phone is the tightest this gets, and the heading beside them
+   has to keep its one line */
+@media (max-width:360px){ .segopt.segi{width:37px} }
 .modelist.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .modelist.two .listrow{padding:0 14px;gap:10px;min-height:52px;position:relative}
 .modelist.two .listrow .lrcv{display:none}
@@ -7358,7 +7362,11 @@ function modeOrder(adaptive){
 // loud, loud to quiet, what this browser opens most, or plain A to Z. Quietest stays the
 // default, so nothing moves until it is asked to.
 const MODESORT_KEY="offshoots.modesort";
-const MODESORTS=[["quiet","Quietest"],["loud","Loudest"],["used","Most used"],["az","A–Z"]];
+const MODESORTS=[
+  ["quiet","Quietest","Quietest first",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M163.51,24.81a8,8,0,0,0-8.42.88L85.25,80H40A16,16,0,0,0,24,96v64a16,16,0,0,0,16,16H85.25l69.84,54.31A8,8,0,0,0,168,224V32A8,8,0,0,0,163.51,24.81ZM152,207.64,92.91,161.69A7.94,7.94,0,0,0,88,160H40V96H88a7.94,7.94,0,0,0,4.91-1.69L152,48.36ZM208,104v48a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>`],
+  ["loud","Loudest","Loudest first",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M163.51,24.81a8,8,0,0,0-8.42.88L85.25,80H40A16,16,0,0,0,24,96v64a16,16,0,0,0,16,16H85.25l69.84,54.31A8,8,0,0,0,168,224V32A8,8,0,0,0,163.51,24.81ZM152,207.64,92.91,161.69A7.94,7.94,0,0,0,88,160H40V96H88a7.94,7.94,0,0,0,4.91-1.69L152,48.36ZM208,104v48a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm32-16v80a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z\"/></svg>`],
+  ["used","Most used","What this browser opens most",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z\"/></svg>`],
+  ["az","A–Z","By name, A to Z",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M87.24,52.59a8,8,0,0,0-14.48,0l-64,136a8,8,0,1,0,14.48,6.81L39.9,160h80.2l16.66,35.4a8,8,0,1,0,14.48-6.81ZM47.43,144,80,74.79,112.57,144ZM200,96c-12.76,0-22.73,3.47-29.63,10.32a8,8,0,0,0,11.26,11.36c3.8-3.77,10-5.68,18.37-5.68,13.23,0,24,9,24,20v3.22A42.76,42.76,0,0,0,200,128c-22.06,0-40,16.15-40,36s17.94,36,40,36a42.73,42.73,0,0,0,24-7.25,8,8,0,0,0,16-.75V132C240,112.15,222.06,96,200,96Zm0,88c-13.23,0-24-9-24-20s10.77-20,24-20,24,9,24,20S213.23,184,200,184Z\"/></svg>`]];
 function modeSort(){
   try{ const v=localStorage.getItem(MODESORT_KEY);
     return MODESORTS.some(s=>s[0]===v) ? v : "quiet";
@@ -7380,10 +7388,13 @@ function modeOrderBy(how){
 }
 function modeSortHtml(){
   const now=modeSort();
-  return `<div class="segwrap msortwrap"><div class="segctl" role="tablist" aria-label="Sort the ways in">`
-    + MODESORTS.map(([k,lbl])=>
-        `<button type="button" role="tab" class="segopt"`
-        + ` data-msort="${k}" aria-selected="${k===now}">${esc(lbl)}</button>`).join("")
+  return `<div class="secthead picksort"><h3 class="secttl">Collections</h3>`
+    + `<div class="segctl segicon" role="tablist" aria-label="Sort the collections">`
+    + MODESORTS.map(([k,lbl,hint,ico])=>
+        `<button type="button" role="tab" class="segopt segi"`
+        + ` data-msort="${k}" aria-selected="${k===now}"`
+        + ` aria-label="${esc(lbl)}. ${esc(hint)}" title="${esc(lbl)}: ${esc(hint)}">`
+        + ico + `</button>`).join("")
     + `</div></div>`;
 }
 // How far a case leans, derived from its own name rather than drawn fresh.
@@ -7590,7 +7601,7 @@ const PAGES_DEF={
       html:`<div class="listgrp sep amlist">${all.map(row).join("")}</div>`};
   },
   modes:()=>({title:"Ways in",
-    lede:"Twenty-seven moods, places and tasks. Each one opens a dozen styles that suit it. The circles on the way in reorder themselves around the ones you open; this list sorts how you ask.",
+    lede:"Twenty-seven moods, places and tasks, each opening the styles that suit it. The circles on the way in reorder themselves around the ones you open.",
     top:modeSortHtml(),
     html:modeListHtml()+copyRow("modes")}),
   picks:()=>picksPage("pete"),

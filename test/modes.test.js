@@ -458,7 +458,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
     const read=()=>s.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
-      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>x.textContent),
+      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>(x.getAttribute("aria-label")||"").split(".")[0]),
         labels:[...u.querySelectorAll(".moderow .lrlbl")].map(x=>x.textContent),
         stored:(()=>{try{return localStorage.getItem("offshoots.modesort")}catch(e){return null}})()};});
 
@@ -502,7 +502,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     await s2.goto(URL+"#modes"); await ready(s2); await landed(s2,"modes");
     const r=await s2.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
-      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>x.textContent)[0],
+      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>(x.getAttribute("aria-label")||"").split(".")[0])[0],
         first:(u.querySelector(".moderow .lrlbl")||{}).textContent};});
     say("a remembered sort is honoured next time the page opens",
       r.on==="A–Z" && r.first==="Burn it off");
@@ -514,7 +514,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     await s3.goto(URL+"#modes"); await ready(s3); await landed(s3,"modes");
     const r=await s3.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
-      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>x.textContent)[0],
+      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>(x.getAttribute("aria-label")||"").split(".")[0])[0],
         rows:u.querySelectorAll(".moderow").length};});
     say("a nonsense stored sort falls back to quietest, with every mode still there",
       r.on==="Quietest" && r.rows===(await s3.evaluate(()=>MODES.length)));
@@ -523,16 +523,26 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // the control has to survive the narrowest phone without clipping a label
   { const s4=await b.newPage({viewport:{width:320,height:700,isMobile:true,hasTouch:true}});
     await s4.goto(URL+"#modes"); await ready(s4); await landed(s4,"modes");
+    // It used to be four words in a track that filled the panel and then scrolled, so the
+    // last option sat off the edge. Icons fit outright at 320, beside the heading, which
+    // is the whole reason for the change: reachable now means on screen, not scrollable to.
     const fit=await s4.evaluate(()=>{
-      const seg=document.querySelector(".segctl"), w=document.querySelector(".segwrap");
-      const btns=[...seg.querySelectorAll("[data-msort]")];
-      return {tall:btns.every(b=>b.getBoundingClientRect().height>=28),
-        unclipped:btns.every(b=>b.scrollWidth<=b.clientWidth+1),
-        reachable:seg.scrollWidth<=w.scrollWidth+1,
+      const seg=document.querySelector(".segctl.segicon");
+      const head=document.querySelector(".secthead.picksort .secttl");
+      const page=seg&&seg.closest(".ppage");
+      const btns=seg?[...seg.querySelectorAll("[data-msort]")]:[];
+      const r=x=>x.getBoundingClientRect();
+      return {n:btns.length,
+        tall:btns.every(b=>r(b).height>=28),
+        onScreen:!!seg && r(seg).right<=r(page).right+1 && r(seg).left>=r(page).left-1,
+        noScroll:!!seg && seg.scrollWidth<=seg.clientWidth+1,
+        besideHead:!!head && !!seg && Math.abs(r(head).top-r(seg).top)<r(head).height,
+        headOneLine:!!head && r(head).height<parseFloat(getComputedStyle(head).lineHeight)*1.5,
         nopush:document.documentElement.scrollWidth<=320+1};});
-    say("at 320px the sort still fits, taps big enough and nothing clipped",
-      fit.tall && fit.unclipped && fit.nopush);
-    say("  and every option is reachable", fit.reachable);
+    say("at 320px all "+fit.n+" sit on screen beside the heading, no scrolling",
+      fit.n===4 && fit.onScreen && fit.noScroll && fit.nopush);
+    say("  with the heading still on one line and the taps big enough",
+      fit.besideHead && fit.headOneLine && fit.tall);
     await s4.screenshot({path:__dirname+"/screens/m-modesort.png"});
     await s4.close(); }
 
