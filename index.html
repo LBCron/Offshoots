@@ -1576,6 +1576,26 @@ a.wk span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   white-space:nowrap}
 .secthead.sectgo .seeall{white-space:nowrap}
 .secthead:not(.sectgo) .sectcv{display:none}
+/* ---- a section that folds ----
+   The heading is the control, the way it is when a heading opens a page, except that
+   what it opens is itself. Same type, same spacing, same chevron: a folded section has
+   to read as a section rather than as a row that happens to be large. */
+.sectfold{margin-top:26px}
+.sectfold > .sectsum{all:unset;box-sizing:border-box;cursor:pointer;display:flex;
+  align-items:center;justify-content:space-between;gap:10px;margin:0;
+  min-height:var(--tap);border-radius:10px;list-style:none}
+.sectfold > .sectsum::-webkit-details-marker{display:none}
+.sectfold > .sectsum .secttl{margin:0}
+.sectfold > .sectsum .sectaside{margin-left:auto}
+.sectfold > .sectsum .sectcv{flex:none;display:grid;place-items:center;color:var(--muted);
+  opacity:.75;transition:transform .16s,opacity .16s}
+.sectfold > .sectsum .sectcv svg{width:17px;height:17px;stroke-width:2.4}
+.sectfold > .sectsum:hover .sectcv{opacity:1}
+.sectfold[open] > .sectsum .sectcv{transform:rotate(90deg);opacity:1}
+.sectfold > .sectsum:focus-visible{outline:0;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+.sectfold > .secbody{padding-top:10px}
+@media (prefers-reduced-motion:reduce){ .sectfold > .sectsum .sectcv{transition:none} }
 .secthead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px}
 .secthead .secttl{margin:0}
 .sectnote{flex:0 1 auto;min-width:0;font:400 var(--t-foot)/var(--t-foot-lh) var(--f-body);color:var(--muted);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2107,8 +2127,14 @@ span.xcov b{font:700 19px var(--f-body);color:#fff;opacity:.92}
 .xopen.off .xgoi{display:none}
 
 /* Explore the connections: the map's own relationships, out of the title menu */
-.cxwrap{display:grid;grid-template-columns:1fr;gap:16px}
-@media (min-width:560px){ .cxwrap{grid-template-columns:1fr 1fr;gap:20px} }
+.cxwrap{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+/* Two columns only where the sheet is actually wide. The old rule asked the window, and
+   on a desktop the panel is a 402px column in a 1440px window: it got two columns of a
+   phone's width and the second one ran 30px past the panel's own edge. 1fr was the other
+   half of that, since its min is min-content and a long name will not shrink past its
+   own longest word; minmax(0,1fr) lets the ellipsis do its job. */
+@media (min-width:560px) and (max-width:899px){
+  .cxwrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px} }
 .cxh{margin:0 0 8px;font:600 var(--t-sub)/1.3 var(--f-body);color:var(--muted);
   letter-spacing:0;text-transform:none}
 .cxlist{display:flex;flex-direction:column;gap:2px}
@@ -5071,7 +5097,7 @@ function readSect(n){
     `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 
-function sect(key,label,html,aside,page,lede,seeall){
+function sect(key,label,html,aside,page,lede,seeall,fold){
   // a heading that opens a fuller version of what is under it becomes the control that
   // opens it, chevron and all, rather than sitting beside a separate row that does
   const inner = `<h3 class="secttl">${esc(label)}</h3>${aside||""}`
@@ -5084,6 +5110,14 @@ function sect(key,label,html,aside,page,lede,seeall){
   // One line under the heading saying what the section is for. It reads as part of the
   // heading rather than as content, so the heading tightens up to meet it.
   const sub = lede ? `<p class="sectlede">${esc(lede)}</p>` : "";
+  // A section that folds. The heading becomes the control, as it does when a heading
+  // opens a page, except that what it opens is itself. "shut" or "open" says where it
+  // starts; everything else about it is a section like any other.
+  if(fold) return `<details class="sect sect-${key} sectfold${lede?" haslede":""}"`
+    + `${fold==="open"?" open":""}><summary class="secthead sectsum">`
+    + `<h3 class="secttl">${esc(label)}</h3>${aside||""}`
+    + `<span class="sectcv">${GOCHEV}</span></summary>`
+    + sub + `<div class="secbody">${html}</div></details>`;
   return `<div class="sect sect-${key}${label?"":" nohead"}${lede?" haslede":""}">`
     + head + sub + `<div class="secbody">${html}</div></div>`;
 }
@@ -5818,9 +5852,15 @@ function linksSect(n,anc,desc){
           + `<small>${byId[i].year<1950?esc(byId[i].disp):byId[i].year}</small></button>`).join("")}</div>`
       : `<p class="cxnone">Nothing on the map yet.</p>`)
     + `</div>`;
+  // Shut. It is the longest thing on a style panel, two columns of up to twenty-five
+  // names each, and it is a place to go next rather than something to read on the way
+  // through. The count beside the heading says how much is behind it.
+  const n2=from.length+led.length;
   return sect("connections","Explore the connections",
     `<div class="cxwrap">${col("cxfrom","Before this style",from)}`
-    + `${col("cxled","After this style",led)}</div>${tally}`);
+    + `${col("cxled","After this style",led)}</div>${tally}`,
+    `<span class="sectaside">${n2} ${n2===1?"style":"styles"}</span>`,
+    "", "", false, "shut");
 }
 // ---------- Go deeper, grouped by what it is ----------
 // One list of mixed media made you read every row to find the podcast. Grouped and
@@ -5836,7 +5876,9 @@ function deepSect(n){
   const folds=DEEPGRP.map(([k,label,sub,types])=>{
     const mine=rows.filter(r=>types.indexOf(r[7])>=0);
     if(!mine.length) return "";
-    return `<details class="xfold deepfold"><summary><span class="dgl">${esc(label)}</span>`
+    // open, where the connections above are shut: nine sources at most, and a title you
+    // can read is the thing itself rather than a way to somewhere else
+    return `<details class="xfold deepfold" open><summary><span class="dgl">${esc(label)}</span>`
       + `<span class="dgs">${esc(sub)}</span><span class="dgn">${mine.length}</span>${GOCHEV}</summary>`
       + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
   }).join("");

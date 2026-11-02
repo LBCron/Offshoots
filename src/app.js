@@ -596,7 +596,7 @@ function readSect(n){
     `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 
-function sect(key,label,html,aside,page,lede,seeall){
+function sect(key,label,html,aside,page,lede,seeall,fold){
   // a heading that opens a fuller version of what is under it becomes the control that
   // opens it, chevron and all, rather than sitting beside a separate row that does
   const inner = `<h3 class="secttl">${esc(label)}</h3>${aside||""}`
@@ -609,6 +609,14 @@ function sect(key,label,html,aside,page,lede,seeall){
   // One line under the heading saying what the section is for. It reads as part of the
   // heading rather than as content, so the heading tightens up to meet it.
   const sub = lede ? `<p class="sectlede">${esc(lede)}</p>` : "";
+  // A section that folds. The heading becomes the control, as it does when a heading
+  // opens a page, except that what it opens is itself. "shut" or "open" says where it
+  // starts; everything else about it is a section like any other.
+  if(fold) return `<details class="sect sect-${key} sectfold${lede?" haslede":""}"`
+    + `${fold==="open"?" open":""}><summary class="secthead sectsum">`
+    + `<h3 class="secttl">${esc(label)}</h3>${aside||""}`
+    + `<span class="sectcv">${GOCHEV}</span></summary>`
+    + sub + `<div class="secbody">${html}</div></details>`;
   return `<div class="sect sect-${key}${label?"":" nohead"}${lede?" haslede":""}">`
     + head + sub + `<div class="secbody">${html}</div></div>`;
 }
@@ -1343,9 +1351,15 @@ function linksSect(n,anc,desc){
           + `<small>${byId[i].year<1950?esc(byId[i].disp):byId[i].year}</small></button>`).join("")}</div>`
       : `<p class="cxnone">Nothing on the map yet.</p>`)
     + `</div>`;
+  // Shut. It is the longest thing on a style panel, two columns of up to twenty-five
+  // names each, and it is a place to go next rather than something to read on the way
+  // through. The count beside the heading says how much is behind it.
+  const n2=from.length+led.length;
   return sect("connections","Explore the connections",
     `<div class="cxwrap">${col("cxfrom","Before this style",from)}`
-    + `${col("cxled","After this style",led)}</div>${tally}`);
+    + `${col("cxled","After this style",led)}</div>${tally}`,
+    `<span class="sectaside">${n2} ${n2===1?"style":"styles"}</span>`,
+    "", "", false, "shut");
 }
 // ---------- Go deeper, grouped by what it is ----------
 // One list of mixed media made you read every row to find the podcast. Grouped and
@@ -1361,7 +1375,9 @@ function deepSect(n){
   const folds=DEEPGRP.map(([k,label,sub,types])=>{
     const mine=rows.filter(r=>types.indexOf(r[7])>=0);
     if(!mine.length) return "";
-    return `<details class="xfold deepfold"><summary><span class="dgl">${esc(label)}</span>`
+    // open, where the connections above are shut: nine sources at most, and a title you
+    // can read is the thing itself rather than a way to somewhere else
+    return `<details class="xfold deepfold" open><summary><span class="dgl">${esc(label)}</span>`
       + `<span class="dgs">${esc(sub)}</span><span class="dgn">${mine.length}</span>${GOCHEV}</summary>`
       + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
   }).join("");

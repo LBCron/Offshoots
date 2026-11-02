@@ -47,6 +47,12 @@ const hash=p=>p.evaluate(()=>location.hash);
 const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains("open")))
   { await p.click("#grab").catch(()=>{}); await opened(p); } };
 
+// Explore the connections is folded shut now: it is the longest thing on a style panel
+// and a place to go next rather than something to read on the way through. Anything that
+// walks the lineage has to open it first, the way a person would.
+const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.open=true; })
+  .catch(()=>{}); await settle(q); };
+
 (async()=>{
   const b=await chromium.launch(); skipWelcome(b);
   let p=await fresh(b,M);
@@ -92,6 +98,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
     await q.click("#grab").catch(()=>{}); await opened(q); };
   await ensureOpen(p);
   for(const id of walk){
+    await openCx(p);
     await p.$eval(`.sect-connections .cxled[data-go="${id}"]`,e=>e.scrollIntoView({block:"center"}));
     await settle(p);
     await p.click(`.sect-connections .cxled[data-go="${id}"]`); await at(p,"#"+id);
@@ -122,6 +129,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   // the trail survives a browse-menu jump too, and empty-space taps
   p=await fresh(b,M,"#disco");
   await ensureOpen(p);
+  await openCx(p);
   await p.$eval(".sect-connections .cxfrom[data-go]",e=>e.scrollIntoView({block:"center"}));
   await settle(p);
   await p.click(".sect-connections .cxfrom[data-go]"); await moved(p,"#disco");
@@ -230,6 +238,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   const hwalk=["hardcore","thrash"];
   p=await fresh(b,M,"#punk");
   await ensureOpen(p);
+  await openCx(p);
   await p.$eval(`.sect-connections [data-go="${hwalk[0]}"]`,e=>e.scrollIntoView({block:"center"}));
   await settle(p);
   await p.click(`.sect-connections [data-go="${hwalk[0]}"]`); await at(p,"#"+hwalk[0]);

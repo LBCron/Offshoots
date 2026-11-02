@@ -217,6 +217,76 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     seg.counts[0]+seg.counts[1] > 0);
   say("  in the flow, with no menu left on a title", seg.inFlow && seg.menus===0);
 
+  // ---------- which sections start open ----------
+  // Explore the connections is the longest thing on a style panel, two columns of up to
+  // twenty-five names, and it is a place to go next rather than something to read on the
+  // way through. It starts shut, with its count beside the heading. Go deeper is the
+  // opposite: at most nine sources, and a title you can read is the thing itself, so its
+  // groups start open.
+  const starts=await p.evaluate(()=>{
+    const cx=document.querySelector(".sect-connections");
+    const rd=document.querySelector(".sect-read");
+    return {cxFold:!!cx && cx.tagName==="DETAILS", cxOpen:!!cx && cx.open,
+      cxAside:cx?(cx.querySelector(".sectaside")||{}).textContent||"":"",
+      cxTap:cx?Math.round(cx.querySelector("summary").getBoundingClientRect().height):0,
+      deep:rd?[...rd.querySelectorAll(".deepfold")].map(d=>d.open):[]};});
+  // open is the only honest reading of a shut <details>: it collapses with
+  // content-visibility, so its children still report a size
+  say("the connections start folded, with the count on the heading (\""
+    + starts.cxAside+"\")", starts.cxFold && starts.cxOpen===false
+    && /^\d+ styles?$/.test(starts.cxAside));
+  say("  its control clearing the tap floor ("+starts.cxTap+"px)", starts.cxTap>=44);
+  // on a style that actually has sources: this one may have none, and a panel with no
+  // Go deeper section is not a panel with a shut one
+  { const dq=await b.newPage({viewport:{width:1440,height:900}});
+    await dq.goto(URL+"#punk"); await arm(dq); await shown(dq,"#chart .n");
+    await until(dq,()=>!!document.querySelector("#chart .n.cur")); await settle(dq);
+    const deep=await dq.evaluate(()=>{
+      const rd=document.querySelector(".sect-read");
+      return {groups:rd?[...rd.querySelectorAll(".deepfold")].map(d=>d.open):[],
+        aside:rd?(rd.querySelector(".sectaside")||{}).textContent||"":""};});
+    say("  while Go deeper starts open ("+deep.groups.length+" groups, "+deep.aside+")",
+      deep.groups.length>0 && deep.groups.every(Boolean));
+    await dq.close(); }
+
+  // ---------- and it fits the panel it is in ----------
+  // Two columns were switched on at a 560px WINDOW, and on a desktop the panel is a
+  // 402px column in a 1440px window: it got two columns of a phone's width and the
+  // second ran thirty pixels past the panel's own edge. 1fr was the other half of it,
+  // since its minimum is min-content and a long name will not shrink past its longest
+  // word, so the ellipsis never got a chance.
+  for(const [w,h,mob] of [[1440,900,false],[700,950,true],[390,844,true]]){
+    const fc=await b.newContext({viewport:{width:w,height:h},isMobile:mob,hasTouch:mob});
+    const q=await fc.newPage();
+    await q.goto(URL+"#punk"); await arm(q); await shown(q,"#chart .n");
+    await until(q,()=>!!document.querySelector("#chart .n.cur")); await settle(q);
+    if(mob) await q.click("#grab").catch(()=>{});
+    await settle(q);
+    await q.$eval(".sect-connections",e=>{ e.open=true; });
+    await settle(q);
+    const fit=await q.evaluate(()=>{
+      const pb=document.getElementById("panelBody"), wrap=document.querySelector(".cxwrap");
+      const pr=pb.getBoundingClientRect();
+      const cs=getComputedStyle(wrap);
+      const tracks=cs.gridTemplateColumns.split(" ").map(parseFloat);
+      const sum=tracks.reduce((a,b)=>a+b,0)+(tracks.length-1)*(parseFloat(cs.columnGap)||0);
+      // The rows are what runs off the edge. The wrapper's own box stays inside the
+      // panel and clips them, so measuring the wrapper said everything was fine while a
+      // name ended seventy pixels past the panel's edge.
+      const rows=[...document.querySelectorAll(".cxgo")];
+      return {panel:Math.round(pr.width), cols:tracks.length,
+        trackSum:Math.round(sum), wrapW:Math.round(wrap.getBoundingClientRect().width),
+        past:rows.filter(e=>e.getBoundingClientRect().right>pr.right+1).length,
+        worst:Math.round(Math.max(...rows.map(e=>e.getBoundingClientRect().right))-pr.right)};});
+    say("at "+w+"px the connections fit the "+fit.panel+"px panel in "
+      + fit.cols+(fit.cols===1?" column":" columns")
+      + (fit.past?": "+fit.past+" rows run "+fit.worst+"px past its edge":""),
+      fit.past===0);
+    say("  with columns that add up to no more than the space for them ("
+      + fit.trackSum+" in "+fit.wrapW+"px)", fit.trackSum<=fit.wrapW+1);
+    await fc.close();
+  }
+
   // the description sits in a fold under the name rather than in a section further down,
   // and it is shut until asked for: the playlist is what the panel opens on
   const fold=await p.evaluate(()=>{ const d=document.querySelector(".aboutfold");
