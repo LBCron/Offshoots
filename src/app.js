@@ -2286,16 +2286,18 @@ function aboutMapFold(){
   const np=playable().length;
   return `<details class="xfold aboutfold ovfold"><summary><span>About this interactive musical atlas</span>${GOCHEV}</summary>`
     + `<div class="xfoldb"><p class="note">`
-    + esc(DATA.length+" styles of North American music, each placed at the year it cohered "
+    + esc(DATA.length+" music styles, each placed at the year it cohered "
       + "into a named, recorded scene and joined to the styles it grew out of, so following "
       + "a line backwards shows you what a sound is made of. "
       + np+" of them carry an essential playlist, and each one starts just outside its own "
       + "style, with the records that pushed it into being, and arrives at it.")
     + `</p>`
-    + `<button type="button" class="listrow lrgo abmore" data-page="about"`
-    + ` aria-label="Read more about this atlas">`
-    + `<span class="lrlbl">Read more about this atlas</span>${GOCHEV}</button>`
-    + `</div></details>`;
+    // the same row Pete's Picks is: a grouped card with the glyph on the left and the
+    // chevron on the right, rather than a line of text pretending to be a link
+    + `<div class="listgrp abmore">`
+    + pageRow("about","Read more about this atlas",null,
+        "The sources, the colophon and the map as data")
+    + `</div></div></details>`;
 }
 // The two settings that belong to the whole app rather than to any style: where playlists
 // open, and how to keep the map to hand. Compact and at the foot, because you set the

@@ -79,8 +79,32 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   say("  saying what the map is, how styles connect, and what a playlist is",
     !!fold && /\bstyles\b/.test(fold.body) && /grew out of/.test(fold.body)
     && /playlist/.test(fold.body));
+  // and not fencing it off to one continent. Reggae, Dub, Ska, Jungle, Grime, Krautrock,
+  // Bossa Nova, Highlife, Afrobeat, Gqom, Cumbia, Soca, Son Cubano and Italo Disco were
+  // all on the map when this claim was first written, and the lines crossing water is
+  // the point of the thing. It came off once and came back with the restructure.
+  say("  without narrowing it to one continent",
+    !!fold && !/North America/i.test(fold.body));
   say("  with the full page one tap on ("+(fold&&fold.more)+")",
     !!fold && fold.more==="Read more about this atlas");
+  // and it is a row, like every other way out of this panel: a card, a glyph, a chevron.
+  // It was a line of text with a chevron after it, which is not a shape this panel uses
+  // anywhere else.
+  { await p.$eval(".ovfold summary",e=>{ if(!e.parentElement.open) e.click(); });
+    await settle(p);
+    const row=await p.evaluate(()=>{
+      const r=document.querySelector('.ovfold [data-page="about"]');
+      if(!r) return null;
+      const g=r.closest(".listgrp"), pete=document.querySelector('[data-page="picks"]');
+      const same=(a,b,k)=>getComputedStyle(a)[k]===getComputedStyle(b)[k];
+      return {boxed:!!g && parseFloat(getComputedStyle(g).borderRadius)>=10
+          && !/rgba\(0, 0, 0, 0\)/.test(getComputedStyle(g).backgroundColor),
+        icon:!!r.querySelector(".lrico svg"), chev:!!r.querySelector(".lrcv"),
+        tap:Math.round(r.getBoundingClientRect().height),
+        likePete:!pete || (same(r,pete,"fontSize") && same(r,pete,"minHeight"))};});
+    say("  drawn as a row in a card, the way Pete's Picks is",
+      !!row && row.boxed && row.icon && row.chev && row.likePete);
+    say("  clearing the tap floor ("+(row&&row.tap)+"px)", !!row && row.tap>=44); }
 
   // ---- the footer: the app's own two settings ----
   const foot=await p.evaluate(()=>{ const sec=document.querySelector(".sect-appset");

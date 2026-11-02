@@ -1707,11 +1707,9 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
 .ovcard .bigttl{margin-bottom:0}
 .ovfold{margin-top:-2px;margin-bottom:4px}
 .ovfold summary{min-height:38px}
-.ovfold .abmore{min-height:var(--tap);padding:0;gap:6px;color:var(--muted);
-  font-size:var(--t-sub)}
-.ovfold .abmore .lrlbl{flex:0 1 auto;font-size:var(--t-sub)}
-.ovfold .abmore:hover{background:transparent;color:var(--fg)}
-.ovfold .abmore svg{width:14px;height:14px}
+/* the row out of the fold is a row, not a line of text with a chevron after it: same
+   card, same glyph, same chevron as every other way out of this panel */
+.ovfold .abmore{margin-top:12px}
 /* Two colours, not one. The ground used to be a tint of the label's own colour, which
    makes the contrast between them chase itself: lighten the text to pass AA and the
    ground lightens with it, so the ratio barely moves. --shg is the fill and --shc is the
@@ -6787,16 +6785,18 @@ function aboutMapFold(){
   const np=playable().length;
   return `<details class="xfold aboutfold ovfold"><summary><span>About this interactive musical atlas</span>${GOCHEV}</summary>`
     + `<div class="xfoldb"><p class="note">`
-    + esc(DATA.length+" styles of North American music, each placed at the year it cohered "
+    + esc(DATA.length+" music styles, each placed at the year it cohered "
       + "into a named, recorded scene and joined to the styles it grew out of, so following "
       + "a line backwards shows you what a sound is made of. "
       + np+" of them carry an essential playlist, and each one starts just outside its own "
       + "style, with the records that pushed it into being, and arrives at it.")
     + `</p>`
-    + `<button type="button" class="listrow lrgo abmore" data-page="about"`
-    + ` aria-label="Read more about this atlas">`
-    + `<span class="lrlbl">Read more about this atlas</span>${GOCHEV}</button>`
-    + `</div></details>`;
+    // the same row Pete's Picks is: a grouped card with the glyph on the left and the
+    // chevron on the right, rather than a line of text pretending to be a link
+    + `<div class="listgrp abmore">`
+    + pageRow("about","Read more about this atlas",null,
+        "The sources, the colophon and the map as data")
+    + `</div></div></details>`;
 }
 // The two settings that belong to the whole app rather than to any style: where playlists
 // open, and how to keep the map to hand. Compact and at the foot, because you set the

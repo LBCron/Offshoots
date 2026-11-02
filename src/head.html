@@ -1707,11 +1707,9 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
 .ovcard .bigttl{margin-bottom:0}
 .ovfold{margin-top:-2px;margin-bottom:4px}
 .ovfold summary{min-height:38px}
-.ovfold .abmore{min-height:var(--tap);padding:0;gap:6px;color:var(--muted);
-  font-size:var(--t-sub)}
-.ovfold .abmore .lrlbl{flex:0 1 auto;font-size:var(--t-sub)}
-.ovfold .abmore:hover{background:transparent;color:var(--fg)}
-.ovfold .abmore svg{width:14px;height:14px}
+/* the row out of the fold is a row, not a line of text with a chevron after it: same
+   card, same glyph, same chevron as every other way out of this panel */
+.ovfold .abmore{margin-top:12px}
 /* Two colours, not one. The ground used to be a tint of the label's own colour, which
    makes the contrast between them chase itself: lighten the text to pass AA and the
    ground lightens with it, so the ratio barely moves. --shg is the fill and --shc is the
