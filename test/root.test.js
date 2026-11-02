@@ -303,12 +303,18 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   say("  and the title starts "+xo.titleTop+"px into the card", xo.titleTop<=40);
   say("  with the title clear of it by "+xo.clearsTitle+"px", xo.clearsTitle>0);
 
-  // the rows go somewhere now rather than unfolding, so the chevron points that way
+  // The rows go somewhere rather than unfolding, so they carry the chevron and not the
+  // solid triangle, which is the disclosure control. Both point right, so the class says
+  // nothing: the path is the only thing that tells them apart.
   const cv=await p.evaluate(()=>{
     const r=document.querySelector('.sect-onmap [data-page="top"]');
     return {points:r.querySelector(".lrcv").innerHTML,
       forward:r.querySelector(".lrcv").classList.contains("lrgov")}; });
-  say("  the chevron points the way the row goes", /M181\.66,122\.34/.test(cv.points) && cv.forward);
+  const CHV=/M181\.66,133\.66l-80,80a8,8,0,0,1-11\.32-11\.32L164\.69,128/;
+  const TRI=/M181\.66,133\.66l-80,80A8,8,0,0,1,88,208V48/;
+  say("  the chevron points the way the row goes",
+    CHV.test(cv.points) && cv.forward ? true
+      : TRI.test(cv.points) ? "it is the fold triangle" : "unrecognised glyph");
 
   // the two map shortcuts are one grouped list, the way a phone app lists collections
   const grp=await p.evaluate(()=>{ const g=document.querySelector(".sect-onmap .listgrp");
