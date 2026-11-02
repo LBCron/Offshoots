@@ -71,10 +71,10 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const c=r[0].querySelector(".mco").getBoundingClientRect();
     return {scrolls:row.scrollWidth>row.clientWidth+1, vis:vis.length,
       round:Math.abs(c.width-c.height)<=1 && c.width>=52,
-      // a sleeve now rather than a jewel case: square, and with no spine down its left
-      // edge, which is what made it read as another book beside the actual books below
-      sleeve:Math.abs(c.width-c.height)<=2 && c.height>=52,
-      spine:getComputedStyle(r[0].querySelector(".mco"),"::before").content!=="none",
+      // a circle again, so round and unleant
+      round:Math.abs(c.width-c.height)<=2 && c.height>=52
+        && getComputedStyle(r[0].querySelector(".mco")).borderRadius==="50%",
+      tilts:r.filter(x=>x.style.getPropertyValue("--tilt")).length,
       dims:Math.round(c.width)+"x"+Math.round(c.height),
       clipped:r.filter(x=>{const l=x.querySelector(".mclbl"); return l.scrollHeight>l.clientHeight+1;})
                .map(x=>x.querySelector(".mclbl").textContent),
@@ -130,42 +130,38 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   await p.evaluate(()=>{document.querySelector(".mrow").scrollLeft=0;});
   await settle(p);
   say("  with "+lay.vis+" in reach before it does", lay.vis>=3);
-  // a record sleeve now, so square rather than round, and still big enough to hit
-  say("  each a square sleeve of "+lay.dims+", in a "+Math.round(lay.tap)+"px target",
-    lay.sleeve && lay.tap>=44);
-  // the hinge went with the case. A spine is what the eye uses to call something a book,
-  // and the Go deeper list two sections down is full of actual books.
-  say("  with no spine down its edge", lay.spine===false);
-  // Each case leans a little, and the lean is derived from the mode's own id rather than
-  // rolled. Two things would break if it were Math.random() or keyed to position: the
-  // row rebuilds on a resize and on every return to Explore, so the shelf would twitch
-  // while you watched it, and the row REORDERS by use, so a case would re-lean without
-  // having moved. The check is that a reorder leaves every lean where it was.
-  const tilts=await p.evaluate(()=>Object.fromEntries([...document.querySelectorAll(".mcirc")]
-    .map(x=>[x.dataset.mode, x.style.getPropertyValue("--tilt")])));
-  const vals=Object.values(tilts).map(parseFloat);
-  say("  every case leaning, none past 4 degrees ("+Math.min(...vals)+" to "+Math.max(...vals)+")",
-    vals.length>0 && vals.every(v=>!isNaN(v) && v>=-4 && v<=4));
-  // all one angle is not a lean, it is a slope
-  say("  at "+new Set(vals).size+" different angles", new Set(vals).size>=6);
-  {
-    // Seeded through an init script, not written and reloaded: Chromium's localStorage
-    // under file:// does not reliably survive a reload, which the block further down
-    // already knew. Written this way it was a coin toss, and it came up tails silently
-    // for as long as a non-boolean verdict printed as no verdict at all.
-    const q=await b.newPage({viewport:M});
-    await q.addInitScript(()=>{ try{ localStorage.setItem("offshoots.modeuse",
-      JSON.stringify({workout:9,party:5})); }catch(e){} });
-    await q.goto(URL); await ready(q);
-    await q.click("#grab").catch(()=>{}); await opened(q);
-    const after=await q.evaluate(()=>Object.fromEntries([...document.querySelectorAll(".mcirc")]
-      .map(x=>[x.dataset.mode, x.style.getPropertyValue("--tilt")])));
-    const first=await q.evaluate(()=>[...document.querySelectorAll(".mcirc")][0].dataset.mode);
-    const moved=Object.keys(tilts).filter(k=>after[k]!==undefined && after[k]!==tilts[k]);
-    say("  and a reorder re-leans nothing (now led by "+first+")",
-      first!=="winddown" && moved.length===0 ? true : "moved: "+moved.slice(0,4).join(","));
-    await q.close();
-  }
+  // A circle again, and now with a picture in it. The case and the sleeve were both
+  // standing in for art that did not exist; there is one per collection now, and a
+  // picture wants the plainest frame there is.
+  say("  each a circle of "+lay.dims+", in a "+Math.round(lay.tap)+"px target",
+    lay.round && lay.tap>=44);
+  // the lean went with the sleeve: a circle has no up, so there is nothing to lean
+  say("  and none of them leaning", lay.tilts===0);
+
+  // every collection carries its own picture, with the glyph still underneath it
+  const moodart=await p.evaluate(()=>[...document.querySelectorAll(".mcirc")].map(x=>{
+    const i=x.querySelector(".mco img"), g=x.querySelector(".mco .facefb svg");
+    return {mode:x.dataset.mode, src:i?i.getAttribute("src"):"",
+      torn:!!i && i.complete && i.naturalWidth===0,
+      drawn:!!i && i.complete && i.naturalWidth>0, glyph:!!g};}));
+  const noArt=moodart.filter(a=>!a.src).map(a=>a.mode);
+  say("every collection has a picture of its own ("+moodart.length+")",
+    noArt.length===0 ? true : noArt.join(", "));
+  say("  named for the collection it belongs to",
+    moodart.every(a=>a.src==="moods/"+a.mode+".jpg"));
+  const torn=moodart.filter(a=>a.torn).map(a=>a.mode);
+  say("  none of them torn", torn.length===0 ? true : torn.join(", "));
+  say("  with the glyph still under it, for one that will not load",
+    moodart.every(a=>a.glyph));
+  { const fs=require("fs"), path=require("path");
+    const dir=path.join(__dirname,"..","moods");
+    const missing=moodart.filter(a=>!fs.existsSync(path.join(dir,a.mode+".jpg"))).map(a=>a.mode);
+    say("  and every file is on disk",
+      missing.length===0 ? true : missing.join(", "));
+    const extra=fs.readdirSync(dir).filter(f=>/\.jpg$/.test(f))
+      .filter(f=>!moodart.some(a=>a.mode+".jpg"===f));
+    say("  with none left over", extra.length===0 ? true : extra.join(", ")); }
+
   say("  and no label cut off"+(lay.clipped.length?": "+lay.clipped.join(", "):""), lay.clipped.length===0);
 
   // the heading is the control that opens the rest, chevron and all, and it has to be

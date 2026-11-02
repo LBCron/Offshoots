@@ -527,9 +527,12 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         +(off.length?" — "+off.map(show).join(", "):" ("+ways.glyph+"px glyph, "
           +ways.gap+" apart, "+ways.label.split("/")[0]+" label)"),
         off.length===0);
-      // a case and a portrait: one is square with a hinge, the other is round
-      say("  and only the sleeve differs ("+ways.radius+" vs "+arts.radius+")",
-        ways.radius!=="50%" && arts.radius==="50%");
+      // They are one component again. The collections were a jewel case and then a
+      // record sleeve, both standing in for art that did not exist; it does now, and a
+      // picture wants the same round frame the artists wear. So the shape that used to
+      // be the one deliberate difference is the last thing that had to come back.
+      say("  including the shape, which is round on both ("+ways.radius
+        +" vs "+arts.radius+")", ways.radius==="50%" && arts.radius==="50%");
       // the heading above each row carries the same weight: a lighter one on either side
       // would say the rows rank differently when they do not
       say("  and their headings match"+(ways.head===arts.head?" ("+ways.head+")":": "

@@ -736,6 +736,10 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 /* the mode list: the energy colour that used to fill a chip now tints its icon tile */
 .modelist .listrow .lrico{color:var(--lvc)}
 .modelist .listrow .lrico svg{width:28px;height:28px}
+/* the same picture as the circle upstairs, in the disc the glyph had */
+.modelist .listrow .lrico.hasimg{border-radius:50%;background:var(--lvc)}
+.modelist .listrow .lrico.hasimg .facefb{color:#fff}
+.modelist .listrow .lrico.hasimg .facefb svg{width:22px;height:22px}
 .moderow{--lvc:#9aa0a6}
 .moderow.lv1{--lvc:#7aa2f7}
 .moderow.lv2{--lvc:#5bbda4}
@@ -851,37 +855,30 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 .acirc .aco.hasimg{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
   0 1px 3px rgb(0 0 0 / .26)}
 
-/* ---------- the collections, as record sleeves ----------
-   These were jewel cases: a hinge strip down the left edge and a portrait format. At
-   this size that reads as a book, and the panel already has a shelf of actual books two
-   sections below under Go deeper. Two things that are not the same should not look the
-   same, and the one with a real spine should be the one with a spine drawn on it.
-   So: square, flat, no hinge. A sleeve rather than a case. It keeps the level colour,
-   the white glyph and the small lean, so a collection is still the same collection, and
-   it loses the one detail that made it a book. */
-.mcirc .mco{position:relative;width:84px;height:84px;border-radius:4px;overflow:hidden;
-  transform:rotate(var(--tilt,0deg));
-  background:linear-gradient(160deg,color-mix(in srgb,var(--lvc) 82%,#fff) 0%,
-    var(--lvc) 58%,color-mix(in srgb,var(--lvc) 76%,#000) 100%);
-  box-shadow:0 1px 1px rgb(0 0 0 / .26), 0 3px 6px rgb(0 0 0 / .20),
-    0 8px 18px rgb(0 0 0 / .22),
-    inset 0 0 0 .5px rgb(255 255 255 / .16)}
-/* One soft corner highlight, the way card stock catches the light above it, kept well
-   under what the plastic had: paper does not glint. */
-.mcirc .mco::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:
-    linear-gradient(128deg,
-      rgb(255 255 255 / .13) 0%, rgb(255 255 255 / .05) 16%,
-      rgb(255 255 255 / 0) 34%),
-    linear-gradient(0deg,
-      rgb(0 0 0 / .10) 0%, rgb(0 0 0 / 0) 24%)}
+/* ---------- the collections, as circles ----------
+   A circle, then a jewel case, then a record sleeve, and back to a circle. The case and
+   the sleeve were both standing in for art that did not exist: a shape drawn to say
+   "there is a record in here" because there was nothing to show. There is now, one
+   picture per collection, and a picture wants the simplest frame you can give it. The
+   round one is also what the artists downstairs wear, so the two rows read as a pair
+   again rather than as squares above circles.
+
+   The glyph stays underneath. A picture that fails to load uncovers the symbol it
+   replaced, which is how every other image in this panel behaves. */
+.mcirc .mco{position:relative;width:84px;height:84px;border-radius:50%;overflow:hidden;
+  background:var(--lvc);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
+    0 1px 3px rgb(0 0 0 / .26)}
+.mcirc .mco img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  display:block;z-index:1}
+.mcirc .mco .facefb{position:absolute;inset:0;display:grid;place-items:center;z-index:0;
+  color:#fff}
+.mcirc .mco .facefb svg{width:41px;height:41px}
 .mcirc .mco svg,.acirc .aco svg{width:41px;height:41px;display:block}
 .acirc:hover .aco,.acirc:focus-visible .aco{transform:scale(1.045)}
 .acirc:active .aco{transform:scale(.95)}
-/* the lean is part of the case, so every other transform has to carry it: a bare
-   scale() here would stand the case up for the length of the press and sit it back down */
-.mcirc:hover .mco,.mcirc:focus-visible .mco{transform:rotate(var(--tilt,0deg)) scale(1.045)}
-.mcirc:active .mco{transform:rotate(var(--tilt,0deg)) scale(.95)}
+.mcirc:hover .mco,.mcirc:focus-visible .mco{transform:scale(1.045)}
+.mcirc:active .mco{transform:scale(.95)}
 .mcirc:focus-visible .mco,.acirc:focus-visible .aco{
   box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 55%,transparent)}
 .mclbl,.aclbl{font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--fg);
@@ -4638,7 +4635,13 @@ const svcName = ()=> SVC==="spotify" ? "Spotify" : SVC==="qobuz" ? "Qobuz" : "Ap
 // Phosphor Fill, MIT. One symbol per kind of act, so a row of artists reads at a glance:
 // who sings, who plays, who is a whole band, who makes it in a room on their own.
 const ROLEICON={"band":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M168,144a40,40,0,1,1-40-40A40,40,0,0,1,168,144ZM64,56A32,32,0,1,0,96,88,32,32,0,0,0,64,56Zm128,0a32,32,0,1,0,32,32A32,32,0,0,0,192,56Z\" opacity=\"0.2\"/><path d=\"M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1,0-16,24,24,0,1,0-23.24-30,8,8,0,1,1-15.5-4A40,40,0,1,1,219,117.51a67.94,67.94,0,0,1,27.43,21.68A8,8,0,0,1,244.8,150.4ZM190.92,212a8,8,0,1,1-13.85,8,57,57,0,0,0-98.15,0,8,8,0,1,1-13.84-8,72.06,72.06,0,0,1,33.74-29.92,48,48,0,1,1,58.36,0A72.06,72.06,0,0,1,190.92,212ZM128,176a32,32,0,1,0-32-32A32,32,0,0,0,128,176ZM72,120a8,8,0,0,0-8-8A24,24,0,1,1,87.24,82a8,8,0,1,0,15.5-4A40,40,0,1,0,37,117.51,67.94,67.94,0,0,0,9.6,139.19a8,8,0,1,0,12.8,9.61A51.6,51.6,0,0,1,64,128,8,8,0,0,0,72,120Z\"/></svg>","voice":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M156.5,151,59,222.45a8,8,0,0,1-10.38-.79l-14.3-14.3A8,8,0,0,1,33.55,197L105,99.5l0,0A64,64,0,0,0,156.48,151Z\" opacity=\"0.2\"/><path d=\"M168,16A72.07,72.07,0,0,0,96,88a73.29,73.29,0,0,0,.63,9.42L27.12,192.22A15.93,15.93,0,0,0,28.71,213L43,227.29a15.93,15.93,0,0,0,20.78,1.59l94.81-69.53A73.29,73.29,0,0,0,168,160a72,72,0,1,0,0-144Zm56,72a55.72,55.72,0,0,1-11.16,33.52L134.49,43.16A56,56,0,0,1,224,88ZM54.32,216,40,201.68,102.14,117A72.37,72.37,0,0,0,139,153.86ZM112,88a55.67,55.67,0,0,1,11.16-33.51l78.34,78.34A56,56,0,0,1,112,88Zm-2.35,58.34a8,8,0,0,1,0,11.31l-8,8a8,8,0,1,1-11.31-11.31l8-8A8,8,0,0,1,109.67,146.33Z\"/></svg>","mc":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M168,64v64a40,40,0,0,1-40,40h0a40,40,0,0,1-40-40V64a40,40,0,0,1,40-40h0A40,40,0,0,1,168,64Z\" opacity=\"0.2\"/><path d=\"M128,176a48.05,48.05,0,0,0,48-48V64a48,48,0,0,0-96,0v64A48.05,48.05,0,0,0,128,176ZM96,64a32,32,0,0,1,64,0v64a32,32,0,0,1-64,0Zm40,143.6V240a8,8,0,0,1-16,0V207.6A80.11,80.11,0,0,1,48,128a8,8,0,0,1,16,0,64,64,0,0,0,128,0,8,8,0,0,1,16,0A80.11,80.11,0,0,1,136,207.6Z\"/></svg>","guitar":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M155.2,100.8c-23-23-55.57-27.63-72.8-10.4a34.21,34.21,0,0,0-7.61,11.66,16.23,16.23,0,0,1-14.72,10C48,112.44,37,116.61,28.8,124.8,7.6,146,13.33,186.12,41.6,214.4s68.39,34,89.6,12.8C139.39,219,143.56,208,144,195.93a16.23,16.23,0,0,1,10-14.72,34.21,34.21,0,0,0,11.66-7.61C182.83,156.37,178.17,123.78,155.2,100.8ZM112,168a24,24,0,1,1,24-24A24,24,0,0,1,112,168Z\" opacity=\"0.2\"/><path d=\"M249.66,46.34l-40-40a8,8,0,0,0-11.31,11.32L200.69,20,140.52,80.16C117.73,68.3,92.21,69.29,76.75,84.74a42.27,42.27,0,0,0-9.39,14.37A8.24,8.24,0,0,1,59.81,104c-14.59.49-27.26,5.72-36.65,15.11C11.08,131.22,6,148.6,8.74,168.07,11.4,186.7,21.07,205.15,36,220s33.34,24.56,52,27.22A71.13,71.13,0,0,0,98.1,248c15.32,0,28.83-5.23,38.76-15.16,9.39-9.39,14.62-22.06,15.11-36.65a8.24,8.24,0,0,1,4.92-7.55,42.12,42.12,0,0,0,14.37-9.39c15.45-15.46,16.44-41,4.58-63.77L236,55.31l2.34,2.34a8,8,0,1,0,11.32-11.31ZM160,167.93a26.12,26.12,0,0,1-8.95,5.83,24.24,24.24,0,0,0-15,21.89c-.36,10.46-4,19.41-10.43,25.88-8.44,8.43-21,11.95-35.36,9.89C75,229.25,59.73,221.19,47.27,208.73S26.75,181,24.58,165.81c-2-14.37,1.46-26.92,9.89-35.36C40.94,124,49.89,120.37,60.35,120h0a24.22,24.22,0,0,0,21.89-15,26.12,26.12,0,0,1,5.83-9c5.49-5.49,13-8.13,21.38-8.13a49.38,49.38,0,0,1,19.13,4.19L108.5,112.19a32,32,0,1,0,35.31,35.31l20.08-20.08C170.41,142.71,169.47,158.41,160,167.93Zm-10.4-61.48a72.9,72.9,0,0,1,5.93,6.75l-15.42,15.42a32.22,32.22,0,0,0-12.68-12.68l15.42-15.43A73,73,0,0,1,149.55,106.45ZM112,128a16,16,0,0,1,16,16h0a16,16,0,1,1-16-16Zm48.85-32.85a86.94,86.94,0,0,0-6.68-6L176,67.31,188.69,80l-21.83,21.82A86.94,86.94,0,0,0,160.86,95.14ZM200,68.68,187.32,56,212,31.31,224.69,44ZM93.66,194.33a8,8,0,0,1-11.31,11.32l-32-32a8,8,0,0,1,11.32-11.31Z\"/></svg>","keys":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M184,40V144H144V40ZM72,144h40V40H72Z\" opacity=\"0.2\"/><path d=\"M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM80,48h24v88H80Zm32,104a8,8,0,0,0,8-8V48h16v96a8,8,0,0,0,8,8h8v56H104V152Zm40-16V48h24v88ZM48,48H64v96a8,8,0,0,0,8,8H88v56H48ZM208,208H168V152h16a8,8,0,0,0,8-8V48h16V208Z\"/></svg>","player":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M208,164a28,28,0,1,1-28-28A28,28,0,0,1,208,164ZM52,168a28,28,0,1,0,28,28A28,28,0,0,0,52,168Z\" opacity=\"0.2\"/><path d=\"M212.92,17.69a8,8,0,0,0-6.86-1.45l-128,32A8,8,0,0,0,72,56V166.08A36,36,0,1,0,88,196V110.25l112-28v51.83A36,36,0,1,0,216,164V24A8,8,0,0,0,212.92,17.69ZM52,216a20,20,0,1,1,20-20A20,20,0,0,1,52,216ZM88,93.75V62.25l112-28v31.5ZM180,184a20,20,0,1,1,20-20A20,20,0,0,1,180,184Z\"/></svg>","dj":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,32a96,96,0,1,0,96,96A96,96,0,0,0,128,32Zm0,120a24,24,0,1,1,24-24A24,24,0,0,1,128,152Z\" opacity=\"0.2\"/><path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm0-144a56.06,56.06,0,0,0-56,56,8,8,0,0,1-16,0,72.08,72.08,0,0,1,72-72,8,8,0,0,1,0,16Zm72,56a72.08,72.08,0,0,1-72,72,8,8,0,0,1,0-16,56.06,56.06,0,0,0,56-56,8,8,0,0,1,16,0Zm-40,0a32,32,0,1,0-32,32A32,32,0,0,0,160,128Zm-48,0a16,16,0,1,1,16,16A16,16,0,0,1,112,128Z\"/></svg>","studio":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M200,40V216H56V40Z\" opacity=\"0.2\"/><path d=\"M136,120v96a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Zm64,72a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V200A8,8,0,0,0,200,192Zm24-32H208V40a8,8,0,0,0-16,0V160H176a8,8,0,0,0,0,16h48a8,8,0,0,0,0-16ZM56,160a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V168A8,8,0,0,0,56,160Zm24-32H64V40a8,8,0,0,0-16,0v88H32a8,8,0,0,0,0,16H80a8,8,0,0,0,0-16Zm72-48H136V40a8,8,0,0,0-16,0V80H104a8,8,0,0,0,0,16h48a8,8,0,0,0,0-16Z\"/></svg>","none":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,184a40,40,0,1,1-40-40A40,40,0,0,1,128,184Z\" opacity=\"0.2\"/><path d=\"M210.3,56.34l-80-24A8,8,0,0,0,120,40V148.26A48,48,0,1,0,136,184V98.75l69.7,20.91A8,8,0,0,0,216,112V64A8,8,0,0,0,210.3,56.34ZM88,216a32,32,0,1,1,32-32A32,32,0,0,1,88,216ZM200,101.25l-64-19.2V50.75L200,70Z\"/></svg>"};
-const PHOTO_DIR="artists/", COVER_DIR="covers/", FB_DIR="artists/fallbacks/";
+const PHOTO_DIR="artists/", COVER_DIR="covers/", FB_DIR="artists/fallbacks/",
+      MOOD_DIR="moods/";
+// Every collection has a picture of its own, named for the mode it belongs to. The glyph
+// stays underneath, so one that fails to load uncovers the symbol it replaced instead of
+// a torn icon, the way the portraits and the sleeves already behave.
+const moodArt = key => `<img src="${MOOD_DIR}${encodeURIComponent(key)}.jpg"`
+  + ` alt="" loading="lazy" decoding="async">`;
 // ---------- a stand-in where there is no portrait and no record ----------
 // 3,353 of the 4,850 acts the map names have neither a photo nor a sleeve, and the role
 // glyph has been carrying all of them: eight symbols across three and a half thousand
@@ -6426,17 +6429,8 @@ function modeSortHtml(){
 // anything keyed to position would re-lean a case that had not moved. Keyed to the mode
 // id, Wind down leans the same way for as long as it is called Wind down.
 //
-// A plain character sum clusters: ids of similar length and spelling land on neighbouring
-// angles and the row reads as a slope rather than a shelf. Multiplying by 31 per
-// character is the usual cheap way to spread them.
-function tiltOf(id){
-  let h=0;
-  for(let i=0;i<id.length;i++) h=(h*31 + id.charCodeAt(i)) >>> 0;
-  // 17 steps across the range, so there is a true upright among them and the rest are
-  // spread at a quarter of a degree, which is finer than the eye reads as a pattern
-  return (((h % 17) - 8) / 2).toFixed(2);
-}
-
+// The circles used to lean. That was for the jewel cases, which wanted to read as things
+// on a shelf; a circle has no up, so there is nothing to lean.
 function modeSect(){
   if(typeof MODES==="undefined") return "";
   // Apple Maps puts its Places on a row of filled circles you swipe through, with the
@@ -6445,9 +6439,9 @@ function modeSect(){
   // of its own.
   const circles=modeOrder(true).map(m=>
     `<button type="button" class="mcirc lv${m[5]||3}" data-mode="${esc(m[0])}"`
-    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}"`
-    + ` style="--tilt:${tiltOf(m[0])}deg">`
-    + `<i class="mco mi">${MODEICON[m[0]]||""}</i>`
+    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}">`
+    + `<i class="mco mi hasimg">${moodArt(m[0])}`
+    + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
     + `<span class="mclbl">${esc(m[1])}</span></button>`).join("");
   return sect("modes","Listening collections",
     `<div class="mrow" role="list">${circles}</div>`,
@@ -6459,7 +6453,8 @@ function modeListHtml(){
   const rows=modeOrderBy(modeSort()).map(m=>
     `<button type="button" class="listrow moderow lv${m[5]||3}" data-mode="${esc(m[0])}"`
     + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}">`
-    + `<i class="lrico mi">${MODEICON[m[0]]||""}</i>`
+    + `<i class="lrico mi hasimg">${moodArt(m[0])}`
+    + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
     + `<span class="lrlbl">${esc(m[1])}</span>${GOCHEV}</button>`).join("");
   return `<div class="listgrp modelist two">${rows}</div>`;
 }
