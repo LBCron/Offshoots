@@ -1842,7 +1842,7 @@ function appShareBtn(){
   return `<button type="button" class="shbtn wide" data-share aria-label="Share this app" title="Share this app">`
     + SHAREGLYPH + TICKGLYPH + `<span class="shlbl">Share this app</span></button>`;
 }
-// Two shortcuts into the map, not a second way to browse it: the map itself is the
+// Two shortcuts into the atlas, not a second way to browse it: the map itself is the
 // browser, and a list of 461 names repeated under it would be a worse one. Each row says
 // where it goes and, underneath, what you get for going there, which the bare count never
 // did. Roots is not among them any more. It was a third list of styles competing with the
@@ -1850,7 +1850,7 @@ function appShareBtn(){
 // itself is still at #roots for anyone who had it.
 function onMapSect(){
   const top=topIds();
-  return sect("onmap","On the map",
+  return sect("onmap","On the atlas",
     `<div class="listgrp sep">`
     + goRow("top","Most influential","Explore musical crossroads",top.length,
         ` data-page="top"`,`The ${top.length} styles that led to the most`)
@@ -1862,6 +1862,7 @@ function onMapSect(){
 function goRow(key,label,sub,count,attr,title){
   return `<button type="button" class="listrow lrtwo"${attr||""}`
     + ` title="${esc(title||label)}" aria-label="${esc(title||label)}">`
+    + rowIcon(key)
     + `<span class="lrtx"><b class="lrlbl">${esc(label)}</b>`
     + `<small class="lrsub">${esc(sub)}</small></span>`
     + (count!=null?`<em class="lrct">${count}</em>`:"")

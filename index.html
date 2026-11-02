@@ -494,7 +494,7 @@ body.open .pcnt{display:none}
    which told you how many of a thing there were but never what the thing was. These two
    go to places the map cannot show you, so they say so in words and keep the number as
    the smaller fact. No icon: the pair sits directly under the heading that names them. */
-.listrow.lrtwo{min-height:64px;align-items:center;gap:10px}
+.listrow.lrtwo{min-height:64px;align-items:center;gap:13px}
 .listrow .lrtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-align:left}
 .listrow .lrtx .lrlbl{flex:none}
 .listrow .lrsub{display:block;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);
@@ -1572,9 +1572,11 @@ a.wk span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sect.haslede .secthead{margin-bottom:3px}
 /* "See all" says what the chevron meant. Only where there is a fuller version to see. */
 .secthead.sectgo .seeall{font:400 var(--t-sub)/1 var(--f-body);color:var(--muted)}
-/* one line, whatever the heading beside it is called: "Listening collections" is long
-   enough to squeeze this into two, with the chevron stranded under the words */
-.secthead.sectgo .sectcv{gap:5px;flex:none;white-space:nowrap}
+/* One line, words then chevron. The box is a grid from when it held the chevron alone,
+   and a grid gives each child a row of its own: "See all" sat on one line with the
+   chevron stranded under it. Adding nowrap did nothing, because nothing was wrapping. */
+.secthead.sectgo .sectcv{display:flex;align-items:center;gap:5px;flex:none;
+  white-space:nowrap}
 .secthead.sectgo .seeall{white-space:nowrap}
 .secthead:not(.sectgo) .sectcv{display:none}
 .secthead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px}
@@ -1677,14 +1679,17 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
   height:.5px;background:var(--sep)}
 .medgrp > :nth-child(2n)::after{content:"";position:absolute;left:0;top:9px;bottom:9px;
   width:.5px;background:var(--sep)}
-/* no icon on these two, so the hairline runs under the text rather than clear of a glyph */
-.lrtwo + .lrtwo::before{left:14px}
+/* the hairline starts where the text does, clear of the glyph, the way every other
+   grouped list in the panel draws it */
 /* Explore has four sections where a style panel has six, and they are all lists rather
    than prose, so they sit a little closer than the panel's default rhythm. Close enough
    that the collections are in view, or nearly, before anyone scrolls. */
 .ovcard .sect{margin-top:26px}
-/* the fold under Explore sits tight to the title, like a style's own description */
-.ovfold{margin-top:2px;margin-bottom:4px}
+/* The fold sits tight under the title, like a style's own description does under its
+   name. The title's own bottom margin was doing nothing but holding the two apart. */
+.ovcard .bigttl{margin-bottom:0}
+.ovfold{margin-top:-2px;margin-bottom:4px}
+.ovfold summary{min-height:38px}
 .ovfold .abmore{min-height:var(--tap);padding:0;gap:6px;color:var(--muted);
   font-size:var(--t-sub)}
 .ovfold .abmore .lrlbl{flex:0 1 auto;font-size:var(--t-sub)}
@@ -6315,7 +6320,7 @@ function appShareBtn(){
   return `<button type="button" class="shbtn wide" data-share aria-label="Share this app" title="Share this app">`
     + SHAREGLYPH + TICKGLYPH + `<span class="shlbl">Share this app</span></button>`;
 }
-// Two shortcuts into the map, not a second way to browse it: the map itself is the
+// Two shortcuts into the atlas, not a second way to browse it: the map itself is the
 // browser, and a list of 461 names repeated under it would be a worse one. Each row says
 // where it goes and, underneath, what you get for going there, which the bare count never
 // did. Roots is not among them any more. It was a third list of styles competing with the
@@ -6323,7 +6328,7 @@ function appShareBtn(){
 // itself is still at #roots for anyone who had it.
 function onMapSect(){
   const top=topIds();
-  return sect("onmap","On the map",
+  return sect("onmap","On the atlas",
     `<div class="listgrp sep">`
     + goRow("top","Most influential","Explore musical crossroads",top.length,
         ` data-page="top"`,`The ${top.length} styles that led to the most`)
@@ -6335,6 +6340,7 @@ function onMapSect(){
 function goRow(key,label,sub,count,attr,title){
   return `<button type="button" class="listrow lrtwo"${attr||""}`
     + ` title="${esc(title||label)}" aria-label="${esc(title||label)}">`
+    + rowIcon(key)
     + `<span class="lrtx"><b class="lrlbl">${esc(label)}</b>`
     + `<small class="lrsub">${esc(sub)}</small></span>`
     + (count!=null?`<em class="lrct">${count}</em>`:"")

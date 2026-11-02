@@ -51,7 +51,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // on the grounds that the title covered it, which worked while there was one list.
   const groups=await p.$$eval("#panelBody .sect .secttl",e=>e.map(x=>x.textContent));
   say("three section headings: "+groups.join(" / "),
-    groups.join("/")==="On the map/Listening collections/Go deeper");
+    groups.join("/")==="On the atlas/Listening collections/Go deeper");
   say("  not Find: these are for when you do not know what you want", !/find/i.test(groups.join(" ")));
   // and each one says in a line what it is for, rather than leaving the heading to carry it
   const ledes=await p.$$eval("#panelBody .sect .sectlede",e=>e.map(x=>x.textContent));
@@ -294,7 +294,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     return {labels:rows.map(r=>r.querySelector(".lrlbl").textContent),
       subs:rows.map(r=>(r.querySelector(".lrsub")||{}).textContent||""),
       chevrons:rows.map(r=>!!r.querySelector(".lrcv")),
-      icons:rows.some(r=>!!r.querySelector(".lrico svg")),
+      icons:rows.every(r=>!!r.querySelector(".lrico svg")),
       oneCard:rows.every(r=>Math.round(r.getBoundingClientRect().width)===Math.round(gb.width)),
       radius:parseFloat(getComputedStyle(g).borderRadius),
       tap:Math.min(...rows.map(r=>Math.round(r.getBoundingClientRect().height))),
@@ -306,9 +306,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     !!grp && grp.labels.join("/")==="Most influential/Surprise me");
   say("  with a second line on each ("+(grp&&grp.subs.join(", "))+")",
     !!grp && grp.subs.every(c=>c.length>0));
-  // no icons on these two: they sit directly under a heading that names them, and a glyph
-  // beside each was a third thing to read in a row that already says it twice
-  say("  and no icon, unlike the library rows below", !!grp && grp.icons===false);
+  say("  with an icon on each, the same as the library rows below", !!grp && grp.icons===true);
   say("  in one card of radius "+(grp&&grp.radius), !!grp && grp.oneCard && grp.radius>=10);
   say("  rows at least "+(grp&&grp.tap)+"px", !!grp && grp.tap>=44);
   // Most influential opens a list; Surprise me is a destination, so it has no chevron
@@ -408,6 +406,13 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     e=>e.tagName==="BUTTON" && e.dataset.page==="modes" && !e.querySelector(".sectaside")));
   say("  saying so in words", await p.$eval(".sect-modes .secthead .seeall",
     e=>e.textContent==="See all"));
+  // on one line, words then chevron. The box was a grid from when it held the chevron
+  // alone, and a grid gives every child a row of its own: "See all" came out stacked on
+  // top of its own chevron at every phone width.
+  say("  on one line with its chevron", await p.$eval(".sect-modes .secthead",h=>{
+    const sa=h.querySelector(".seeall").getBoundingClientRect();
+    const cv=h.querySelector(".sectcv svg").getBoundingClientRect();
+    return Math.abs(sa.top-cv.top)<10 && cv.left>=sa.right-1;}));
   // and only there: the other two headings open nothing, so neither offers to
   say("  and nowhere else on the panel",
     (await p.$$("#panelBody .sect .seeall")).length===1);
