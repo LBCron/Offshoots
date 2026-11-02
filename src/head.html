@@ -1973,6 +1973,28 @@ a.am .amgo{display:none}
 /* and in a list row it keeps the 34px disc the glyph had */
 .listrow .lrico.hasimg{border-radius:50%}
 
+/* And where there is no record either, a silhouette: one of 144 anonymous figures, drawn
+   cream on transparent. Cream needs something to sit on, and the thing it already sits on
+   everywhere else in this app is the family's deep cover-art ground, so the disc takes
+   that. In dark mode that is the panel's own ground and the disc melts into it, which is
+   why it carries the same faint ring a sleeve does; in light mode it is a small deep
+   circle on a pale panel, which is what a record looks like there too.
+
+   The alternative was to mask the PNG and let it take the panel's colour, which is what
+   the artwork was cut for. It is refused from a file:// URL: the browser will load the
+   same file as an image and not as a mask, and this map is opened from a folder on a disk
+   often enough that a thing which only works when served is not a thing that works. */
+/* The ground has to be stated at every specificity the lifted photo ground is, which is
+   .acirc .aco.hasimg for the circles and .hasimg on its own elsewhere. Beaten by the
+   first of those, a cream figure in light mode went onto a pale disc and vanished. */
+.hasimg.hasfb,
+.acirc .aco.hasfb,
+.listrow .lrico.hasfb{background:var(--tint-d,#2b2b2f)}
+.acirc .aco.hasfb,.listrow .lrico.hasfb{border-radius:50%}
+.acirc .aco.hasfb{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
+  0 1px 3px rgb(0 0 0 / .26)}
+/* square art in a square box, so cover crops nothing but the corners the disc takes */
+
 /* Where an artist has no portrait, one of their records stands in. It is drawn in the
    same disc as a face: the row is a row of artists, and giving the stand-ins their own
    shape split it into two kinds of thing when all it wanted was one.

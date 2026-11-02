@@ -167,8 +167,13 @@ const onPage=async(q,k)=>{ await until(q,k=>{
       return {chips:c.length, nowrap:getComputedStyle(r).flexWrap==="nowrap",
         scrolls:r.scrollWidth>r.clientWidth+1,
         oneLine:[...new Set(c.map(x=>Math.round(x.getBoundingClientRect().top)))].length===1,
-        // a symbol per kind of act, so a row of artists reads before you read a name
-        symbols:c.every(x=>!!x.querySelector(".aco svg") && /\br-\w+/.test(x.className)),
+        // Something in every disc, and the role on every circle. It used to be a symbol
+        // per kind of act in all of them; most now carry a photo, one of the act's
+        // sleeves, or a silhouette, and the symbol is what is left when there is none of
+        // those. The role class stays either way: it is what colours the row.
+        symbols:c.every(x=>{const a=x.querySelector(".aco");
+          return !!a && (!!a.querySelector("svg") || !!a.querySelector("img"))
+            && /\br-\w+/.test(x.className);}),
         round:c.every(x=>{const q=x.querySelector(".aco").getBoundingClientRect();
           return Math.abs(q.width-q.height)<=1 && q.width>=56;}),
         isBtn:!!h && h.tagName==="BUTTON" && h.dataset.page==="artists",
@@ -178,7 +183,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         tap:h?Math.round(h.getBoundingClientRect().height):0};});
     say("the key artists are one scrolling line of "+(row&&row.chips),
       !!row && row.nowrap && row.oneLine && row.scrolls);
-    say("  each a circle carrying a symbol for what the act is",
+    say("  each a circle carrying a face, a sleeve or a figure",
       !!row && row.symbols && row.round);
     // four circles landing exactly on the screen edge read as the end of the row, so the
     // tile is sized from the row and the fourth is always cut about in half
@@ -397,21 +402,21 @@ const onPage=async(q,k)=>{ await until(q,k=>{
           fill:getComputedStyle(a.querySelector(".lrico")).backgroundImage,
           ink:getComputedStyle(a.querySelector(".lrico")).color}));
         return {rows, roles:[...new Set(rows.map(r=>r.role))]};});
-      say("every artist on the page has a role circle with a symbol in it ("
+      say("every artist on the page has a disc of their own ("
         +pair.rows.length+" of them)",
-        pair.rows.length>3 && pair.rows.every(r=>r.glyph && /^r-[a-z]+$/.test(r.role)));
+        pair.rows.length>3 && pair.rows.every(r=>(r.glyph||r.photo)
+          && /^r-[a-z]+$/.test(r.role)));
       // the colour is in the glyph, so that is where to look for it
       say("  coloured by what the act is, not all alike ("+pair.roles.length+" kinds here)",
         pair.roles.length>1 && new Set(pair.rows.map(r=>r.ink)).size>1);
-      // Two cases, and the difference is the whole design. 520 of the key artists have a
-      // portrait and the rest never will, so the glyph is not a placeholder: it is what
-      // a row looks like when there is no face, and it has to look deliberate.
-      // Without a photo: the glyph alone. This went round twice, a coloured glyph on
-      // neutral grey and then a filled circle with a white glyph, before landing here,
-      // because at 34px a disc is mostly disc.
-      const bare=pair.rows.filter(r=>!r.photo), faced=pair.rows.filter(r=>r.photo);
-      say("  "+bare.length+" without a photo, each the glyph alone",
-        bare.length>0 && bare.every(r=>!/gradient/.test(r.fill)
+      // Three cases now, and the differences are the design. A portrait where there is
+      // one; one of their records where there is not; and a silhouette where there is
+      // neither, which is most of them. The glyph is what is left when even that is
+      // missing, which means the whole folder is gone.
+      const faced=pair.rows.filter(r=>r.photo);
+      const bare=pair.rows.filter(r=>!r.photo);
+      say("  "+bare.length+" with no image of any kind left, each the glyph alone",
+        bare.every(r=>!/gradient/.test(r.fill)
           && !/rgb/.test(r.tinted.replace(/rgba\(0, 0, 0, 0\)/,""))));
       say("  and not white, which needs a disc to sit on",
         bare.every(r=>r.ink!=="rgb(255, 255, 255)"));
@@ -479,7 +484,13 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         const t=document.querySelector(tile); if(!t) return null;
         const co=t.querySelector(circ), l=t.querySelector(lbl),
               r=document.querySelector(row), h=document.querySelector(head),
-              sv=co.querySelector("svg"), cv=h&&h.querySelector(".sectcv svg");
+              cv=h&&h.querySelector(".sectcv svg");
+        // whichever circle in this row still shows a symbol: most of the artists now
+        // carry a photo, a sleeve or a silhouette instead, and the first one in the row
+        // used to be assumed to be a glyph and crashed the check when it was not
+        const sv=[...document.querySelectorAll(circ)]
+          .map(x=>x.querySelector(":scope > svg")).find(Boolean)
+          || co.querySelector("svg");
         // the chevron is a sibling of the title, not inside it: measure type off whichever
         // element carries the words, and the chevron off the heading as a whole
         const ht=(h&&h.querySelector(".secttl"))||h;
@@ -488,7 +499,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         // measures bigger than it is: the ways in lean now, and their 41px glyph came
         // back as 43.4. The laid-out width is what the two rows have to agree on.
         const lay=e=>+parseFloat(cs(e).width).toFixed(1);
-        return {tile:px(t), circle:px(co), glyph:lay(sv), gap:cs(r).gap,
+        return {tile:px(t), circle:px(co), glyph:sv?lay(sv):0, gap:cs(r).gap,
           label:cs(l).fontSize+"/"+cs(l).fontWeight,
           stack:cs(t).gap, radius:cs(co).borderRadius,
           head:ht?cs(ht).fontSize+"/"+cs(ht).fontWeight:"none",
@@ -507,7 +518,11 @@ const onPage=async(q,k)=>{ await until(q,k=>{
       // the glyph, the gaps and the label. What is now deliberately different is the
       // sleeve itself, and that difference is the point, so it gets its own check rather
       // than being quietly dropped from the list.
-      const off=["tile","glyph","gap","label","stack"].filter(k=>!same(k));
+      // glyph only where both rows still have one to measure: the artists row shows a
+      // symbol now only when an act has no photo, no sleeve and no silhouette either
+      const keys=["tile","gap","label","stack"].concat(
+        ways.glyph&&arts.glyph ? ["glyph"] : []);
+      const off=keys.filter(k=>!same(k));
       say("the ways in and key artists rows are laid out the same"
         +(off.length?" — "+off.map(show).join(", "):" ("+ways.glyph+"px glyph, "
           +ways.gap+" apart, "+ways.label.split("/")[0]+" label)"),
@@ -568,6 +583,118 @@ const onPage=async(q,k)=>{ await until(q,k=>{
           row==="https://music.apple.com/us/artist/"+ID);
       }
       await q.close(); } }
+
+  // ---- the stand-in, where there is no portrait and no record ----
+  // 3,353 of the 4,850 acts the map names have neither, and eight role glyphs were
+  // carrying all of them: a panel could show four circles wearing the same microphone.
+  // These are 144 anonymous silhouettes, and the claims worth holding are that nobody who
+  // has a real image loses it, that a name always draws the same one, and that the file
+  // named is a file that exists.
+  const fs=require("fs"), path=require("path");
+  const FBDIR=path.join(__dirname,"..","artists","fallbacks");
+  const cat=JSON.parse(fs.readFileSync(path.join(FBDIR,"catalog.json"),"utf8"));
+  const known=new Set(cat.entries.map(e=>e.file));
+  say("the library is on disk and matches its catalog ("+cat.entries.length+")",
+    cat.entries.every(e=>fs.existsSync(path.join(FBDIR,e.file))));
+  { const hash=require("crypto").createHash;
+    const wrong=cat.entries.filter(e=>hash("sha256")
+      .update(fs.readFileSync(path.join(FBDIR,e.file))).digest("hex")!==e.sha256);
+    say("  every file byte for byte what was handed over",
+      wrong.length===0 ? true : wrong.slice(0,3).map(e=>e.file).join(", ")); }
+
+  const PHONE={width:393,height:852,isMobile:true,hasTouch:true,deviceScaleFactor:2};
+  { const q=await b.newPage({viewport:PHONE});
+    await q.goto(URL+"#acidhouse"); await selected(q);
+    await q.click("#grab").catch(()=>{}); await opened(q);
+    const head=await q.$('[data-page="artists"]');
+    if(head){ await head.click(); await onPage(q,"artists"); }
+    const rows=await q.evaluate(()=>{
+      const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden).pop();
+      return [...u.querySelectorAll("a.amrow[data-name]")].map(a=>{
+        const i=a.querySelector(".lrico"), img=i&&i.querySelector("img");
+        return {name:a.dataset.name, fb:!!i&&i.classList.contains("hasfb"),
+          cov:!!i&&i.classList.contains("hascov"),
+          src:img?img.getAttribute("src"):"",
+          glyph:!!i&&!!i.querySelector(".facefb svg,:scope > svg"),
+          torn:!!img && img.complete && img.naturalWidth===0,
+          w:img?img.naturalWidth:0}; }); });
+    const fbs=rows.filter(r=>r.fb);
+    say("the page draws "+fbs.length+" stand-ins among "+rows.length+" artists", fbs.length>0);
+    say("  every one of them a file in the catalog",
+      fbs.every(r=>known.has(r.src.split("/").pop())));
+    say("  none of them torn", fbs.every(r=>!r.torn && r.w===256));
+    // the silhouette is cut out of its square, so a symbol behind it shows through the
+    // gaps between an arm and a body and the row wears both at once
+    say("  and no glyph showing through the gaps", fbs.every(r=>!r.glyph));
+    // nobody who has a real image may lose it to one
+    const D=require("../src/data.js");
+    const stolen=fbs.filter(r=>(D.PHOTO||{})[r.name] || (D.COVERART||{})[r.name]);
+    say("  and nobody with a photo or a sleeve was given one",
+      stolen.length===0 ? true : stolen.map(r=>r.name).join(", "));
+    await q.close(); }
+
+  // the same name, the same figure: in the circle row, in the list, and on a fresh load
+  { const want=["Phuture","Mr. Fingers","DJ Pierre"];
+    const seen=[];
+    for(let pass=0;pass<2;pass++){
+      const q=await b.newPage({viewport:PHONE});
+      await q.goto(URL+"#acidhouse"); await selected(q);
+      await q.click("#grab").catch(()=>{}); await opened(q);
+      const circles=await q.evaluate(n=>Object.fromEntries(
+        [...document.querySelectorAll("a.acirc[data-name]")]
+          .filter(a=>n.indexOf(a.dataset.name)>=0)
+          .map(a=>[a.dataset.name,(a.querySelector(".hasfb img")||{}).getAttribute
+            ? a.querySelector(".hasfb img").getAttribute("src") : ""])), want);
+      const head=await q.$('[data-page="artists"]');
+      if(head){ await head.click(); await onPage(q,"artists"); }
+      const list=await q.evaluate(n=>Object.fromEntries(
+        [...document.querySelectorAll("a.amrow[data-name]")]
+          .filter(a=>n.indexOf(a.dataset.name)>=0)
+          .map(a=>{const i=a.querySelector(".hasfb img");
+            return [a.dataset.name, i?i.getAttribute("src"):""];})), want);
+      seen.push({circles,list});
+      await q.close();
+    }
+    const [a,c]=seen;
+    const same=Object.keys(a.list).filter(n=>a.list[n] && a.circles[n])
+      .every(n=>a.circles[n]===a.list[n]);
+    note("drawn for "+Object.keys(a.list).join(", "),
+      Object.values(a.list).map(v=>v.split("/").pop()).join(", "));
+    say("the row and the list draw the same figure for a name", same);
+    say("  and so does a second load", JSON.stringify(a.list)===JSON.stringify(c.list)); }
+
+  // the pool comes from the role table the app already keeps, not from the name or the
+  // style: a band gets a group, a DJ gets a DJ, and anything unstated gets a plain figure
+  { const D=require("../src/data.js");
+    const pick=n=>{ let h=2166136261;
+      for(let i=0;i<n.length;i++){ h^=n.charCodeAt(i); h=Math.imul(h,16777619); }
+      return h>>>0; };
+    const seq=(p,k)=>Array.from({length:k},(_,i)=>p+"-"+String(i+1).padStart(2,"0")+".png");
+    const pools={portrait:seq("solo",24), singer:seq("singer",24), keyboard:seq("keyboard",8),
+      dj:seq("dj",8), quartet:seq("group-04",12),
+      guitar:seq("acoustic",12).concat(seq("electric",16))};
+    const role={band:"quartet",voice:"singer",mc:"singer",guitar:"guitar",
+      keys:"keyboard",dj:"dj",player:"portrait",studio:"portrait",none:"portrait"};
+    const names=new Set();
+    for(const l of Object.values(D.ROSTER||{})) for(const n of l) names.add(n);
+    const need=[...names].filter(n=>!(D.PHOTO||{})[n] && !(D.COVERART||{})[n]);
+    const tally={};
+    for(const n of need){ const r=(D.ROLE||{})[n]||"none";
+      const p=pools[role[r]||"portrait"];
+      const f=p[pick(n)%p.length];
+      if(!known.has(f)){ tally.MISSING=(tally.MISSING||0)+1; continue; }
+      tally[r]=(tally[r]||0)+1; }
+    note(need.length+" acts need one, by what the role table says", JSON.stringify(tally));
+    say("every one of them names a file that exists", !tally.MISSING);
+    // and the pools are used evenly enough that a panel is not four of the same figure
+    const spread={};
+    for(const n of need.filter(n=>((D.ROLE||{})[n]||"none")==="none")){
+      const p=pools.portrait, f=p[pick(n)%p.length];
+      spread[f]=(spread[f]||0)+1; }
+    const counts=Object.values(spread).sort((a,b)=>a-b);
+    say("  and the plain figures come up evenly ("+counts[0]+" to "
+      + counts[counts.length-1]+" across "+counts.length+" of 24)",
+      counts.length===24 && counts[counts.length-1] < counts[0]*1.6); }
 
   await b.close();
 })();
