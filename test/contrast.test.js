@@ -111,8 +111,19 @@ const parse=s=>{
   // heaviest of all. So this measures two things: that every string still reads on
   // whatever ground its family paints, and that no family is much heavier than the rest.
   const D=require("../src/data.js");
-  const one={};
-  for(const r of D.DATA){ if(!one[r[3]] && D.PLAY[r[0]]) one[r[3]]=r[0]; }
+  // A few styles per family, most promising first. The panel is what gets measured, and
+  // which artists it puts on the front is worked out at render time from the style's own
+  // note as well as its roster, so scoring the data here only gets close: the loop takes
+  // the next candidate when a panel turns out to show four photographs and no silhouette.
+  const cand={};
+  for(const r of D.DATA){
+    if(!D.PLAY[r[0]]) continue;
+    const who=(D.ROSTER||{})[r[0]]||[];
+    const n=who.slice(0,4).filter(a=>!(D.PHOTO||{})[a] && !(D.COVERART||{})[a]).length;
+    (cand[r[3]]=cand[r[3]]||[]).push({id:r[0], n});
+  }
+  for(const f in cand) cand[f].sort((a,b)=>b.n-a.n);
+  const one=Object.fromEntries(Object.entries(cand).map(([f,l])=>[f,l[0].id]));
   const fams=Object.keys(D.FAMSKIN).filter(f=>one[f]);
   say("every family has a style to measure ("+fams.length+" of "
     + Object.keys(D.FAMSKIN).length+")", fams.length===Object.keys(D.FAMSKIN).length);
@@ -120,14 +131,21 @@ const parse=s=>{
   for(const scheme of ["light","dark"]){
     const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,
       hasTouch:true,deviceScaleFactor:2,colorScheme:scheme});
-    const bad=[], grounds=[];
+    const bad=[], grounds=[], discs=[];
     let worst={r:99}, strings=0;
     for(const fam of fams){
-      const p=await ctx.newPage();
-      await p.goto(URL+"#"+one[fam]); await ready(p);
-      await until(p,()=>document.body.classList.contains("open")).catch(()=>{});
-      await settle(p);
-      const r=await p.evaluate(()=>{
+      // up to three tries for a panel that actually puts a silhouette on the front
+      let p, r, tries=0;
+      for(const c of cand[fam].slice(0,3)){
+        tries++;
+        if(p) await p.close();
+        p=await ctx.newPage();
+        await p.goto(URL+"#"+c.id); await ready(p);
+        await until(p,()=>document.body.classList.contains("open")).catch(()=>{});
+        await settle(p);
+        if(await p.$(".hasfb")) break;
+      }
+      r=await p.evaluate(()=>{
         const num=c=>{ const n=(c.match(/[\d.]+/g)||[]).map(Number);
           const rgb=/color\(/.test(c) ? n.slice(0,3).map(v=>v*255) : n.slice(0,3);
           const a=/color\(/.test(c) ? (n.length>3?n[3]:1) : (n.length>3?n[3]:1);
@@ -181,7 +199,13 @@ const parse=s=>{
             parseFloat(cs.fontSize), +cs.fontWeight, e.textContent.trim().slice(0,20)]);
         });
         const card=document.querySelector("#panelBody .pcard");
-        return {rows:out, ground:bgOf(card||document.getElementById("panelBody"),[0,0,0]),
+        // the disc a silhouette sits on, and the colour the figure is flooded with
+        const disc=document.querySelector(".hasfb");
+        const cs=disc?getComputedStyle(disc):null;
+        const fl=getComputedStyle(document.querySelector("#fbtint feFlood"));
+        return {rows:out, disc:cs?cs.backgroundColor:"",
+          fig:fl.floodColor||fl.getPropertyValue("flood-color")||"",
+          ground:bgOf(card||document.getElementById("panelBody"),[0,0,0]),
           map:getComputedStyle(document.body).backgroundColor};
       });
       strings+=r.rows.length;
@@ -192,6 +216,10 @@ const parse=s=>{
         if(v<worst.r) worst={r:v, fam, cls, txt};
       });
       grounds.push({fam, vsMap:ratio(parse(r.ground),parse(r.map))});
+      if(r.disc && r.fig){
+        discs.push({fam, step:ratio(parse(r.disc),parse(r.ground)),
+          fig:ratio(parse(r.fig),parse(r.disc))});
+      }
       await p.close();
     }
     say(scheme+" panels: "+strings+" strings across "+fams.length
@@ -212,6 +240,20 @@ const parse=s=>{
     const spread=+(hi.vsMap/lo.vsMap).toFixed(2);
     say("  and no family is much heavier than the rest ("+spread+"x "
       + "between lightest and darkest)", spread <= (scheme==="light" ? 1.35 : 3));
+
+    // ---- the silhouette disc ----
+    // Not type, so AA does not apply; what has to hold is that you can see it. The disc
+    // was the panel's own raised ground, which on a tinted panel is a shade of the wash
+    // the panel already is: the circle disappeared and the figure floated on the page
+    // with nothing under it.
+    discs.sort((a,b)=>a.step-b.step);
+    const faint=discs[0], flat=discs.slice().sort((a,b)=>a.fig-b.fig)[0];
+    say(scheme+" discs: all "+discs.length+" of "+fams.length
+      + " families show a circle (faintest "
+      + (faint&&faint.fam)+" at "+(faint&&faint.step)+":1 against the panel)",
+      discs.length===fams.length && faint.step>=1.25);
+    say("  with a figure you can read on it (flattest "+(flat&&flat.fam)+" at "
+      + (flat&&flat.fig)+":1)", !!flat && flat.fig>=2.5);
     await ctx.close();
   }
 

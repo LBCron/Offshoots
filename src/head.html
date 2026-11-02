@@ -1418,12 +1418,21 @@ aside#panel{transition:background .25s}
    now lands between 1.11 and 1.13 against white where they used to run 9.2 to 19.4, so no
    family is heavier than another. The pair is chosen here rather than in script, like
    every other palette in this file. */
-aside#panel.tinted{ --tint:var(--tint-l); --ink:var(--ink-l); --acc:var(--acc-l); }
+aside#panel.tinted{ --tint:var(--tint-l); --ink:var(--ink-l); --acc:var(--acc-l);
+  /* the disc a silhouette sits on, and the figure on it. A third of the family's accent
+     stirred into its ground: solid, a plain step away from the panel so the circle is
+     always there to see, and the same hue so it belongs to the family rather than being
+     dropped on it. The figure takes the accent at full strength. */
+  --fbdisc:color-mix(in srgb,var(--acc) 30%,var(--tint)); --fbink:var(--acc); }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) aside#panel.tinted{
-    --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d); } }
+    --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d);
+    /* a fifth, not a third, and the type rather than the accent: four families carry a
+       bright accent in the dark and a disc of it would be the loudest thing on the page */
+    --fbdisc:color-mix(in srgb,var(--ink) 20%,var(--tint)); --fbink:var(--ink); } }
 :root[data-theme="dark"] aside#panel.tinted{
-  --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d); }
+  --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d);
+  --fbdisc:color-mix(in srgb,var(--ink) 20%,var(--tint)); --fbink:var(--ink); }
 /* --tint is the ground, --ink the type, --acc the link colour; the rest is derived */
 aside#panel.tinted{
   --panel:var(--tint); --fg:var(--ink); --accent:var(--acc); --accent-fg:var(--tint);
@@ -1988,11 +1997,13 @@ a.am .amgo{display:none}
 #fbtint{position:absolute;width:0;height:0;overflow:hidden}
 #fbtint feFlood{flood-color:var(--fbink,var(--muted))}
 .hasfb img{filter:url(#fbink)}
-/* the disc is the panel's own raised ground, the same one a photo gets, so the gaps the
-   artwork leaves between an arm and a body show the page through */
+/* The disc is its own solid colour and not the panel's raised ground. On a tinted panel
+   that ground is a shade of the same wash the panel is, so the circle was invisible and
+   the figure floated on the page with nothing under it. --fbdisc is a step away from the
+   panel in the family's own accent, so there is always a circle there. */
 .hasimg.hasfb,
 .acirc .aco.hasfb,
-.listrow .lrico.hasfb{background:var(--fill2)}
+.listrow .lrico.hasfb{background:var(--fbdisc,var(--fill))}
 .acirc .aco.hasfb,.listrow .lrico.hasfb{border-radius:50%}
 /* square art in a square box, so cover crops nothing but the corners the disc takes */
 
