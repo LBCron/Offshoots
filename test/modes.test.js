@@ -9,6 +9,8 @@
 // loud it is, two abreast without clipping a label, and a tap that pushes a page of
 // twelve picks you can select from.
 const {chromium}=require("playwright");
+const DATA=require(require("path").join(__dirname,"..","src","data.js"));
+const MODESIZE=k=>{ const m=DATA.MODES.find(x=>x[0]===k); return m?m[4].length:-1; };
 const skipWelcome=require("./_hello");
 const {settle,until,shown,arm}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
@@ -305,7 +307,9 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   say("  the size of the cover art below it ("+(mark&&mark.art)+")",
     !!mark && mark.art>0 && Math.abs(mark.w-mark.art)<=2);
   say("  coloured by how loud it is (lv"+pg.lvc+")", /^[1-5]$/.test(pg.lvc||""));
-  say("  listing "+pg.picks+" picks", pg.picks===12);
+  // the whole collection, whatever size it is: these ran to twelve when twelve was all
+  // there was, and a count written into the test is a count that stops being true
+  say("  listing "+pg.picks+" picks", pg.picks===MODESIZE(String(pg.key||"").replace("mode:","")));
   say("  starting at the top", pg.top===0);
   say("  and a way back ("+pg.backLbl+")", pg.back && pg.backLbl==="Offshoots");
   // every pick carries its playlist's cover, or, where there is no file, the same square
@@ -430,8 +434,8 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   await d.click("#panelBack"); await onPage(d,"root");
   say("and clips nothing"+(dl.clipped.length?": "+dl.clipped.join(", "):""), dl.clipped.length===0);
   await d.click('[data-mode="sit"]'); await onPage(d,"mode:sit");
-  say("tapping one pushes a page of picks",
-    (await d.$$eval(".ppage:not([hidden]) .picks [data-go]",e=>e.length))===12);
+  say("tapping one pushes a page of picks ("+MODESIZE("sit")+")",
+    (await d.$$eval(".ppage:not([hidden]) .picks [data-go]",e=>e.length))===MODESIZE("sit"));
   say("  which stays inside the panel", await d.evaluate(()=>{
     const pg=document.querySelector(".ppage:not([hidden])"), b=document.getElementById("panelBody");
     return Math.round(pg.getBoundingClientRect().width)<=Math.round(b.getBoundingClientRect().width);}));

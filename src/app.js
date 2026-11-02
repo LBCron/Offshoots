@@ -791,7 +791,7 @@ function syncBack(){
 function select(id,{scroll=true,smooth=true,keepPlace=false,repaint=true}={}){
   if(!byId[id]) return;
   const switched = state.sel!==id;
-  if(switched && !GOINGBACK) pushTrail();
+  if(switched && !GOINGBACK){ pushTrail(); bumpStyle(id); }
   state.sel=id; closeNav();
   // only a real change of style brings a dismissed sheet back; re-selects from
   // resize, zoom and setOpen must leave it where the user put it
@@ -1503,6 +1503,27 @@ $("panel").addEventListener("click",e=>{
   const sv=e.target.closest("[data-svc]"); if(sv){ setSvc(sv.dataset.svc); return; }
   { const pg=e.target.closest("[data-page]");
     if(pg){ e.preventDefault(); pushPage(pg.dataset.page); return; } }
+  // one of this collection, rather than one of the map: the point of standing in a
+  // collection is that everything in it already fits
+  { const pa=e.target.closest("[data-pickany]");
+    if(pa){ e.preventDefault();
+      const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===pa.dataset.pickany);
+      const pool=m ? m[4].map(([id])=>id).filter(id=>byId[id] && id!==state.sel) : [];
+      const pick=pool[Math.floor(Math.random()*pool.length)];
+      if(pick){ closeNav(); select(pick); panelTop(); } return; } }
+  // swapped where they stand, like the sort on the collections list: rebuilding the page
+  // would throw away the scroll, and re-sorting is for looking at the same set again
+  { const ps=e.target.closest("[data-psort]");
+    if(ps){ e.preventDefault();
+      setPickSort(ps.dataset.psort);
+      const seg=ps.closest(".segctl");
+      if(seg) seg.querySelectorAll("[data-psort]").forEach(b=>
+        b.setAttribute("aria-selected", String(b===ps)));
+      const page=ps.closest(".ppage"), list=page&&page.querySelector(".picks");
+      const m=page && typeof MODES!=="undefined"
+        && MODES.find(x=>"mode:"+x[0]===page.dataset.p);
+      if(list&&m){ list.innerHTML=modePicks(m); amUpgrade(); }
+      return; } }
   { const rr=e.target.closest("[data-random]");
     if(rr){ const pool=nodes.filter(n=>n.id!==state.sel);
       const pick=pool[Math.floor(Math.random()*pool.length)];
@@ -1761,7 +1782,7 @@ function setTint(fam){
 // a way in for people who know what they want the music to DO but not what to call it
 let MODE=null;
 function modePicks(m){
-  return m[4].map(([id,why])=>{
+  return pickOrder(m,pickSort()).map(([id,why])=>{
     const n=byId[id]; if(!n) return "";
     // the playlist's own cover, which is the thing you would recognise before you
     // recognised the name. Where there is no file the shared handler swaps in the tile
@@ -1919,6 +1940,25 @@ const MODEICON={"winddown":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" a
 // the page, and the row falls back to the plain order when it cannot be read. The full
 // list behind the heading keeps that plain order, so there is one place where the
 // twenty-six sit still and the colour runs quiet to loud down the page.
+// The same tally, for styles rather than collections. A collection now runs to forty-odd
+// entries, which is too many to read down every time, so the sort offers what this browser
+// keeps coming back to. Local, never sent anywhere, and the sort falls back to the
+// relevance order where there is nothing to go on, which is every first visit.
+const STYLEUSE_KEY="offshoots.styleuse";
+function styleUse(){
+  try{ const r=localStorage.getItem(STYLEUSE_KEY);
+    const o=r?JSON.parse(r):null;
+    return (o && typeof o==="object" && !Array.isArray(o)) ? o : {};
+  }catch(e){ return {}; }
+}
+function bumpStyle(k){
+  try{ const o=styleUse(); o[k]=(+o[k]||0)+1;
+    // halved at 40, like the collection tally: a count that only grows freezes the order
+    // around the first week's listening
+    if(o[k]>=40) for(const i in o){ const v=Math.floor((+o[i]||0)/2); if(v) o[i]=v; else delete o[i]; }
+    localStorage.setItem(STYLEUSE_KEY,JSON.stringify(o));
+  }catch(e){}
+}
 const MODEUSE_KEY="offshoots.modeuse";
 function modeUse(){
   try{ const r=localStorage.getItem(MODEUSE_KEY);
@@ -2033,10 +2073,55 @@ function wrapStack(card){
   return stack;
 }
 function resetPages(){ PSTACK=[]; }
+// Twelve picks fitted on a screen and needed no order but the one they were written in.
+// Forty do not, so the order is stated and chosen. Relevance is that written order, which
+// is the collection's own argument about what fits it best, and stays the default.
+const PICKSORT_KEY="offshoots.picksort";
+const PICKSORTS=[["fit","Relevance"],["az","A\u2013Z"],["used","Most used"]];
+function pickSort(){
+  try{ const v=localStorage.getItem(PICKSORT_KEY);
+    return PICKSORTS.some(p=>p[0]===v) ? v : "fit";
+  }catch(e){ return "fit"; }
+}
+function setPickSort(v){ try{ localStorage.setItem(PICKSORT_KEY,v); }catch(e){} }
+function pickOrder(m,how){
+  const list=m[4].filter(([id])=>byId[id]);
+  if(how==="az") return list.slice().sort((a,b)=>
+    byId[a[0]].name.localeCompare(byId[b[0]].name));
+  if(how==="used"){
+    // ties keep the relevance order, so an untouched browser reads top to bottom as
+    // written rather than scrambling into whatever order the ids happen to sit in
+    const use=styleUse();
+    return list.map((p,i)=>[p,i]).sort((a,b)=>
+      ((+use[b[0][0]]||0)-(+use[a[0][0]]||0)) || a[1]-b[1]).map(x=>x[0]);
+  }
+  return list;
+}
+function pickSortHtml(){
+  const now=pickSort();
+  return `<div class="segwrap psortwrap"><div class="segctl" role="tablist" aria-label="Sort this collection">`
+    + PICKSORTS.map(([k,lbl])=>
+        `<button type="button" role="tab" class="segopt"`
+        + ` data-psort="${k}" aria-selected="${k===now}">${esc(lbl)}</button>`).join("")
+    + `</div></div>`;
+}
+// A collection is a shelf of forty now, and picking off a shelf is work. This does the
+// picking: one of these, opened, which is the whole transaction most of the time. It takes
+// from the collection rather than from the map, so what it lands on is something that
+// belongs here, and every one of them has a playlist to play.
+function modeTop(m){
+  const n=m[4].filter(([id])=>byId[id]).length;
+  return `<div class="modetop">`
+    + `<button type="button" class="pickany" data-pickany="${esc(m[0])}">`
+    + `${ROWICON.random||""}<span class="palbl">Surprise me</span>`
+    + `<span class="pact">${n}</span></button>`
+    + pickSortHtml() + `</div>`;
+}
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);
   if(!m) return null;
-  return {title:m[2], icon:MODEICON[m[0]]||"", lv:m[5]||3, lede:m[3], html:`<div class="picks">${modePicks(m)}</div>`};
+  return {title:m[2], icon:MODEICON[m[0]]||"", lv:m[5]||3, lede:m[3], top:modeTop(m),
+    html:`<div class="picks">${modePicks(m)}</div>`};
 }
 function pushPage(key){
   if(key.indexOf("mode:")===0) bumpMode(key.slice(5));

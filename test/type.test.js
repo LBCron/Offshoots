@@ -16,6 +16,8 @@
 // the all-caps check passed against the very CSS it was written to catch, because every
 // all-caps label lived in the style panel and the menus.
 const {chromium}=require("playwright");
+const DATA=require(require("path").join(__dirname,"..","src","data.js"));
+const MODESIZE=k=>{ const m=DATA.MODES.find(x=>x[0]===k); return m?m[4].length:-1; };
 const skipWelcome=require("./_hello");
 const {settle,until,shown,arm}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
@@ -176,7 +178,7 @@ const readRules=(p)=>p.evaluate(()=>{
     if(!grp){ say(name+": the pick list opened", false); bad++; }
     else {
       // unboxed: no ground, no radius, and the hairline carries the whole division
-      const ok = grp.rows===12 && grp.radius<1
+      const ok = grp.rows===MODESIZE("coffee") && grp.radius<1
         && /rgba\(0, 0, 0, 0\)/.test(grp.groupBg)
         && grp.sepLeft>=24 && grp.sepH>0 && grp.sepH<=1 && !grp.firstHasSep;
       say(name+": "+grp.rows+" rows, no ground, radius "+grp.radius
