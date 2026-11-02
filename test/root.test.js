@@ -72,15 +72,15 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       underTitle:!!ttl && !!(ttl.compareDocumentPosition(d)&4),
       body:(d.querySelector(".note")||{}).textContent||"",
       more:(d.querySelector("[data-page=\"about\"] .lrlbl")||{}).textContent||""}; });
-  say("About this map is folded under the title", !!fold && fold.open===false
-    && /About this map/.test(fold.label) && fold.underTitle);
+  say("About the atlas is folded under the title", !!fold && fold.open===false
+    && /About this interactive musical atlas/.test(fold.label) && fold.underTitle);
   say("  and its control clears the tap floor ("+(fold&&fold.tap)+"px)", !!fold && fold.tap>=44);
   // the three things it has to cover, in the brief's own order
   say("  saying what the map is, how styles connect, and what a playlist is",
     !!fold && /\bstyles\b/.test(fold.body) && /grew out of/.test(fold.body)
     && /playlist/.test(fold.body));
   say("  with the full page one tap on ("+(fold&&fold.more)+")",
-    !!fold && fold.more==="More about this map");
+    !!fold && fold.more==="Read more about this atlas");
 
   // ---- the footer: the app's own two settings ----
   const foot=await p.evaluate(()=>{ const sec=document.querySelector(".sect-appset");
@@ -244,7 +244,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       belowRow:Math.round(tb.top-rb.bottom), inRow:!!row.querySelector(".bigttl"),
       controls:[...row.querySelectorAll("button")].filter(b=>!b.hidden).length,
       rowH:Math.round(rb.height)}; });
-  say("the root is titled "+(hdr&&hdr.name), !!hdr && hdr.name==="Explore");
+  say("the root is titled "+(hdr&&hdr.name), !!hdr && hdr.name==="Offshoots");
   say("  left-aligned under the row, "+(hdr&&hdr.belowRow)+"px below it",
     !!hdr && hdr.align==="left" && hdr.belowRow>=0 && hdr.inRow===false);
   say("  flush with the section headings ("+(hdr&&hdr.flush)+"px)", !!hdr && Math.abs(hdr.flush)<=1);
@@ -373,7 +373,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     return {exists:!!r, label:r?r.querySelector(".lrlbl").textContent:"",
       tap:r?Math.round(r.getBoundingClientRect().height):0}; });
   say("opening it offers the rest ("+abMore.label+")",
-    abMore.exists && abMore.label==="More about this map");
+    abMore.exists && abMore.label==="Read more about this atlas");
   say("  tap target "+abMore.tap+"px", abMore.tap>=44);
   await p.click('.ovfold [data-page="about"]'); await onPage(p,"about");
   const ab=await p.evaluate(()=>{
@@ -381,7 +381,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     return {up:!!pg&&!pg.hidden, title:(pg.querySelector(".bigttl .mn")||{}).textContent,
       top:Math.round(pg.getBoundingClientRect().top-b.getBoundingClientRect().top),
       scroll:b.scrollTop, stats:(pg.querySelector(".stats")||{}).textContent||""}; });
-  say("tapping it pushes the page", ab.up && ab.title==="About this map");
+  say("tapping it pushes the page", ab.up && ab.title==="About this interactive musical atlas");
   say("  landing at the top rather than past the fold ("+ab.top+"px, scroll "+ab.scroll+")",
     ab.scroll===0 && ab.top<=80);
   note("  stats line inside", ab.stats);
@@ -397,7 +397,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   await p.click("#panelBack"); await onPage(p,"root");
   await p.evaluate(()=>{document.getElementById("panelBody").scrollTop=0;});
   say("back returns to Explore",
-    (await p.$eval('.ppage[data-p="root"] .bigttl .mn',e=>e.textContent))==="Explore");
+    (await p.$eval('.ppage[data-p="root"] .bigttl .mn',e=>e.textContent))==="Offshoots");
   note("families stated once", (await p.$eval("#panelBody",e=>e.textContent)).split("families").length-1);
 
   // ---- 6: the heading is the way to the full set ----

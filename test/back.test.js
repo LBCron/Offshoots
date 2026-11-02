@@ -59,7 +59,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   // a mode is a pushed page now, and a pushed page owns the back button: it points at
   // the list you came from rather than at a style you visited
   say("a mode page takes the button over", await shown(p));
-  say("naming the list under it", (await label(p))==="Back to Explore");
+  say("naming the list under it", (await label(p))==="Back to Offshoots");
   const first=await p.$eval(".picks .pick",e=>e.dataset.go);
   await p.click(".picks .pick"); await at(p,"#"+first);
   say("appears after picking "+first, await shown(p));
@@ -114,7 +114,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   // the map pill now shows wherever a style is selected, so a deep link offers both
   say("home is offered here too, beside the step back", (await p.$eval("#mapHome",e=>!e.hidden))===true);
   await p.click("#panelBack"); await at(p,"");
-  say("and lands on the unselected map", (await hash(p))==="" && (await p.$eval(".ovcard .mn",e=>e.textContent))==="Explore");
+  say("and lands on the unselected map", (await hash(p))==="" && (await p.$eval(".ovcard .mn",e=>e.textContent))==="Offshoots");
   say("hidden once the trail runs out", (await shown(p))===false);
   say("no stale highlight left on the map", (await p.$$eval("#chart .n.cur",e=>e.length))===0);
   await p.screenshot({path:__dirname+"/screens/m-back.png"});
@@ -264,7 +264,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
       pages:[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden).map(x=>x.dataset.p),
       cur:!!document.querySelector("#chart .n.cur"), home:!document.getElementById("mapHome").hidden}));
     say("the map button opens Explore and clears the style",
-      back.open && back.hash==="" && back.title==="Explore"
+      back.open && back.hash==="" && back.title==="Offshoots"
       && back.pages.join()==="root" && back.cur===false);
     say("  and takes its own button away, there being nowhere left to go", back.home===false);
 
@@ -306,7 +306,7 @@ const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains(
   say("it overlaps the "+strip.stripw+"px lane strip by "+strip.over+"px, which mirroring cost",
     strip.over>0 && strip.over<=strip.stripw);
   await p.click("#mapHome"); await at(p,"");
-  say("one tap lands on the map", (await hash(p))==="" && (await p.$eval(".ovcard .mn",e=>e.textContent))==="Explore");
+  say("one tap lands on the map", (await hash(p))==="" && (await p.$eval(".ovcard .mn",e=>e.textContent))==="Offshoots");
   say("and goes again rather than sitting there dead", (await home(p))===false);
   { const k=await parked(p); say("  gone from the corner", k.shown===false); }
   // home is a reset: the walk that led here is gone, so back goes too

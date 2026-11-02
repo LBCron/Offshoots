@@ -311,7 +311,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   say("  coloured by how loud it is (lv"+pg.lvc+")", /^[1-5]$/.test(pg.lvc||""));
   say("  listing "+pg.picks+" picks", pg.picks===12);
   say("  starting at the top", pg.top===0);
-  say("  and a way back ("+pg.backLbl+")", pg.back && pg.backLbl==="Explore");
+  say("  and a way back ("+pg.backLbl+")", pg.back && pg.backLbl==="Offshoots");
   // every pick carries its playlist's cover, or, where there is no file, the same square
   // filled with the family colour and the style's initials. Never a gap: the three lines
   // of text are laid out against that column.

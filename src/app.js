@@ -751,7 +751,7 @@ function syncBack(){
   const b=$("panelBack"); if(!b) return;
   // a pushed page owns the back button while it is up: it is the nearer thing to leave
   if(PSTACK.length){
-    const under = PSTACK.length>1 ? PSTACK[PSTACK.length-2].title : (state.sel ? byId[state.sel].name : "Explore");
+    const under = PSTACK.length>1 ? PSTACK[PSTACK.length-2].title : (state.sel ? byId[state.sel].name : "Offshoots");
     b.hidden=false; b.setAttribute("aria-label","Back to "+under); b.setAttribute("title","Back to "+under);
     const t0=b.querySelector(".bklbl"); if(t0) t0.textContent=under;
     b.classList.remove("tomap"); b.classList.add("topage");
@@ -2107,7 +2107,7 @@ const PAGES_DEF={
     html:styleRows(topIds(), x=>x.children.length)}),
   about:()=>{ const np=playable().length,
       withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
-    return {title:"About this map", html:`
+    return {title:"About this interactive musical atlas", html:`
     <div class="about"><div class="abouthd"><img class="appicon" alt="" src="${ICONSRC()}"><p class="stats">${$("stats").textContent} · ${np} with a playlist</p></div>
     <h4 class="subh">What it is for</h4>
     <p>Every style here is placed at the year it cohered into a named, recorded scene, and joined to the styles it grew out of. Time runs left to right, so following a line backwards shows you what a sound is made of.</p>
@@ -2269,7 +2269,7 @@ function pageRow(key,label,count,title){
 // the data link.
 function aboutMapFold(){
   const np=playable().length;
-  return `<details class="xfold aboutfold ovfold"><summary><span>About this map</span>${GOCHEV}</summary>`
+  return `<details class="xfold aboutfold ovfold"><summary><span>About this interactive musical atlas</span>${GOCHEV}</summary>`
     + `<div class="xfoldb"><p class="note">`
     + esc(DATA.length+" styles of North American music, each placed at the year it cohered "
       + "into a named, recorded scene and joined to the styles it grew out of, so following "
@@ -2278,8 +2278,8 @@ function aboutMapFold(){
       + "style, with the records that pushed it into being, and arrives at it.")
     + `</p>`
     + `<button type="button" class="listrow lrgo abmore" data-page="about"`
-    + ` aria-label="More about this map">`
-    + `<span class="lrlbl">More about this map</span>${GOCHEV}</button>`
+    + ` aria-label="Read more about this atlas">`
+    + `<span class="lrlbl">Read more about this atlas</span>${GOCHEV}</button>`
     + `</div></details>`;
 }
 // The two settings that belong to the whole app rather than to any style: where playlists
@@ -2295,14 +2295,14 @@ function ovFooter(){
 function emptyPanel(){
   setTint("");
   syncBack();                      // so the map pill is in its home state from the first paint
-  setExpandLabel("", "About this map", "About");
+  setExpandLabel("", "About this interactive musical atlas", "About");
   setPbar("Offshoots", FAMS.length+" families · "+nodes.length+" styles");
   syncPull();
   const top=[...nodes].sort((a,b)=>b.children.length-a.children.length||a.year-b.year).slice(0,12);
   const np=playable().length;
   const withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
   resetPages();
-  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Explore</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Explore</span></h1>${aboutMapFold()}<div class="more">
+  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Offshoots</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Offshoots</span></h1>${aboutMapFold()}<div class="more">
     ${onMapSect()}
     ${modeSect()}
     ${deeperSect()}
