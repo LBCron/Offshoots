@@ -939,25 +939,11 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 @media (prefers-reduced-motion:reduce){ .segopt{transition:none} }
 /* the sort sits above the list it acts on */
 .segwrap.msortwrap{margin-bottom:14px}
-/* The two controls that act on a whole collection, side by side above its list: one that
-   does the choosing for you, one that says how the list is ordered. On a phone they stack,
-   because the sort needs its full width before it starts scrolling sideways. */
-.modetop{display:flex;align-items:center;gap:10px;margin:2px 0 14px;flex-wrap:wrap}
-.modetop .segwrap.psortwrap{margin:0;flex:1 1 auto;min-width:0}
-.modetop .segctl{width:100%}
-@media (max-width:520px){ .modetop{flex-direction:column;align-items:stretch;gap:8px} }
-.pickany{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:8px;
-  flex:none;cursor:pointer;min-height:var(--tap);padding:0 14px;border-radius:10px;
-  background:var(--acc,var(--accent));color:var(--panel);
-  font:600 var(--t-sub)/1 var(--f-body);transition:filter .15s}
-.pickany svg{width:17px;height:17px;flex:none}
-.pickany:hover{filter:brightness(1.08)}
-.pickany:active{filter:brightness(.94)}
-.pickany:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
-/* the size of what it is choosing from, which is the reason the button exists */
-.pickany .pact{font:500 var(--t-foot) var(--f-mono);opacity:.72;
-  font-variant-numeric:tabular-nums}
-@media (prefers-reduced-motion:reduce){ .pickany{transition:none} }
+/* The two controls that act on a whole collection, between the lede and the list: the
+   shortcut past it, drawn as the same row it is on the Explore panel, and then the order
+   the list is in. */
+.modetop{margin:2px 0 12px}
+.segwrap.psortwrap{margin:0 0 14px}
 .modelist.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .modelist.two .listrow{padding:0 14px;gap:10px;min-height:52px;position:relative}
 .modelist.two .listrow .lrcv{display:none}
@@ -7481,11 +7467,15 @@ function pickSortHtml(){
 // belongs here, and every one of them has a playlist to play.
 function modeTop(m){
   const n=m[4].filter(([id])=>byId[id]).length;
-  return `<div class="modetop">`
-    + `<button type="button" class="pickany" data-pickany="${esc(m[0])}">`
-    + `${ROWICON.random||""}<span class="palbl">Surprise me</span>`
-    + `<span class="pact">${n}</span></button>`
-    + pickSortHtml() + `</div>`;
+  // The same row as Surprise me on the Explore panel, because it is the same act: the
+  // scope is the only difference, and the second line is where that gets said. Drawn as a
+  // button in accent fill first, which made it the loudest thing on the page and read as
+  // the thing to do rather than the shortcut past the list.
+  return `<div class="listgrp modetop">`
+    + goRow("random","Surprise me",`One of these ${n}, at random`,null,
+        ` data-pickany="${esc(m[0])}"`,
+        `Open one of these ${n} styles, chosen at random`)
+    + `</div>` + pickSortHtml();
 }
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);

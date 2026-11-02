@@ -2111,11 +2111,15 @@ function pickSortHtml(){
 // belongs here, and every one of them has a playlist to play.
 function modeTop(m){
   const n=m[4].filter(([id])=>byId[id]).length;
-  return `<div class="modetop">`
-    + `<button type="button" class="pickany" data-pickany="${esc(m[0])}">`
-    + `${ROWICON.random||""}<span class="palbl">Surprise me</span>`
-    + `<span class="pact">${n}</span></button>`
-    + pickSortHtml() + `</div>`;
+  // The same row as Surprise me on the Explore panel, because it is the same act: the
+  // scope is the only difference, and the second line is where that gets said. Drawn as a
+  // button in accent fill first, which made it the loudest thing on the page and read as
+  // the thing to do rather than the shortcut past the list.
+  return `<div class="listgrp modetop">`
+    + goRow("random","Surprise me",`One of these ${n}, at random`,null,
+        ` data-pickany="${esc(m[0])}"`,
+        `Open one of these ${n} styles, chosen at random`)
+    + `</div>` + pickSortHtml();
 }
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);

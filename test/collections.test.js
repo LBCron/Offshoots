@@ -61,12 +61,14 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
     const look=()=>p.evaluate(()=>{
       const pg=document.querySelector('.ppage[data-p="mode:dinner"]');
-      const btn=pg.querySelector(".pickany"), seg=pg.querySelector(".psortwrap");
+      const btn=pg.querySelector("[data-pickany]"), seg=pg.querySelector(".psortwrap");
       const lede=pg.querySelector(".pglede"), list=pg.querySelector(".picks");
       const r=x=>x?x.getBoundingClientRect():null;
       return {names:[...pg.querySelectorAll(".pknm")].map(x=>x.textContent),
-        label:btn?(btn.querySelector(".palbl")||{}).textContent:"(none)",
-        count:btn?(btn.querySelector(".pact")||{}).textContent:"",
+        label:btn?(btn.querySelector(".lrlbl")||{}).textContent:"(none)",
+        sub:btn?(btn.querySelector(".lrsub")||{}).textContent:"",
+        chev:btn?!!btn.querySelector(".lrcv"):false,
+        carded:btn?!!btn.closest(".listgrp"):false,
         tap:btn?Math.round(r(btn).height):0,
         aboveList: btn&&list ? r(btn).bottom<=r(list).top : null,
         belowLede: btn&&lede ? r(btn).top>=r(lede).top : null,
@@ -76,11 +78,15 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     });
     const v=await look();
     const dinner=D.MODES.find(m=>m[0]==="dinner");
-    note(tag, v.names.length+" picks, button \""+v.label+" "+v.count+"\"");
+    note(tag, v.names.length+" picks, row \""+v.label+" / "+v.sub+"\"");
     say(tag+": the whole collection is on the page", v.names.length===dinner[4].length);
     say("  with a control that picks one for you (\""+v.label+"\")",
-      v.label==="Surprise me" && v.count===String(dinner[4].length));
-    say("  clearing the tap floor ("+v.tap+"px)", v.tap>=36);
+      v.label==="Surprise me");
+    // the same row as Surprise me on the Explore panel: icon, label, second line, chevron,
+    // in a card. It said the same thing as an accent-filled button, and shouted it.
+    say("    drawn as a go row in a card, saying what it picks from (\""+v.sub+"\")",
+      v.carded && v.chev && v.sub==="One of these "+dinner[4].length+", at random");
+    say("  clearing the tap floor ("+v.tap+"px)", v.tap>=44);
     say("  sitting under the lede and above the list", v.belowLede && v.aboveList);
     note("  sort", v.sorts.join(" "));
     say("  and the three orders, relevance first and selected",
@@ -129,7 +135,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     let landed=[];
     for(let i=0;i<6;i++){
       await backToCollection();
-      await p.click(".pickany"); await settle(p);
+      await p.click("[data-pickany]"); await settle(p);
       await new Promise(r=>setTimeout(r,250));
       landed.push(await p.evaluate(()=>location.hash.slice(1)));
     }
