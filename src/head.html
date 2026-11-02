@@ -579,6 +579,10 @@ body.open .pcnt{display:none}
 /* the back button names where it goes; once the bar carries a title too, the pair would
    crowd a phone, so the label gives way and the arrow speaks for itself */
 @media (max-width:420px){ #panel.barttl .ovcard .navleft .navback.topage .bklbl{display:none} }
+/* a style panel's bar is narrower than the root's and its back label is a style name,
+   so the two never fit side by side: once the compact title is in, the arrow speaks for
+   itself at every width rather than only on a phone */
+#panel.barttl .pcard:not(.ovcard) .navrow>#panelBack .bklbl{display:none}
 @media (max-width:899px){ .ovcard .bigttl{margin:14px 0 8px} }
 /* beside the share button there is no room for the destination's name, and the two
    glyphs already say map and back */
@@ -2134,7 +2138,8 @@ span.xcov b{font:700 19px var(--f-body);color:#fff;opacity:.92}
 @media (min-width:560px) and (max-width:899px){
   .cxwrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px} }
 .cxh{margin:0 0 8px;font:600 var(--t-sub)/1.3 var(--f-body);color:var(--muted);
-  letter-spacing:0;text-transform:none}
+  letter-spacing:0;text-transform:none;display:flex;align-items:center;gap:6px}
+.cxh .cxar{flex:none;width:14px;height:14px;opacity:.8}
 .cxlist{display:flex;flex-direction:column;gap:2px}
 .cxgo{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:9px;width:100%;
   cursor:pointer;min-height:var(--tap);padding:0 10px;border-radius:10px;color:var(--fg);
@@ -2144,6 +2149,12 @@ span.xcov b{font:700 19px var(--f-body);color:#fff;opacity:.92}
 .cxgo .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cxgo small{flex:none;font:500 var(--t-foot) var(--f-mono);color:var(--muted);
   font-variant-numeric:tabular-nums}
+/* the go-to mark sits after the year, closer to it than the gap between name and year, so
+   the two read as one trailing group rather than as a third column */
+.cxgo .lrcv{flex:none;width:14px;height:14px;margin-left:-3px;color:var(--muted);opacity:.5;
+  transition:transform .15s,opacity .15s}
+.cxgo:hover .lrcv{opacity:.9;transform:translateX(2px)}
+@media (prefers-reduced-motion:reduce){ .cxgo .lrcv{transition:none} }
 .cxwrap + .tally{margin:14px 0 0}
 .cxnone{margin:0;padding:0 10px;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
 

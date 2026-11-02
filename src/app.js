@@ -846,7 +846,7 @@ function select(id,{scroll=true,smooth=true,keepPlace=false,repaint=true}={}){
     + `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg>`
     + `<span class="bklbl"></span>`
     + `<svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.6 7.4 3.6v10.8l-4.6 2z"/><path d="M7.4 3.6 12.6 5.6v10.8L7.4 14.4z"/><path d="M12.6 5.6 17.2 3.6v10.8l-4.6 2z"/></svg></button>`
-    + `<span class="navgap"></span>`
+    + `<div class="navttl navgap ovttl"><span class="mn"></span></div>`
     + CLOSEBTN
     + `</div>`;                       // .pcard stays open: .more goes inside it, so the
                                       // sticky header has the whole card to stick within
@@ -950,7 +950,7 @@ function setPbar(t,s){ PBAR={t:t||"",s:s||""}; const a1=$("pbarTitle"), a2=$("pb
   let pending=0, lastTop=-1;
   const measure=()=>{
     const pages=[...body.querySelectorAll(".ppage")].filter(x=>!x.hidden);
-    const big=(pages[0]||body).querySelector(".bigttl");
+    const big=(pages[0]||body).querySelector(".bigttl, .pttl");
     const nav=body.querySelector(".pcard .navrow");
     const cls=$("panel").classList;
     return {big, nav, top:body.scrollTop,
@@ -972,7 +972,7 @@ function setPbar(t,s){ PBAR={t:t||"",s:s||""}; const a1=$("pbarTitle"), a2=$("pb
     if(cls.contains("pscrolled")!==scrolled) cls.toggle("pscrolled",scrolled);
     if(cls.contains("barttl")!==m.ttl) cls.toggle("barttl",m.ttl);
     const slot=m.nav&&m.nav.querySelector(".navttl.ovttl .mn");
-    if(slot&&m.big){ const t=(m.big.querySelector(".mn")||m.big).textContent.trim();
+    if(slot&&m.big){ const t=(m.big.querySelector(".mn, .ptnm")||m.big).textContent.trim();
       if(slot.textContent!==t) slot.textContent=t; }
   };
   const sync=()=>{ apply(measure()); };
@@ -1347,12 +1347,22 @@ function linksSect(n,anc,desc){
   const dfams=new Set([...desc.keys()].map(k=>byId[k].fam));
   const tally=`<p class="tally">${anc.size} ancestor styles \u00b7 ${desc.size} descendant styles`
     + `${desc.size?` across ${dfams.size} ${dfams.size===1?"family":"families"}`:""}</p>`;
-  const col=(cls,label,ids)=>`<div class="cxcol"><h4 class="cxh">${esc(label)}</h4>`
+  // Which way each column points. On the map a parent is to the left of its child because
+  // it came earlier, so the arrows are that same axis rather than a generic up and down,
+  // and they take currentColor so they tint with the heading. The heading text is still
+  // the label: the arrows are decoration over it, not the thing being read out.
+  const col=(cls,label,arrow,ids)=>`<div class="cxcol"><h4 class="cxh">`
+    + (arrow==="from"?CXARL:"") + `<span>${esc(label)}</span>` + (arrow==="led"?CXARR:"")
+    + `</h4>`
     + (ids.length
+      // Rows that go somewhere now look like it. They were a dot, a name and a year with
+      // nothing to say they were buttons, which on a phone is indistinguishable from a
+      // list. Same chevron as every other go-to row, so the idiom holds across the panel.
       ? `<div class="cxlist">${ids.map(i=>`<button type="button" class="cxgo ${cls}" data-go="${esc(i)}">`
           + `<i class="dot" style="background:${FAM[byId[i].fam].c}"></i>`
           + `<span class="nm">${esc(byId[i].name)}</span>`
-          + `<small>${byId[i].year<1950?esc(byId[i].disp):byId[i].year}</small></button>`).join("")}</div>`
+          + `<small>${byId[i].year<1950?esc(byId[i].disp):byId[i].year}</small>`
+          + GOCHEV + `</button>`).join("")}</div>`
       : `<p class="cxnone">Nothing on the map yet.</p>`)
     + `</div>`;
   // Shut. It is the longest thing on a style panel, two columns of up to twenty-five
@@ -1360,8 +1370,8 @@ function linksSect(n,anc,desc){
   // through. The count beside the heading says how much is behind it.
   const n2=from.length+led.length;
   return sect("connections","Explore the connections",
-    `<div class="cxwrap">${col("cxfrom","Before this style",from)}`
-    + `${col("cxled","After this style",led)}</div>${tally}`,
+    `<div class="cxwrap">${col("cxfrom","Before this style","from",from)}`
+    + `${col("cxled","After this style","led",led)}</div>${tally}`,
     `<span class="sectaside">${n2} ${n2===1?"style":"styles"}</span>`,
     "", "", false, "shut");
 }
@@ -1843,6 +1853,8 @@ function plStylesHtml(k){
 const FOLDTRI="<svg class=\"lrcv lrgov\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M181.66,133.66l-80,80A8,8,0,0,1,88,208V48a8,8,0,0,1,13.66-5.66l80,80A8,8,0,0,1,181.66,133.66Z\"/></svg>";
 // a row that takes you somewhere points that way; the triangle unfolds what is already here
 const GOCHEV="<svg class=\"lrcv lrgov\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z\"/></svg>";
+const CXARL="<svg class=\"cxar\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z\"/></svg>";
+const CXARR="<svg class=\"cxar\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z\"/></svg>";
 const LRCHEV="<svg class=\"lrcv\" viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z\"/></svg>";
 // every way of browsing the map is a collection you open, so they are one grouped list:
 // icon, name, how many, chevron, hairlines starting at the name. They used to be three
@@ -2651,7 +2663,8 @@ $("panelBody").addEventListener("error",e=>{
 })();
 
 function panelTop(){ const pb=$("panelBody"); if(!pb) return; const cls=$("panel").classList;
-  pb.scrollTop=0; cls.remove("pscrolled"); setTimeout(()=>{ pb.scrollTop=0; cls.remove("pscrolled"); },60); }
+  pb.scrollTop=0; cls.remove("pscrolled"); cls.remove("barttl");
+  setTimeout(()=>{ pb.scrollTop=0; cls.remove("pscrolled"); cls.remove("barttl"); },60); }
 function qsync(){ const b=$("qclear"); if(b) b.hidden = !q.value; }
 function openSearch(){
   // iOS only raises the keyboard if focus happens inside the tap itself, so do it first and synchronously

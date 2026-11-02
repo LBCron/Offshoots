@@ -57,8 +57,11 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   say("  with the date beside it", await d.$eval(".pttl .ptyr",e=>/\d{4}/.test(e.textContent)));
   say("no control left in the nav row but Back and Close",
     (await d.$$(".navrow button")).length===2);
+  // a menu, specifically: the bar does carry the style's name once you scroll past it,
+  // but that is a label, not somewhere to go
   say("the lineage is a section, not a menu on the title",
-    (await d.$$(".sect-connections")).length===1 && (await d.$$(".navttl")).length===0);
+    (await d.$$(".sect-connections")).length===1
+    && (await d.$$("button.navttl, .navttl[aria-haspopup]")).length===0);
   const sb=await d.evaluate(()=>{ const w=document.querySelector(".shbtn.wide");
     if(!w) return null;
     const r=w.getBoundingClientRect(), body=document.getElementById("panelBody");
@@ -210,7 +213,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
       counts:cols.map(c=>c.querySelectorAll("[data-go]").length),
       title:(s.querySelector(".secttl")||{}).textContent||"",
       inFlow:getComputedStyle(s).position==="static",
-      menus:document.querySelectorAll(".navttl").length};});
+      menus:document.querySelectorAll("button.navttl, .navttl[aria-haspopup]").length};});
   say("both directions are on the panel (\""+seg.title+"\": "+seg.heads.join(" | ")+")",
     !!seg && /^Before this style/.test(seg.heads[0]) && /^After this style/.test(seg.heads[1]));
   say("  listing "+seg.counts.join(" and ")+" styles by name",

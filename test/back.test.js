@@ -171,7 +171,10 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
     const nm=document.querySelector(".pttl").getBoundingClientRect();
     return {back:g("#panelBack"), x:g(".pmin"),
       nameBelow:Math.round(nm.top-r.bottom),
-      titles:document.querySelectorAll(".navrow .navttl").length,
+      // the lineage menu that used to live on the title, not the compact name the bar
+      // shows once you scroll past it: that one is a div, and it is centred rather than
+      // between these two
+      titles:document.querySelectorAll(".navrow button.navttl, .navrow .navttl[aria-haspopup]").length,
       backPos:getComputedStyle(document.querySelector("#panelBack")).position,
       xPos:getComputedStyle(document.querySelector(".pmin")).position,
       pad:Math.round(parseFloat(getComputedStyle(document.querySelector(".pcard .navrow")).paddingRight)),
