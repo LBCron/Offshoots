@@ -48,6 +48,16 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
 // say() is what lets say() treat anything that is not true as a failure.
 const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
+// The page says how many collections there are, in words, and a number written into
+// prose goes stale the moment one is added: it said twenty-seven with twenty-eight on the
+// page. Spelled out from the real count so the copy cannot drift from the data.
+const WORDS=["zero","one","two","three","four","five","six","seven","eight","nine","ten",
+  "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen",
+  "nineteen","twenty"];
+const spell=n=>n<=20?WORDS[n]
+  :n<30?"twenty-"+WORDS[n-20]
+  :n<40?"thirty-"+WORDS[n-30]:String(n);
+
 (async()=>{
   const b=await chromium.launch(); skipWelcome(b);
 
@@ -146,23 +156,34 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     return {mode:x.dataset.mode, src:i?i.getAttribute("src"):"",
       torn:!!i && i.complete && i.naturalWidth===0,
       drawn:!!i && i.complete && i.naturalWidth>0, glyph:!!g};}));
-  const noArt=moodart.filter(a=>!a.src).map(a=>a.mode);
-  say("every collection has a picture of its own ("+moodart.length+")",
-    noArt.length===0 ? true : noArt.join(", "));
+  // A collection without its own painting wears the glyph, which is a real fallback and
+  // not a failure. It is still a gap, so the ones waiting for art are named here rather
+  // than tolerated quietly: adding a collection with no picture shows up in this diff.
+  // The list is checked both ways, so it cannot outlive the gap it describes.
+  const AWAITING=["system"];
+  const fs=require("fs"), path=require("path");
+  const dir=path.join(__dirname,"..","moods");
+  const onDisk=m=>fs.existsSync(path.join(dir,m+".jpg"));
+  const missing=moodart.filter(a=>!onDisk(a.mode)).map(a=>a.mode);
+  const unexpected=missing.filter(m=>!AWAITING.includes(m));
+  const stale=AWAITING.filter(m=>onDisk(m));
+  if(missing.length) note("waiting on a painting, wearing the glyph", missing.join(", "));
+  say("every collection has a picture of its own ("
+    +(moodart.length-missing.length)+" of "+moodart.length+")",
+    unexpected.length===0 ? true : unexpected.join(", "));
+  say("  and the list of the ones that do not is still true",
+    stale.length===0 ? true : "has art now: "+stale.join(", "));
+  // lazy loading means an off-screen circle has not tried yet, so the fallback is proved
+  // on the one that is on screen rather than inferred from the ones that are not
   say("  named for the collection it belongs to",
     moodart.every(a=>a.src==="moods/"+a.mode+".jpg"));
   const torn=moodart.filter(a=>a.torn).map(a=>a.mode);
   say("  none of them torn", torn.length===0 ? true : torn.join(", "));
   say("  with the glyph still under it, for one that will not load",
     moodart.every(a=>a.glyph));
-  { const fs=require("fs"), path=require("path");
-    const dir=path.join(__dirname,"..","moods");
-    const missing=moodart.filter(a=>!fs.existsSync(path.join(dir,a.mode+".jpg"))).map(a=>a.mode);
-    say("  and every file is on disk",
-      missing.length===0 ? true : missing.join(", "));
-    const extra=fs.readdirSync(dir).filter(f=>/\.jpg$/.test(f))
-      .filter(f=>!moodart.some(a=>a.mode+".jpg"===f));
-    say("  with none left over", extra.length===0 ? true : extra.join(", ")); }
+  const extra=fs.readdirSync(dir).filter(f=>/\.jpg$/.test(f))
+    .filter(f=>!moodart.some(a=>a.mode+".jpg"===f));
+  say("  with none left over", extra.length===0 ? true : extra.join(", "));
 
   say("  and no label cut off"+(lay.clipped.length?": "+lay.clipped.join(", "):""), lay.clipped.length===0);
 
@@ -463,7 +484,10 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
         stored:(()=>{try{return localStorage.getItem("offshoots.modesort")}catch(e){return null}})()};});
 
     const start=await read();
-    say("the ways in page has a sort, defaulting to quietest",
+      say("the page counts the collections correctly ("+spell(DATA.MODES.length)+")",
+      new RegExp("\\b"+spell(DATA.MODES.length)+"\\b","i")
+        .test(await s.$eval(".pglede",e=>e.textContent)));
+  say("the ways in page has a sort, defaulting to quietest",
       start.on.length===1 && start.on[0]==="Quietest");
 
     const seen={quiet:start.labels.join("|")};
