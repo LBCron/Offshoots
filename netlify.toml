@@ -1,0 +1,26 @@
+# Netlify serves this directory as-is: index.html is committed already built, so there
+# is no build command. These lines pin what the project's settings already say, so the
+# setup lives in the repo and not only in a dashboard.
+
+[build]
+  publish = "."
+
+[build.environment]
+  # package.json lists Playwright for the tests. Netlify installs it on every deploy;
+  # this keeps it from downloading browsers nothing on the server will run.
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
+
+[functions]
+  # suggest.mjs, served at /api/suggest
+  directory = "netlify/functions"
+
+# short addresses for the two pages that get handed to people
+[[redirects]]
+  from = "/suggest"
+  to = "/suggest.html"
+  status = 200
+
+[[redirects]]
+  from = "/contribute"
+  to = "/contribute.html"
+  status = 200

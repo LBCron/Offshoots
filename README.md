@@ -18,9 +18,40 @@ descriptions, and 270 styles with a playlist on Apple Music and Spotify.
 | `src/` | The files it is built from |
 | `test/` | Browser checks that drive the built page |
 | `art/` | Playlist cover art, one square JPEG per style |
+| `suggest.html` | The form for suggesting a Go deeper link |
+| `contribute.html` | The page that hands out the bookmarklet |
+| `netlify/functions/` | `suggest.mjs`, which files each suggestion as an issue |
+| `tools/ingest.js` | Brings approved suggestions into `src/data.js` |
 
 Netlify serves this directory as-is. No build command, no publish subdirectory:
-`index.html` is committed already built.
+`index.html` is committed already built. `netlify.toml` pins that, plus the function.
+
+## Suggestions
+
+Go deeper grows from suggestions. Anyone can send one from `/contribute` (a bookmarklet)
+or `/suggest` (the form, also linked at the bottom of every Go deeper list). Each one
+becomes an issue in the private `bryanbell/Offshoots-submissions` repo, labelled
+`pending`. Nothing reaches the map from there on its own.
+
+To publish one, edit the JSON block in the issue until it is a finished READ row
+(publication, kind, year, access, a note that says why), then swap `pending` for
+`approved`. To reject one, close it. Then:
+
+```
+node tools/ingest.js            # what would be added, and what still needs edits
+node tools/ingest.js --write    # add approved rows to src/data.js and rebuild
+npm test                        # commit and push, then:
+node tools/ingest.js --close    # close the issues that landed
+```
+
+Ingest holds anything that would fail `test/read.test.js`, and says why.
+
+Guests are credited by a key rather than a login. `CONTRIBUTORS` in Netlify's
+environment maps each key to a picker in `PICKERS`; a guest's link is
+`/contribute#k=<key>`, and what they send is labelled `<picker>s-picks` and lands in
+`PICKED` as theirs. `GITHUB_TOKEN` there can open issues in the submissions repo and
+nothing else. Ingest needs its own token that can read that repo: `gh auth login`, or
+`GH_TOKEN`.
 
 ## How the connections work
 

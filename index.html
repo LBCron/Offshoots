@@ -755,6 +755,16 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 .rd:hover .rdi{background:color-mix(in srgb,var(--rdc) 34%,transparent)}
 .rdx{flex:1;min-width:0;display:block}
 .reads{--rdlead:69px}
+/* the last line of Go deeper: an invitation, quieter than the rows above it, with the
+   same tile so it lines up with their icons */
+a.deepsug{display:flex;align-items:center;gap:13px;min-height:var(--tap);margin-top:10px;padding:6px 14px;
+  border-radius:14px;color:var(--muted);text-decoration:none;font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body);
+  transition:background .15s,color .15s}
+a.deepsug .dsi{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:11px;
+  box-shadow:inset 0 0 0 1px var(--line);color:var(--muted)}
+a.deepsug .dsi svg{width:18px;height:18px}
+a.deepsug:hover{background:color-mix(in srgb,var(--fg) 7%,transparent);color:var(--fg)}
+a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent) 55%,transparent)}
 /* ---- the panel as a stack of pages ---- */
 /* The pages are stacked in normal flow, one shown at a time: a true side-by-side slide
    would need the scroller to hold two full-height pages at once, and the taller one
@@ -6901,7 +6911,12 @@ function deepSect(n){
       + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
   }).join("");
   if(!folds) return "";
-  return sect("read","Go deeper", folds,
+  // the way more of these arrive: a link out to the suggestion form, with this style
+  // already filled in. It opens on its own so the map keeps its place underneath.
+  const sug = `<a class="deepsug" href="suggest.html?s=${encodeURIComponent(n.id)}" target="_blank" rel="noopener">`
+    + `<i class="dsi"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg></i>`
+    + `<span>Suggest something</span></a>`;
+  return sect("read","Go deeper", folds + sug,
     `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 function panel(n,anc,desc){

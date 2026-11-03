@@ -1410,7 +1410,12 @@ function deepSect(n){
       + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
   }).join("");
   if(!folds) return "";
-  return sect("read","Go deeper", folds,
+  // the way more of these arrive: a link out to the suggestion form, with this style
+  // already filled in. It opens on its own so the map keeps its place underneath.
+  const sug = `<a class="deepsug" href="suggest.html?s=${encodeURIComponent(n.id)}" target="_blank" rel="noopener">`
+    + `<i class="dsi"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg></i>`
+    + `<span>Suggest something</span></a>`;
+  return sect("read","Go deeper", folds + sug,
     `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 function panel(n,anc,desc){
