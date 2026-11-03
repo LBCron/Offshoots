@@ -33,6 +33,33 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // the map is drawn, not merely loaded: the sheet is measured against it
   await p.goto(URL); await shown(p,"#chart .n"); await rest(p);
 
+  // ---- the peek height has to be known before anyone drags ----
+  // It can only be read while the sheet is in it, and the app opens on Explore, so the
+  // moments that catch it have to be on the way past rather than afterwards. When it is
+  // not caught, sheetMin() falls back to a 170px guess and the halfway point a drag has
+  // to cross moves from 489px to 380px: pushing the sheet down does nothing until you
+  // have dragged it most of the way to the floor. 130px is past the real halfway and
+  // nowhere near the guessed one, so it tells the two apart.
+  {
+    const q=await ctx.newPage();
+    await q.goto(URL); await shown(q,"#chart .n"); await settle(q);
+    const hd=await q.evaluate(()=>{const r=document.querySelector(".pcard .navrow").getBoundingClientRect();
+      return [Math.round(r.left+r.width/2),Math.round(r.top+r.height/2)];});
+    const was=await q.evaluate(()=>document.getElementById("panel").offsetHeight);
+    await q.mouse.move(hd[0],hd[1]); await q.mouse.down();
+    for(let i=1;i<=8;i++){ await q.mouse.move(hd[0],hd[1]+130*i/8);
+      await q.evaluate(()=>document.getElementById("panel").offsetHeight); }
+    await q.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+    await q.mouse.up();
+    await until(q,()=>!document.body.classList.contains("open")).catch(()=>{});
+    await settle(q); await new Promise(r=>setTimeout(r,250));
+    const now=await q.evaluate(()=>({open:document.body.classList.contains("open"),
+      h:document.getElementById("panel").offsetHeight}));
+    say("a drag past halfway closes a sheet that launched open ("+was+" to "+now.h+"px)",
+      now.open===false);
+    await q.close();
+  }
+
   const open=()=>p.evaluate(()=>document.body.classList.contains("open"));
   const setTop=v=>p.evaluate(v=>{document.getElementById("panelBody").scrollTop=v;},v);
   const top=()=>p.evaluate(()=>document.getElementById("panelBody").scrollTop);

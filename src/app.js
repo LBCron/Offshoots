@@ -899,6 +899,16 @@ function glideSheet(from){
 function setOpen(v){
   const glide = OVERLAY && !reduce;
   const from = glide ? Math.round($("panel").getBoundingClientRect().height) : 0;
+  // The peek height can only be read while the sheet is in it, and the two moments that
+  // used to catch it, load and 300ms, both arrive with the sheet already up now that the
+  // app opens on Explore. So MINH stayed 0 and sheetMin() fell back to its 170 guess,
+  // which moves the halfway point a drag has to cross from 489px to 380px: pushing the
+  // sheet down stopped working until you had dragged it most of the way to the floor.
+  // Here is the one moment it is still there to measure, on the way past.
+  if(v && !OPEN && OVERLAY){
+    const h = Math.round($("panel").getBoundingClientRect().height);
+    if(h) MINH = h;
+  }
   setOpenNow(v);
   if(glide) glideSheet(from);
 }
@@ -2872,7 +2882,21 @@ if(window.ResizeObserver){
   const pel=$("panel");
   if(pel) new ResizeObserver(()=>{ syncMapPad(); }).observe(pel);
 }
-function render(){ RENDERED=true; dims(); LOD = Z<0.9; $("chart").classList.toggle("lod",LOD); fit();
+// A leaf drawn as a dot takes no width in the layout, so the rows pack tighter and the map
+// gets shorter. That is the whole job: the labels never collide at any zoom, because a row
+// is chosen from the measured width of what is going in it. Height is the thing zooming out
+// is for.
+//
+// The threshold was 0.9, set when every label was pinned to one size whatever the zoom. The
+// labels scale now, so at 80% they are smaller than they were and there is room that was not
+// there before: keeping all 461 makes the map 3323px against 3408 at 90%, so zooming out
+// still shrinks it. At 70% it does not. All 461 there comes out at 3438px, which is TALLER
+// than 90%, and a zoom-out that grows the map is not a zoom-out. So the drop happens one
+// step lower than it did, and 139 labels stop disappearing at 80%.
+//
+// 0.75 rather than 0.8 because 0.9 minus 0.1 is 0.8 exactly but 0.8 minus 0.1 is
+// 0.7000000000000001, and a threshold should not depend on which way the float fell.
+function render(){ RENDERED=true; dims(); LOD = Z<0.75; $("chart").classList.toggle("lod",LOD); fit();
   const res=SRES(); $("inner").style.paddingBottom=res+"px"; measureHead();
   layout(scroller.clientHeight-AXH-BAR()-res-HEADH); draw(); }
 let lastW=0,lastH=0,rt;

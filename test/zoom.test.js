@@ -68,5 +68,35 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   say("  and every style is still labelled ("+far.n+")",
     out.n===one.n && one.n===far.n);
 
+  // ---- what the overview drops, and when ----
+  // A leaf drawn as a dot takes no width, so the rows pack tighter and the map gets
+  // shorter, which is what zooming out is for. The threshold was set when labels were
+  // pinned to one size; now that they scale there is room at 80% that was not there
+  // before, and 139 labels were vanishing a step too early.
+  const seen=async z=>{
+    await p.click("#zreset");
+    const n=Math.round((z-1)*10);
+    for(let i=0;i<Math.abs(n);i++) await p.click(n>0?"#zin":"#zout");
+    await settle(p);
+    return p.evaluate(()=>{ const sv=document.querySelector("#chart");
+      const lab=[...sv.querySelectorAll(".n")].filter(g=>{
+        const t=g.querySelector("text:not(.halo)");
+        return t && getComputedStyle(t).display!=="none"; }).length;
+      return {h:Math.round(+sv.getAttribute("height")), lab,
+        total:sv.querySelectorAll(".n").length}; });
+  };
+  const z90=await seen(0.9), z80=await seen(0.8), z70=await seen(0.7);
+  note("labelled at 90 / 80 / 70", [z90,z80,z70].map(x=>x.lab+" of "+x.total).join("  "));
+  note("map height", [z90,z80,z70].map(x=>x.h+"px").join(" → "));
+  say("every style is still named at 80% ("+z80.lab+" of "+z80.total+")",
+    z80.lab===z80.total && z90.lab===z90.total);
+  say("  and the map still gets shorter for it ("+z90.h+" → "+z80.h+"px)", z80.h<z90.h);
+  // the floor on the other side: at the last step keeping them all makes the map taller
+  // than it was a step up, and a zoom-out that grows the map is not a zoom-out
+  say("at 70% the leaves go, which is what buys the height",
+    z70.lab<z70.total && z70.h<z80.h);
+  say("  and a named style is the one you can still read ("+z70.lab+" left)",
+    z70.lab>z70.total*0.6);
+
   await b.close();
 })();
