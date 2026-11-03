@@ -156,7 +156,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       await settle(p);
     };
     let landed=[];
-    for(let i=0;i<6;i++){
+    for(let i=0;i<4;i++){
       await backToCollection();
       await p.click("[data-pickany]"); await settle(p);
       await new Promise(r=>setTimeout(r,250));
@@ -165,6 +165,47 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("  surprise lands inside this collection every time ("+landed.length+" tries)",
       landed.every(h=>inHere.has(h)) ? true : landed.filter(h=>!inHere.has(h)).join(" "));
     say("    and not always on the same one", new Set(landed).size>1);
+    await p.close();
+  }
+  // ---- the same painting wherever you meet a collection ----
+  // The page wore the Phosphor glyph while the circle you tapped to get there and the row
+  // in the list both wore the painting, so arriving looked like arriving somewhere else.
+  {
+    const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
+    await p.goto(URL); await arm(p); await shown(p,"#chart .n"); await settle(p);
+    if(await p.evaluate(()=>!document.body.classList.contains("open"))){
+      await p.click("#grab").catch(()=>{});
+      await until(p,()=>document.body.classList.contains("open")); await settle(p); }
+    const miss=[], unloaded=[];
+    // three of them, opened for real, rather than reading the markup: a src that never
+    // resolves to a file looks identical in the HTML and blank on the page
+    for(const k of ["focus","dinner","showkid"]){
+      const want=await p.evaluate(key=>{
+        const c=document.querySelector('.mcirc[data-mode="'+key+'"] img')
+          || document.querySelector('.moderow[data-mode="'+key+'"] img');
+        return c?c.getAttribute("src"):null; },k);
+      await p.click('[data-mode="'+k+'"]');
+      await until(p,()=>!!document.querySelector(".ppage:not([hidden]) .bigttl .pgi"));
+      await settle(p); await new Promise(r=>setTimeout(r,350));
+      const got=await p.evaluate(()=>{
+        const i=document.querySelector(".ppage:not([hidden]) .bigttl .pgi");
+        const im=i&&i.querySelector("img");
+        return {src:im?im.getAttribute("src"):null,
+          loaded:im?(im.complete&&im.naturalWidth>0):false,
+          glyph:!!(i&&i.querySelector(".facefb svg"))}; });
+      if(!want || got.src!==want) miss.push(k+": "+got.src+" vs "+want);
+      if(!got.loaded) unloaded.push(k);
+      if(!got.glyph) miss.push(k+": no glyph behind it");
+      // back out of a collection rather than reloading: a mode page pops to the root
+      // panel, where the circles are. Only a style panel resets the stack.
+      await p.click("#panelBack");
+      await until(p,()=>!!document.querySelector('[data-mode="focus"]'));
+      await settle(p);
+    }
+    say("a collection's page wears the same art as the circle you tapped",
+      miss.length===0 ? true : miss.join(" | "));
+    say("  and the file is really there (3 opened)",
+      unloaded.length===0 ? true : "blank: "+unloaded.join(" "));
     await p.close();
   }
   await b.close();

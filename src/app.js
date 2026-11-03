@@ -2138,7 +2138,8 @@ function modeTop(m){
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);
   if(!m) return null;
-  return {title:m[2], icon:MODEICON[m[0]]||"", lv:m[5]||3, lede:m[3], top:modeTop(m),
+  return {title:m[2], icon:moodArt(m[0])+`<b class="facefb">${MODEICON[m[0]]||""}</b>`,
+    iconCls:"hasimg", lv:m[5]||3, lede:m[3], top:modeTop(m),
     html:`<div class="picks">${modePicks(m)}</div>`};
 }
 function pushPage(key){
@@ -2156,7 +2157,7 @@ function pushPage(key){
   const page=document.createElement("div");
   page.className="ppage pgin"; page.dataset.p=key;
   if(d.lv) page.classList.add("lv"+d.lv);
-  page.innerHTML=`<h1 class="bigttl${d.icon?" withi":""}">${d.icon?`<i class="pgi mi">${d.icon}</i>`:""}<span class="mn">${esc(d.title)}</span></h1>`
+  page.innerHTML=`<h1 class="bigttl${d.icon?" withi":""}">${d.icon?`<i class="pgi mi${d.iconCls?" "+d.iconCls:""}">${d.icon}</i>`:""}<span class="mn">${esc(d.title)}</span></h1>`
     + (d.lede?`<p class="note pglede">${esc(d.lede)}</p>`:"")
     // a slot between the lede and the body, for a control that acts on the whole page
     + (d.top||"")
