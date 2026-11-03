@@ -21,6 +21,19 @@
    one. That is why only the shell and the map need a light set at all. */
 :root{
   --sectline:#c7c7cc; --sectw:1px; --sep:color-mix(in srgb,#1a1a1c 14%,transparent); --bg:#ffffff; --band:#f2f2f7; --mapbg:#fbfbfd; --panel:#ffffff; --fg:#1a1a1c; --muted:#5f5f66; --line:#d8d8dc; --grid:#ebebf0; --roots:#f4f4f7;
+
+  /* ---- the four things that stop a panel reading as one flat sheet ----
+     A card is a step up from the panel, and it has an edge: a hairline ring so the shape
+     is there even where the fill is faint, and a lit top edge so it reads as raised
+     rather than cut out. The shadow is what says it is lying on something. All three are
+     shadows and background layers rather than borders, so no card changes size and no row
+     inside one moves. --grain is the last one, a tile of noise over the whole panel: a
+     large flat field of one value reads as paint, and a little tooth reads as material.
+     Light and dark want opposite tools. On white a white rim light is invisible and a
+     shadow does the work; on near-black a shadow is invisible and the rim does it. */
+  --cardline:rgb(0 0 0 / .055); --cardtop:rgb(255 255 255 / .9);
+  --cardsh:0 1px 2px rgb(0 0 0 / .045), 0 8px 20px -8px rgb(0 0 0 / .10);
+  --grain:.022;
   --fill:#ebebf0; --fill2:#f2f2f6; --scrim:rgb(0 0 0 / .32); --halo:#ffffff; --ok:#248a3d; --accent:#007aff; --accent-fg:#ffffff; --blue:#007aff; --bluetx:#0057ab;
   --glass:rgb(255 255 255 / .86); --shadow:0 1px 2px rgb(0 0 0 / .10), 0 10px 30px rgb(0 0 0 / .14);
   --bar:0px; --gutter:16px;
@@ -51,14 +64,22 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#000000; --band:#141416; --mapbg:#0f0f11; --panel:#2b2b2f; --fg:#f5f5f7; --muted:#b0b0b6; --line:#3a3a3c; --grid:#232326; --roots:#161618;
-  --fill:#3d3d41; --fill2:#37373a; --scrim:rgb(0 0 0 / .6); --halo:#0f0f11; --ok:#30d158; --accent:#0a84ff; --accent-fg:#ffffff; --blue:#0a84ff; --bluetx:#8cc5ff;
+
+  --cardline:rgb(255 255 255 / .085); --cardtop:rgb(255 255 255 / .07);
+  --cardsh:0 1px 2px rgb(0 0 0 / .32), 0 10px 26px -10px rgb(0 0 0 / .5);
+  --grain:.032;
+  --fill:#3d3d41; --fill2:#3b3b40; --scrim:rgb(0 0 0 / .6); --halo:#0f0f11; --ok:#30d158; --accent:#0a84ff; --accent-fg:#ffffff; --blue:#0a84ff; --bluetx:#8cc5ff;
   --glass:rgb(44 44 48 / .86); --shadow:0 1px 2px rgb(0 0 0 / .4), 0 10px 30px rgb(0 0 0 / .5);
   --node-s:72%; --node-l:64%; --sectline:#5a5a60; --sectw:1px; --sep:color-mix(in srgb,#f5f5f7 15%,transparent);
   --link:#5aa9ff; --lite:#f5f5f7; --lite-fg:#1a1a1c; --lite-mut:#6a6a70;
   --cdot:var(--c); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#000000; --band:#141416; --mapbg:#0f0f11; --panel:#2b2b2f; --fg:#f5f5f7; --muted:#b0b0b6; --line:#3a3a3c; --grid:#232326; --roots:#161618;
-  --fill:#3d3d41; --fill2:#37373a; --scrim:rgb(0 0 0 / .6); --halo:#0f0f11; --ok:#30d158; --accent:#0a84ff; --accent-fg:#ffffff; --blue:#0a84ff; --bluetx:#8cc5ff;
+
+  --cardline:rgb(255 255 255 / .085); --cardtop:rgb(255 255 255 / .07);
+  --cardsh:0 1px 2px rgb(0 0 0 / .32), 0 10px 26px -10px rgb(0 0 0 / .5);
+  --grain:.032;
+  --fill:#3d3d41; --fill2:#3b3b40; --scrim:rgb(0 0 0 / .6); --halo:#0f0f11; --ok:#30d158; --accent:#0a84ff; --accent-fg:#ffffff; --blue:#0a84ff; --bluetx:#8cc5ff;
   --glass:rgb(44 44 48 / .86); --shadow:0 1px 2px rgb(0 0 0 / .4), 0 10px 30px rgb(0 0 0 / .5);
   --node-s:72%; --node-l:64%; --sectline:#5a5a60; --sectw:1px; --sep:color-mix(in srgb,#f5f5f7 15%,transparent);
   --link:#5aa9ff; --lite:#f5f5f7; --lite-fg:#1a1a1c; --lite-mut:#6a6a70;
@@ -261,7 +282,7 @@ aside h3,.pcard h3.sec{font:600 var(--t-head)/var(--t-head-lh) var(--f-body);let
    ground, rows flush inside it, and a hairline between rows that starts where the
    text starts rather than cutting the whole width. Scoped to .picks because the
    featured row carries .pick too and stays its own card. */
-.picks{display:flex;flex-direction:column;gap:0;background:var(--fill2);border-radius:14px;
+.picks{display:flex;flex-direction:column;gap:0;border-radius:14px;
   --seplead:33px}   /* 16 padding + 8 dot + 9 gap: the separator lines up with the title */
 .picks>.pick{position:relative;background:transparent;border-radius:0}
 .picks>.pick:first-child{border-radius:14px 14px 0 0}
@@ -446,7 +467,14 @@ body.open .pcnt{display:none}
 /* the ways of browsing are one grouped list, the way a phone app lists collections:
    a single rounded card, a row each, and hairlines that start at the name rather than
    running the full width. --lrlead is that inset: padding + icon + gap. */
-.listgrp{background:var(--fill2);border-radius:14px;overflow:hidden;--lrlead:57px}
+/* One treatment for all three kinds of card. The ring is an outer shadow rather than an
+   inset one, because a row that paints its own background on hover would cover an inset
+   ring along its edge. The rim light is a background layer rather than a pseudo-element,
+   because every row inside is transparent at rest and so lets it through. */
+.listgrp,.picks,.reads{
+  background:linear-gradient(var(--cardtop) 0 1px,#0000 1px),var(--fill2);
+  box-shadow:0 0 0 1px var(--cardline),var(--cardsh)}
+.listgrp{border-radius:14px;overflow:hidden;--lrlead:57px}
 .listgrp .navwrap{display:block;position:relative}
 .listgrp .navwrap + .navwrap::after{content:"";position:absolute;left:var(--lrlead);right:0;top:0;
   height:.5px;background:var(--sep);pointer-events:none}
@@ -691,7 +719,7 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 /* Go deeper, laid out like a news list. One block with hairlines between the rows
    rather than a card each, so the titles form a column the eye can run down. The
    separators inset past the icon, the way the Browse list does it. */
-.reads{background:var(--fill2);border-radius:14px;overflow:hidden;margin-top:2px;--rdlead:57px}
+.reads{border-radius:14px;overflow:hidden;margin-top:2px;--rdlead:57px}
 .rd{position:relative;display:flex;gap:13px;padding:13px 14px;color:var(--fg);
   text-decoration:none;transition:background .15s}
 .rd + .rd::after{content:"";position:absolute;left:var(--rdlead);right:0;top:0;
@@ -1439,6 +1467,15 @@ aside#panel{position:relative;z-index:30;flex:0 0 var(--sidew);width:var(--sidew
 /* a wash of the family's cover-art ground; --tint is set per selection.
    the muted ink is darkened/brightened to hold contrast over the wash. */
 aside#panel{transition:background .25s}
+/* #panel already makes a stacking context, so a negative-z pseudo paints above its own
+   background and below everything in it. Fixed to the panel rather than to the scroller,
+   so the tooth stays still while the content moves over it, which is how a surface
+   behaves. pointer-events:none keeps it out of every tap. */
+aside#panel::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  opacity:var(--grain);mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:140px 140px}
+@media (prefers-reduced-transparency:reduce){ aside#panel::after{display:none} }
 /* The panel takes the shelf's field, and which field depends on the mode. It used to be
    the one deep ground in both, which is right over a black map and wrong over a near-white
    one: the darkest families read as a slab dropped on the page, and the five that are
