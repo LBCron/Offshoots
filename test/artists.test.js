@@ -7,7 +7,7 @@
 // same-document navigation and does not re-select.
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 // Anything that is not true is a failure. A check that answered with its detail instead
 // of false used to print with no prefix at all, so the runner counted it as no check and
@@ -475,7 +475,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
       // where the layout has no peek there is nothing to expand, and a click on a control
       // that will never appear is a thirty-second sleep wearing a click's clothes.
       const handle=await q.$eval("#grab",e=>!!e.getClientRects().length).catch(()=>false);
-      if(handle){ await q.click("#grab"); await opened(q); }
+      if(handle){ await raise(q); await opened(q); }
       // wait for the row itself rather than a stopwatch: under a loaded machine the sheet
       // can still be opening, and a missing row would read as the two rows disagreeing
       await q.waitForSelector(tile,{state:"attached",timeout:8000}).catch(()=>{});
@@ -608,7 +608,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
   const PHONE={width:393,height:852,isMobile:true,hasTouch:true,deviceScaleFactor:2};
   { const q=await b.newPage({viewport:PHONE});
     await q.goto(URL+"#acidhouse"); await selected(q);
-    await q.click("#grab").catch(()=>{}); await opened(q);
+    await raise(q); await opened(q);
     const head=await q.$('[data-page="artists"]');
     if(head){ await head.click(); await onPage(q,"artists"); }
     const rows=await q.evaluate(()=>{
@@ -642,7 +642,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
     for(let pass=0;pass<2;pass++){
       const q=await b.newPage({viewport:PHONE});
       await q.goto(URL+"#acidhouse"); await selected(q);
-      await q.click("#grab").catch(()=>{}); await opened(q);
+      await raise(q); await opened(q);
       const circles=await q.evaluate(n=>Object.fromEntries(
         [...document.querySelectorAll("a.acirc[data-name]")]
           .filter(a=>n.indexOf(a.dataset.name)>=0)

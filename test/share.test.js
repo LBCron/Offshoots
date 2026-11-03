@@ -1,6 +1,6 @@
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,gone,shown,arm}=require("./_wait");
+const {settle,until,gone,shown,arm,raise}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 const Dk={width:1280,height:900};
@@ -175,7 +175,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     peek.name && peek.play && peek.art);
   say("  and nothing below it", !peek.artists && !peek.links && !peek.deeper);
   say("and shares nothing by itself", (await p.evaluate(()=>window.__copied.length))===0);
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
   await p.$eval("#panelBody .shbtn",e=>e.scrollIntoView({block:"center"})); await settle(p);
   await p.click("#panelBody .shbtn"); await wrote(p,0); await settle(p);
   say("the control at the foot does the sharing", (await p.evaluate(()=>window.__copied.length))===1);
@@ -186,7 +186,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   await p.reload(); await arm(p); await shown(p,"#chart .n");
   // the header is measured against the selection, so the style has to be current
   await until(p,()=>!!document.querySelector("#chart .n.cur")); await settle(p);
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
   // The name is a heading in the body now, so nothing has to thread between the two
   // controls pinned to the nav row's corners. What matters instead is that a long one
   // wraps rather than running under them or off the card.
@@ -263,7 +263,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     const q=await fc.newPage();
     await q.goto(URL+"#punk"); await arm(q); await shown(q,"#chart .n");
     await until(q,()=>!!document.querySelector("#chart .n.cur")); await settle(q);
-    if(mob) await q.click("#grab").catch(()=>{});
+    if(mob) await raise(q);
     await settle(q);
     await q.$eval(".sect-connections",e=>{ e.open=true; });
     await settle(q);
@@ -375,7 +375,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // #about is the one hash that is not a style id, so it has to survive boot and land
   // on the open section rather than on an empty overview.
   const ab=await fresh(b,M);
-  await ab.click("#grab").catch(()=>{});
+  await raise(ab);
   await opened(ab);
   await ab.$eval(".ovfold summary",e=>{ if(!e.parentElement.open) e.click(); });
   await settle(ab);
@@ -439,7 +439,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   { const w=await b.newPage({viewport:M});
     await w.goto(URL+"#neoswing"); await arm(w); await shown(w,"#chart .n");
     await until(w,()=>!!document.querySelector("#chart .n.cur")); await settle(w);
-    await w.click("#grab").catch(()=>{}); await opened(w);
+    await raise(w); await opened(w);
     await w.evaluate(()=>{document.getElementById("panelBody").scrollTop=260;});
     // the band is the one the scrolled state draws, so wait for the state
     await until(w,()=>document.getElementById("panel").classList.contains("pscrolled")); await settle(w);
@@ -476,7 +476,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
       const sm=d.querySelector("summary");
       return !d.open
         && Math.abs(d.getBoundingClientRect().height - sm.getBoundingClientRect().height) <= 1;}));
-    await w.click("#grab").catch(()=>{}); await opened(w);
+    await raise(w); await opened(w);
     const r=await w.evaluate(()=>{ const s=document.querySelector(".aboutfold");
       s.open=true;
       const tl=document.querySelector(".sect-connections .tally");

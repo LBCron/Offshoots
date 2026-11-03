@@ -12,7 +12,7 @@ const {chromium}=require("playwright");
 const DATA=require(require("path").join(__dirname,"..","src","data.js"));
 const MODESIZE=k=>{ const m=DATA.MODES.find(x=>x[0]===k); return m?m[4].length:-1; };
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 // one name for "the page is loaded, the map is drawn and nothing is moving". The circles
 // are laid out against the map, so a loaded document is not enough.
@@ -35,7 +35,7 @@ const landed=async(q,k)=>{ await until(q,k=>{
 const fresh=async(b,vp)=>{ const p=await b.newPage({viewport:vp}); const errs=[];
   p.on("pageerror",e=>errs.push(String(e))); p.on("console",m=>{if(m.type()==="error")errs.push(m.text());});
   await p.goto(URL); await ready(p);
-  if(vp===M){ await p.click("#grab").catch(()=>{}); await opened(p); }
+  if(vp===M){ await raise(p); await opened(p); }
   p._errs=errs; return p; };
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 const Dk={width:1280,height:900};
@@ -250,7 +250,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     await q.addInitScript(u=>{ try{ u ? localStorage.setItem("offshoots.modeuse",JSON.stringify(u))
       : localStorage.removeItem("offshoots.modeuse"); }catch(e){} }, use);
     await q.goto(URL); await ready(q);
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await q.waitForSelector(".mcirc",{state:"attached",timeout:8000}).catch(()=>{});
     await opened(q);
     return q; };

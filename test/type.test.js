@@ -19,7 +19,7 @@ const {chromium}=require("playwright");
 const DATA=require(require("path").join(__dirname,"..","src","data.js"));
 const MODESIZE=k=>{ const m=DATA.MODES.find(x=>x[0]===k); return m?m[4].length:-1; };
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 // Anything that is not true is a failure. A check that answered with its detail instead
 // of false used to print with no prefix at all, so the runner counted it as no check and
@@ -154,7 +154,7 @@ const readRules=(p)=>p.evaluate(()=>{
     // 1. the overview
     let p=await ctx.newPage();
     await p.goto(URL); await ready(p);
-    if(open){ await p.click("#grab").catch(()=>{}); await opened(p); }
+    if(open){ await raise(p); await opened(p); }
     check(name+" overview", await readType(p,"#panelBody"), await readTaps(p,"#panelBody",TIER.tap));
 
     const rules=await readRules(p);
@@ -209,7 +209,7 @@ const readRules=(p)=>p.evaluate(()=>{
     await p.close();
     p=await ctx.newPage();
     await p.goto(URL+"#roots"); await ready(p);
-    if(open){ await p.click("#grab").catch(()=>{}); await opened(p); }
+    if(open){ await raise(p); await opened(p); }
     await onPage(p,"roots");
     const pg=await p.$('.ppage[data-p="roots"]');
     if(pg){
@@ -220,7 +220,7 @@ const readRules=(p)=>p.evaluate(()=>{
     // 3. a style panel, on a fresh page: hash navigation on a loaded page does not select
     p=await ctx.newPage();
     await p.goto(URL+"#shoegaze"); await selected(p);
-    if(open){ await p.click("#grab").catch(()=>{}); await opened(p); }
+    if(open){ await raise(p); await opened(p); }
     const got=await p.$eval(".pcard .pttl .ptnm",e=>e.textContent).catch(()=>null);
     say(name+" style panel opened on Shoegaze", got==="Shoegaze");
     if(got!=="Shoegaze") bad++;
@@ -265,7 +265,7 @@ const readRules=(p)=>p.evaluate(()=>{
   {
     const q=await b.newPage({viewport:{width:430,height:900}});
     await q.goto(URL); await ready(q);
-    await q.click("#grab").catch(()=>{}); await settle(q);
+    await raise(q); await settle(q);
     await q.click('[data-page="modes"]').catch(()=>{}); await settle(q);
     const r=await q.evaluate(()=>{
       const loose=[], press=[...document.querySelectorAll("button,[role='button']")];

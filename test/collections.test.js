@@ -5,7 +5,7 @@
 const path=require("path");
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const D=require(path.join(__dirname,"..","src","data.js"));
 const URL="file://"+path.join(__dirname,"..","index.html");
 const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
@@ -52,7 +52,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const p=await (await b.newContext({viewport:vp})).newPage();
     await p.goto(URL); await arm(p); await shown(p,"#chart .n"); await settle(p);
     if(await p.evaluate(()=>!document.body.classList.contains("open"))){
-      await p.click("#grab").catch(()=>{});
+      await raise(p);
       await until(p,()=>document.body.classList.contains("open")); await settle(p); }
     // a collection opens by tapping it: the hash does not deep-link one
     await p.click('[data-mode="dinner"]');
@@ -149,7 +149,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const backToCollection=async()=>{
       await p.goto(URL); await arm(p); await shown(p,"#chart .n"); await settle(p);
       if(await p.evaluate(()=>!document.body.classList.contains("open"))){
-        await p.click("#grab").catch(()=>{});
+        await raise(p);
         await until(p,()=>document.body.classList.contains("open")); await settle(p); }
       await p.click('[data-mode="dinner"]');
       await until(p,()=>!!document.querySelector('.ppage[data-p="mode:dinner"]'));
@@ -174,7 +174,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
     await p.goto(URL); await arm(p); await shown(p,"#chart .n"); await settle(p);
     if(await p.evaluate(()=>!document.body.classList.contains("open"))){
-      await p.click("#grab").catch(()=>{});
+      await raise(p);
       await until(p,()=>document.body.classList.contains("open")); await settle(p); }
     const miss=[], unloaded=[];
     // three of them, opened for real, rather than reading the markup: a src that never

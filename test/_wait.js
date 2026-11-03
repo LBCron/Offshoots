@@ -97,4 +97,25 @@ async function shown(p, sel, cap){
   }, sel, cap);
 }
 
-module.exports = {settle, until, gone, shown, arm, CAP, IDLE};
+// The app opens on Explore rather than on a peek of it, so the grabber is a toggle whose
+// resting state changed under every test that used it to open the sheet: a bare tap now
+// closes what it used to open, and the wait for body.open that follows hangs until the
+// cap. This taps only when the sheet is shut, which is what every one of those call sites
+// meant in the first place.
+async function raise(page){
+  const shut = await page.evaluate(()=>!document.body.classList.contains("open"));
+  if(shut) await page.click("#grab").catch(()=>{});
+  return shut;
+}
+
+// Its opposite, for the call sites that tapped the grabber meaning close. Rewriting every
+// tap as raise() turned those into no-ops, which is worse than the breakage it fixed: a
+// check that asks whether the sheet is shut after a tap that never happened still reads
+// like a check.
+async function lower(page){
+  const open = await page.evaluate(()=>document.body.classList.contains("open"));
+  if(open) await page.click("#grab").catch(()=>{});
+  return open;
+}
+
+module.exports = {settle, until, gone, shown, arm, raise, lower, CAP, IDLE};

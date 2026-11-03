@@ -1,6 +1,6 @@
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,arm}=require("./_wait");
+const {settle,until,arm,raise,lower}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 // Anything that is not true is a failure. A check that answered with its detail instead
@@ -45,7 +45,7 @@ const hash=p=>p.evaluate(()=>location.hash);
 // From and Led to moved out of the header and into the card, so reaching them on a phone
 // means opening the sheet first. The peek is the playlist; the lineage is below it.
 const open=async p=>{ if(await p.evaluate(()=>!document.body.classList.contains("open")))
-  { await p.click("#grab").catch(()=>{}); await opened(p); } };
+  { await raise(p); await opened(p); } };
 
 // Explore the connections is folded shut now: it is the longest thing on a style panel
 // and a place to go next rather than something to read on the way through. Anything that
@@ -60,7 +60,7 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   say("hidden with nothing behind you", (await shown(p))===false);
 
   // overview with a mode open -> a style -> back
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
   await p.click('[data-mode="winddown"]'); await onPage(p,"mode:winddown");
   // a mode is a pushed page now, and a pushed page owns the back button: it points at
   // the list you came from rather than at a style you visited
@@ -95,7 +95,7 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   // is a section in the card now, so the sheet has to be open to walk it: that is the
   // trade the restructure made, the peek being for playing rather than for navigating.
   const ensureOpen=async q=>{ if(!(await q.evaluate(()=>document.body.classList.contains("open"))))
-    await q.click("#grab").catch(()=>{}); await opened(q); };
+    await raise(q); await opened(q); };
   await ensureOpen(p);
   for(const id of walk){
     await openCx(p);
@@ -152,7 +152,7 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   // the behaviour being walked, so the test closes it rather than pretending otherwise.
   say("the sheet is open, since the lineage lives in the card",
     (await p.evaluate(()=>document.body.classList.contains("open")))===true);
-  await p.click("#grab").catch(()=>{});
+  await lower(p);
   await until(p,()=>!document.body.classList.contains("open")); await settle(p);
   say("tapped bare map", await tapBare());
   say("which clears to the map", (await hash(p))==="");
@@ -197,7 +197,7 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   // mid-sentence, reads as broken rather than as considerate. The style half is covered
   // by the sub-page pops above; this checks the exception.
   const q=await fresh(b,M);
-  await q.click("#grab").catch(()=>{}); await opened(q);
+  await raise(q); await opened(q);
   const deep=await q.evaluate(()=>{const b=document.getElementById("panelBody");
     b.scrollTop=b.scrollHeight; return b.scrollTop;});
   await settle(q);
@@ -233,7 +233,7 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   { const k=await parked(p);
     say("  and not there at all", k.shown===false);
     say("  so nothing covers the strip when there is nowhere to go", k.shown===false); }
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
   await p.click('[data-mode="winddown"]'); await onPage(p,"mode:winddown");
   const pick1=await p.$eval(".picks .pick",e=>e.dataset.go);
   await p.click(".picks .pick"); await at(p,"#"+pick1);
@@ -285,7 +285,7 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   // again from two levels in: a style with a page pushed on top of it, which is the
   // deepest the button is offered from and the most there is to unwind
   { const q=await fresh(b,M,"#gospel"); await settle(q);
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await until(q,()=>document.body.classList.contains("open"));
     await settle(q);
     const pushed=await q.$('[data-page="artists"]');
@@ -324,7 +324,7 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   // home is a reset: the walk that led here is gone, so back goes too
   say("back is cleared away with it", (await shown(p))===false);
   // and the trail really is empty, not merely hidden: the next move starts from the map
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
   await p.click('[data-mode="winddown"]'); await onPage(p,"mode:winddown");
   const pick2=await p.$eval(".picks .pick",e=>e.dataset.go);
   await p.click(".picks .pick"); await at(p,"#"+pick2);

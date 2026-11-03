@@ -10,7 +10,7 @@
 // starts from a clean stack rather than remembering where you were.
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 const Dk={width:1280,height:900};
@@ -48,7 +48,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   p.on("pageerror",e=>errs.push(String(e)));
   await p.goto(URL+(hash||"")); await ready(p);
   if(hash) await pushed(p);
-  if(vp===M){ await p.click("#grab").catch(()=>{}); await glided(p); await settle(p); }
+  if(vp===M){ await raise(p); await glided(p); await settle(p); }
   p._errs=errs; return p; }
 const state=p=>p.evaluate(()=>{
   const pages=[...document.querySelectorAll(".ppage")];

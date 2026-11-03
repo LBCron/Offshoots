@@ -1,6 +1,6 @@
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise,lower}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 const Dk={width:1280,height:900};
@@ -32,7 +32,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
 (async()=>{
   const b=await chromium.launch(); skipWelcome(b);
   let p=await fresh(b,M);
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
 
   // ---- order on the page ----
   // Explore is four sections now, in the order you would want them: what the map itself
@@ -349,7 +349,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // Anyone who had the address keeps it, and the styles, the root classifications and
   // the lineage behind them are all untouched. It is reached by its hash now.
   { const rp=await fresh(b,M,"#roots");
-    await rp.click("#grab").catch(()=>{}); await opened(rp);
+    await raise(rp); await opened(rp);
     await onPage(rp,"roots");
     const r=await rp.evaluate(()=>{ const page=document.querySelector('.ppage[data-p="roots"]');
       if(!page || page.hidden) return null;
@@ -375,7 +375,18 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // still matters for the rows that replaced it: a named row on a minimised sheet has to
   // navigate rather than just expand the panel, which is what tap-anywhere-to-open does.
   { const mini=await fresh(b,M);
-    say("sheet starts minimised", (await mini.$eval("body",e=>e.classList.contains("open")))===false);
+    // Opening the app lands on Explore now rather than on a peek of it, so the minimised
+    // state has to be asked for before the thing it proves can be checked at all.
+    say("opening the app lands on Explore",
+      (await mini.$eval("body",e=>e.classList.contains("open")))===true);
+    const vis=await mini.evaluate(()=>{
+      const r=document.getElementById("panel").getBoundingClientRect();
+      return {sheet:Math.round(r.height), map:Math.round(r.top), vh:innerHeight}; });
+    say("  with the map still showing above it ("+vis.map+"px of "+vis.vh+")",
+      vis.map>=vis.vh*0.2 && vis.sheet>=vis.vh*0.55);
+    await lower(mini); await settle(mini);
+    say("  and one pull puts it back to a peek",
+      (await mini.$eval("body",e=>e.classList.contains("open")))===false);
     say("  and nothing is left of Start here",
       (await mini.$$(".sect-feat, .featpick, .shuf, [data-shuffle]")).length===0);
     await mini.close(); }
@@ -452,7 +463,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // the point of the order is that the covers are in reach without a hunt.
   // on a page that has not had the fold opened: this one has, from the About check above
   const rp2=await fresh(b,M);
-  await rp2.click("#grab").catch(()=>{}); await opened(rp2);
+  await raise(rp2); await opened(rp2);
   const reach=await rp2.$eval("#panelBody",e=>{
     const a=e.querySelector(".ovcard").getBoundingClientRect();
     const m=e.querySelector(".sect-modes").getBoundingClientRect();

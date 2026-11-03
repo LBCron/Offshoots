@@ -7,7 +7,7 @@
 // on the style and the row on the page are the same row.
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const D=require("../src/data.js");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
@@ -122,7 +122,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
   // --- the way in: its own section under the browse lists, not among them. Explore is
   // about styles; this section is about sources, and the two were reading as one list.
   await p.goto(URL); await ready(p);
-  await p.click("#grab").catch(()=>{}); await settle(p);
+  await raise(p); await settle(p);
   const sect=await p.evaluate(()=>{
     const d=document.querySelector(".sect-deeper"), br=document.querySelector(".sect-modes");
     if(!d||!br) return null;

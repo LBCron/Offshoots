@@ -6,7 +6,7 @@
 const path=require("path");
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+path.join(__dirname,"..","index.html");
 const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
 const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
@@ -16,7 +16,7 @@ const open=async p=>{
   // shut besides. Shut, content-visibility lets the rows report a size they never had laid
   // out, so measuring without doing both reads geometry that does not exist.
   if(await p.evaluate(()=>!document.body.classList.contains("open"))){
-    await p.click("#grab").catch(()=>{});
+    await raise(p);
     await until(p,()=>document.body.classList.contains("open")); await settle(p); }
   await p.evaluate(()=>{ const d=document.querySelector(".sect-connections");
     d.open=true; d.scrollIntoView({block:"start"}); });

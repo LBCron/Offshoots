@@ -10,7 +10,7 @@
 // so none of the root tokens reach them and nothing was checking what came out.
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 // Anything that is not true is a failure. A check that answered with its detail instead
 // of false used to print with no prefix at all, so the runner counted it as no check and
@@ -55,7 +55,7 @@ const parse=s=>{
       colorScheme:scheme});
     const p=await ctx.newPage();
     await p.goto(URL); await ready(p);
-    if(mob){ await p.click("#grab"); await opened(p); }
+    if(mob){ await raise(p); await opened(p); }
     const rows=await p.evaluate(()=>{
       // The ground a string actually sits on, not the first painted ancestor. A
       // translucent background has to be composited over what is under it or the reading

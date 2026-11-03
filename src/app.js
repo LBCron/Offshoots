@@ -2945,7 +2945,10 @@ function openHello(){
 // left alone with the map, and everything else is reachable from either.
 const STARTS={
   modes: ()=>{ setOpen(true); setTimeout(()=>pushPage("modes"),120); },
-  map:   ()=>{}
+  // Look around the map used to open nothing because the sheet was already down. The app
+  // opens on Explore now, so doing nothing hands someone who asked for the map a panel
+  // over two thirds of it. This is the one place that asks for the peek by name.
+  map:   ()=>{ setOpen(false); }
 };
 
 // ---------- step three: keeping it ----------
@@ -3028,7 +3031,17 @@ function boot(){
     setTimeout(()=>openAbout(true,h),420); // after the sheet has finished opening
   }
   else if(byId[h]) select(h,{smooth:false});
-  else { emptyPanel(); scroller.scrollLeft = 0; scroller.scrollTop = 0; syncPeek(); }
+  else {
+    emptyPanel(); scroller.scrollLeft = 0; scroller.scrollTop = 0; syncPeek();
+    // Opening the app lands on Explore rather than on a peek of it. The peek was right
+    // when the panel was a blurb and two rows: it said the map is the thing and this is
+    // a drawer. It is a shelf now, and a drawer you have to pull every time you open the
+    // app is a tap charged for the same thing every session. The map still has a third of
+    // the screen, and one pull down puts it back.
+    // Only here: arriving on a link somebody sent is somebody else's arrival, and that
+    // one still opens on the map, which is what the link was about.
+    setOpen(true);
+  }
   // a hash of any kind means somebody was sent here, so the map speaks for itself
   if(!h && !helloSeen()) setTimeout(openHello,260);
 }

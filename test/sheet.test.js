@@ -12,7 +12,7 @@
 // makes every "it closed" assertion pass without testing anything.
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise,lower}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 // Anything that is not true is a failure. A check that answered with its detail instead
 // of false used to print with no prefix at all, so the runner counted it as no check and
@@ -58,7 +58,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   });
   // open means the body says so, the glide has cleaned up after itself, and then the page
   // has gone quiet. Waiting for the class alone would measure the sheet mid-flight.
-  const ensure=async()=>{ if(!await open()){ await p.click("#grab");
+  const ensure=async()=>{ if(!await open()){ await raise(p);
       await until(p,()=>document.body.classList.contains("open")); }
     await glided(); await still(); await rest(p); };
   // a gesture that is meant to shut the sheet is over when the class has gone and the
@@ -124,7 +124,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   for(const [name,id] of [["the overview",""],["a style","#mathrock"]]){
     const q=await ctx.newPage();
     await q.goto(URL+id); await shown(q,"#chart .n"); await rest(q);
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await until(q,()=>document.body.classList.contains("open")); await rest(q);
     // each wheel has landed when the card has scrolled further than it had, or when it
     // has nothing further to give: four of them is more than a short card can take, and
@@ -148,7 +148,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     await q.close();
   }
 
-  await p.click("#grab"); await shut();
+  await lower(p); await shut();
   say("it is minimised again", (await open())===false);
   await swipe(195,R[1]-40,0,-60); await opened();
   say("a swipe up still opens it", await open());
@@ -241,9 +241,9 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // close above already told us where the sheet ends up, so reverse once it has covered a
   // third of the distance between the two heights.
   const third=(R[1]-R[0])-((R[1]-R[0])-closing.to)/3;
-  await p.click("#grab");
+  await raise(p);
   await until(p,h=>document.getElementById("panel").getBoundingClientRect().height<h,third);
-  await p.click("#grab"); await opened();
+  await raise(p); await opened();
   const back=await p.evaluate(()=>Math.round(document.getElementById("panel").getBoundingClientRect().height));
   say("reversed mid-animation, it settles at "+back+"px", Math.abs(back-(R[1]-R[0]))<=2);
 
@@ -257,6 +257,9 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     await p.mouse.move(x,y); await p.mouse.down();
     const seen=[];
     for(let i=1;i<=steps;i++){ await p.mouse.move(x,y+dy*i/steps); seen.push(await hgt()); if(pause) await p.waitForTimeout(pause); }
+    // Same reason the page-side gesture waits: the release reads the sheet's current
+    // offsetHeight, so the last move's inline height has to have landed before letting go.
+    await p.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
     if(release) await p.mouse.up();
     return seen; };
   // A flick is a claim about speed, and Playwright's mouse cannot make one: every move is
@@ -272,6 +275,11 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       await new Promise(r=>setTimeout(r,8));
       ev("pointermove",y+dy*i/steps);
     }
+    // Let the last move be applied before letting go. The release reads the sheet's
+    // current offsetHeight to decide, and under a loaded machine the inline height from
+    // the final pointermove had not landed yet, so it read the height the sheet started
+    // at and kept it open. The gesture was right and the reading was early.
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     ev("pointerup",y+dy);
   },[x,y,dy,steps]);
   await ensure();
@@ -309,7 +317,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // minimised sheet opened it instead
   await p.click("#sheetpull");
   await until(p,()=>!document.body.classList.contains("sheetgone")); await rest(p);
-  if(await open()){ await p.click("#grab"); await shut(); }
+  if(await open()){ await lower(p); await shut(); }
   say("  from the peek, the same", (await open())===false);
   await p.click(".ovcard .pmin");
   await until(p,()=>document.body.classList.contains("sheetgone")); await rest(p);
@@ -363,7 +371,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       if(e) o[s]=+(e.getBoundingClientRect().top-pa.top).toFixed(2);}); return o;});
   await p.goto(URL); await shown(p,"#chart .n"); await rest(p);
   const shut0=await offsets();
-  await p.click("#grab"); await opened();
+  await raise(p); await opened();
   const wide=await offsets();
   const moved=Object.keys(shut0).filter(k=>Math.abs(shut0[k]-wide[k])>0.5);
   say("the card holds its position in both states"+(moved.length?" ("+moved.map(k=>k+" "+shut0[k]+" -> "+wide[k]).join(", ")+")":""), moved.length===0);
@@ -381,7 +389,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     return [cs.backdropFilter||cs.webkitBackdropFilter||"none", cs.backgroundColor];});
   say("its ground is frosted: "+frost[0], /blur/.test(frost[0]));
   say("and translucent: "+frost[1], /rgba|\/ 0\./.test(frost[1]));
-  await p.click("#grab"); await opened();
+  await raise(p); await opened();
   const g2=await geo();
   say("opening no longer resizes the map ("+g1.mapH+" -> "+g2.mapH+")", g1.mapH===g2.mapH);
   // a tinted style panel frosts over its own family ground, not the root's.
@@ -433,7 +441,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   };
   const open1=await bottomGap();
   say("with the sheet open, the last lane clears it by "+open1.lane+"px", open1.lane>SHADOW);
-  await p.click("#grab"); await shut();
+  await raise(p); await shut();
   const shut1=await bottomGap();
   say("minimised, the same ("+shut1.lane+"px lane, "+shut1.style+"px style)", shut1.lane>SHADOW && shut1.style>SHADOW);
   // and at a height the user dragged it to, which no setOpen reports
@@ -454,7 +462,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       const o={}; [".sthead",".sect-listen",".startrow",".plbtn"].forEach(s=>{ const e=document.querySelector(s);
         if(e) o[s]=Math.round(e.getBoundingClientRect().top-pa.top); }); return o; });
     const peek=await where();
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await until(q,()=>document.body.classList.contains("open")); await rest(q);
     const open=await where();
     const moved=Object.keys(peek).filter(k=>Math.abs(peek[k]-open[k])>1);
@@ -492,7 +500,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
     for(const [sel,what] of [[".mcirc","a mood circle"],[".listrow","a list row"]]){
       await q.goto(URL); await shown(q,"#chart .n");
-      await q.click("#grab").catch(()=>{});
+      await raise(q);
       await q.waitForSelector(sel,{state:"attached",timeout:8000}).catch(()=>{});
       await settle(q);
       // the first one that is actually in the sheet, not the first in the document. The
@@ -523,7 +531,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     // contents 48px to the right the first time anyone scrolled. Nothing the header does
     // may move the panel's contents across the screen.
     { await q.goto(URL); await shown(q,"#chart .n");
-      await q.click("#grab").catch(()=>{});
+      await raise(q);
       await until(q,()=>document.body.classList.contains("open")); await settle(q);
       const across=()=>q.evaluate(()=>{
         const pb=document.getElementById("panelBody"), pn=document.getElementById("panel");
@@ -552,7 +560,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     // the map: one 56ms frame, in the one place every scroll passes through, which is why
     // it read as a hitch rather than as slowness. The classes live on the panel now.
     { await q.goto(URL); await shown(q,"#chart .n");
-      await q.click("#grab").catch(()=>{});
+      await raise(q);
       await until(q,()=>document.body.classList.contains("open")); await settle(q);
       const fr=await q.evaluate(async ()=>{
         const pb=document.getElementById("panelBody");
@@ -577,7 +585,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
     // and sideways from the same circle still moves the row, which is what pan-x was for
     await q.goto(URL); await shown(q,"#chart .n");
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await q.waitForSelector(".mcirc",{state:"attached",timeout:8000}).catch(()=>{});
     await settle(q);
     const cb=await q.evaluate(()=>{ const r=document.querySelector(".mcirc").getBoundingClientRect();
@@ -605,7 +613,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     await q.addInitScript(()=>{ try{ localStorage.setItem("offshoots.seen","1");
       localStorage.setItem("offshoots.tip","1"); }catch(e){} });
     await q.goto(URL); await shown(q,"#chart .n");
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await q.waitForSelector(".sect-modes",{state:"attached",timeout:8000}).catch(()=>{});
     await settle(q);
     const r=await q.evaluate(()=>{
@@ -620,7 +628,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     // flex item, so it sized to its widest line and hung off the left of the screen. The
     // overview was narrow enough to hide that.
     await q.goto(URL+"#disco"); await shown(q,"#chart .n");
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await settle(q); await q.waitForTimeout(300);
     const s=await q.evaluate(()=>{
       const pb=document.getElementById("panelBody"), c=document.querySelector(".pcard");

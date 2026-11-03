@@ -6,7 +6,7 @@
 const path=require("path");
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+path.join(__dirname,"..","index.html");
 const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
 const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
@@ -23,7 +23,7 @@ const lum=rgb=>{ const c=(rgb.match(/[\d.]+/g)||[]).slice(0,3).map(Number)
     const p=await c.newPage();
     await p.goto(URL); await arm(p); await shown(p,"#chart .n"); await settle(p);
     if(await p.evaluate(()=>!document.body.classList.contains("open"))){
-      await p.click("#grab").catch(()=>{});
+      await raise(p);
       await until(p,()=>document.body.classList.contains("open")); await settle(p); }
     await settle(p); await new Promise(r=>setTimeout(r,250));
 
@@ -81,7 +81,7 @@ const lum=rgb=>{ const c=(rgb.match(/[\d.]+/g)||[]).slice(0,3).map(Number)
     for(const id of pick){
       await p.goto(URL+"#"+id); await arm(p); await shown(p,"#chart .n"); await settle(p);
       if(await p.evaluate(()=>!document.body.classList.contains("open"))){
-        await p.click("#grab").catch(()=>{});
+        await raise(p);
         await until(p,()=>document.body.classList.contains("open")); await settle(p); }
       await settle(p);
       const r=await p.evaluate(()=>{
@@ -107,7 +107,7 @@ const lum=rgb=>{ const c=(rgb.match(/[\d.]+/g)||[]).slice(0,3).map(Number)
     const p=await c.newPage();
     await p.goto(URL+"#gospel"); await arm(p); await shown(p,"#chart .n"); await settle(p);
     if(await p.evaluate(()=>!document.body.classList.contains("open"))){
-      await p.click("#grab").catch(()=>{});
+      await raise(p);
       await until(p,()=>document.body.classList.contains("open")); await settle(p); }
     await settle(p); await new Promise(r=>setTimeout(r,250));
     const got=await p.evaluate(()=>{

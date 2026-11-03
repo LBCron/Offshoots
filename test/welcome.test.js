@@ -11,7 +11,7 @@
 //
 // This suite is the one that does NOT mark it seen first.
 const {chromium}=require("playwright");
-const {settle,until,gone,shown,arm}=require("./_wait");
+const {settle,until,gone,shown,arm,raise,lower}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={viewport:{width:393,height:852,isMobile:true,hasTouch:true},deviceScaleFactor:2};
 const D={viewport:{width:1280,height:900}};
@@ -322,7 +322,7 @@ const toStep=async(q,n)=>{
       n.dispatchEvent(new MouseEvent("click",{bubbles:true})); });
     // the panel is built from the selection, so the style has to be current
     await until(q,()=>!!document.querySelector("#chart .n.cur")); await settle(q);
-    await q.click("#grab").catch(()=>{});
+    await raise(q);
     await until(q,()=>document.body.classList.contains("open"));
     // the glide leaves an inline height on the panel while the sheet is still moving
     await until(q,()=>!document.getElementById("panel").style.height); await settle(q);

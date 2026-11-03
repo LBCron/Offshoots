@@ -7,7 +7,7 @@
 // a note on every one, since the note is what makes it worth a tap.
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+__dirname+"/../index.html";
 const M={width:390,height:844,isMobile:true,hasTouch:true,deviceScaleFactor:2};
 // Anything that is not true is a failure. A check that answered with its detail instead
@@ -90,7 +90,7 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
   await p.goto(URL+"#shoegaze"); await selected(p);
   say("hidden in the peek",
     await p.$eval(".sect-read",e=>getComputedStyle(e).display==="none"));
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
   const r=await p.evaluate(()=>{
     const s=document.querySelector(".sect-read"), a=[...s.querySelectorAll("a.rd")];
     return {shown:getComputedStyle(s).display!=="none",
@@ -168,7 +168,7 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
   // and a style with nothing says nothing, rather than showing an empty heading
   p=await b.newPage({viewport:M}); p.on("pageerror",e=>errs.push(String(e)));
   await p.goto(URL+"#spirituals"); await selected(p);
-  await p.click("#grab").catch(()=>{}); await opened(p);
+  await raise(p); await opened(p);
   say("a style with no reads shows no section", (await p.$$(".sect-read")).length===0);
   say("but still describes the style", (await p.$$(".aboutfold")).length===1);
   await p.close();
