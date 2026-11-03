@@ -97,5 +97,59 @@ const lum=rgb=>{ const c=(rgb.match(/[\d.]+/g)||[]).slice(0,3).map(Number)
       thin.length===0 ? true : thin.join(", "));
     await c.close();
   }
+  // ---- the same edge on every close and back, and on the other panels ----
+  // These all set their fill with the `background` shorthand, which wipes the rim layer,
+  // and .navback and .brback use all:unset, which wipes both the layer and the ring. The
+  // shared rule has to sit after every one of those or it silently does nothing: the first
+  // draft of it sat beside .pmin and .navback came out bare.
+  for(const scheme of ["light","dark"]){
+    const c=await b.newContext({viewport:{width:390,height:844},colorScheme:scheme});
+    const p=await c.newPage();
+    await p.goto(URL+"#gospel"); await arm(p); await shown(p,"#chart .n"); await settle(p);
+    if(await p.evaluate(()=>!document.body.classList.contains("open"))){
+      await p.click("#grab").catch(()=>{});
+      await until(p,()=>document.body.classList.contains("open")); await settle(p); }
+    await settle(p); await new Promise(r=>setTimeout(r,250));
+    const got=await p.evaluate(()=>{
+      const out={};
+      for(const sel of [".pmin",".navback","#mapSearch","#mapHome"]){
+        const e=document.querySelector(sel);
+        if(!e){ out[sel]="missing"; continue; }
+        const s=getComputedStyle(e);
+        out[sel]={rim:/linear-gradient/.test(s.backgroundImage),
+          ring:/0px 0px 0px 1px/.test(s.boxShadow),
+          lifted:s.boxShadow.split(/,(?![^(]*\))/).length>=2,
+          // the fill still has to be there: splitting the shorthand is where this breaks
+          filled:!/rgba\(0, 0, 0, 0\)|transparent/.test(s.backgroundColor)};
+      }
+      return out;
+    });
+    const bad=Object.entries(got).filter(([,v])=>
+      v==="missing" || !v.rim || !v.ring || !v.lifted || !v.filled)
+      .map(([k,v])=>k+" "+JSON.stringify(v));
+    say(scheme+": close, back and the two map circles all carry the edge",
+      bad.length===0 ? true : bad.join(" | "));
+    await c.close();
+  }
+
+  // the welcome sheet is a panel in its own right and was the flattest thing in the app
+  for(const scheme of ["light","dark"]){
+    const c=await b.newContext({viewport:{width:390,height:844},colorScheme:scheme});
+    const p=await c.newPage();
+    await p.goto(URL);
+    await p.waitForSelector("#hellocard",{timeout:8000}).catch(()=>{});
+    await settle(p); await new Promise(r=>setTimeout(r,300));
+    const h=await p.evaluate(()=>{
+      const e=document.querySelector("#hellocard"); if(!e) return null;
+      const s=getComputedStyle(e);
+      return {rim:/linear-gradient/.test(s.backgroundImage),
+        grain:/svg|url/.test(s.backgroundImage),
+        ring:/0px 0px 0px 1px/.test(s.boxShadow),
+        filled:!/rgba\(0, 0, 0, 0\)/.test(s.backgroundColor)};
+    });
+    say("  and the welcome sheet carries it too, with the grain ("+scheme+")",
+      h && h.rim && h.grain && h.ring && h.filled ? true : JSON.stringify(h));
+    await c.close();
+  }
   await b.close();
 })();

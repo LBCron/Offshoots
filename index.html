@@ -33,6 +33,8 @@
      shadow does the work; on near-black a shadow is invisible and the rim does it. */
   --cardline:rgb(0 0 0 / .055); --cardtop:rgb(255 255 255 / .9);
   --cardsh:0 1px 2px rgb(0 0 0 / .045), 0 8px 20px -8px rgb(0 0 0 / .10);
+  --ctlsh:0 1px 1px rgb(0 0 0 / .05), 0 2px 6px -2px rgb(0 0 0 / .10);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.09'/%3E%3C/svg%3E");
   --grain:.022;
   --fill:#ebebf0; --fill2:#f2f2f6; --scrim:rgb(0 0 0 / .32); --halo:#ffffff; --ok:#248a3d; --accent:#007aff; --accent-fg:#ffffff; --blue:#007aff; --bluetx:#0057ab;
   --glass:rgb(255 255 255 / .86); --shadow:0 1px 2px rgb(0 0 0 / .10), 0 10px 30px rgb(0 0 0 / .14);
@@ -67,6 +69,8 @@
 
   --cardline:rgb(255 255 255 / .085); --cardtop:rgb(255 255 255 / .07);
   --cardsh:0 1px 2px rgb(0 0 0 / .32), 0 10px 26px -10px rgb(0 0 0 / .5);
+  --ctlsh:0 1px 1px rgb(0 0 0 / .3), 0 2px 6px -2px rgb(0 0 0 / .45);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E");
   --grain:.032;
   --fill:#3d3d41; --fill2:#3b3b40; --scrim:rgb(0 0 0 / .6); --halo:#0f0f11; --ok:#30d158; --accent:#0a84ff; --accent-fg:#ffffff; --blue:#0a84ff; --bluetx:#8cc5ff;
   --glass:rgb(44 44 48 / .86); --shadow:0 1px 2px rgb(0 0 0 / .4), 0 10px 30px rgb(0 0 0 / .5);
@@ -78,6 +82,8 @@
 
   --cardline:rgb(255 255 255 / .085); --cardtop:rgb(255 255 255 / .07);
   --cardsh:0 1px 2px rgb(0 0 0 / .32), 0 10px 26px -10px rgb(0 0 0 / .5);
+  --ctlsh:0 1px 1px rgb(0 0 0 / .3), 0 2px 6px -2px rgb(0 0 0 / .45);
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E");
   --grain:.032;
   --fill:#3d3d41; --fill2:#3b3b40; --scrim:rgb(0 0 0 / .6); --halo:#0f0f11; --ok:#30d158; --accent:#0a84ff; --accent-fg:#ffffff; --blue:#0a84ff; --bluetx:#8cc5ff;
   --glass:rgb(44 44 48 / .86); --shadow:0 1px 2px rgb(0 0 0 / .4), 0 10px 30px rgb(0 0 0 / .5);
@@ -99,7 +105,7 @@ button{font-family:inherit}
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round'><circle cx='8.5' cy='8.5' r='5.5'/><path d='M13 13l4 4'/></svg>");background-repeat:no-repeat;background-position:15px center;background-size:17px}
 .search input::placeholder{color:var(--muted)}
 .search input:focus-visible{outline:0;box-shadow:0 0 0 .5px rgb(0 0 0 / .10),0 0 0 4px color-mix(in srgb,var(--accent) 35%,transparent)}
-.results{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 6px);background:var(--lite);color:var(--lite-fg);border-radius:12px;margin:0;padding:5px;list-style:none;box-shadow:0 0 0 .5px rgb(0 0 0 / .18),0 12px 32px rgb(0 0 0 / .45)}
+.results{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 6px);background-image:linear-gradient(rgb(255 255 255 / .55) 0 1px,#0000 1px);background-color:var(--lite);color:var(--lite-fg);border-radius:12px;margin:0;padding:5px;list-style:none;box-shadow:0 0 0 .5px rgb(0 0 0 / .18),0 12px 32px rgb(0 0 0 / .45)}
 .results li button{all:unset;display:flex;gap:8px;align-items:baseline;width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;cursor:pointer}
 .results li button:hover,.results li button.act{background:rgb(0 0 0 / .07)}
 /* three kinds of result in one list, each saying which it is with a mark rather than a
@@ -360,14 +366,15 @@ a.am:hover{color:var(--accent)}
 #wikiwrap{position:fixed;inset:0;z-index:60;display:grid;place-items:center}
 #wikiwrap[hidden]{display:none}
 #wikibd{position:absolute;inset:0;background:rgb(0 0 0 / .32);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:wfade .18s ease}
-#wikicard{position:relative;display:flex;flex-direction:column;width:min(860px,94vw);height:min(86vh,900px);background:var(--panel);border-radius:18px;overflow:hidden;box-shadow:0 24px 70px rgb(0 0 0 / .32),0 0 0 .5px var(--line);animation:wpop .22s cubic-bezier(.32,.72,0,1)}
+#wikicard{position:relative;display:flex;flex-direction:column;width:min(860px,94vw);height:min(86vh,900px);background-color:var(--panel);border-radius:18px;overflow:hidden;box-shadow:0 24px 70px rgb(0 0 0 / .32),0 0 0 1px var(--cardline);animation:wpop .22s cubic-bezier(.32,.72,0,1)}
 @keyframes wfade{from{opacity:0}}
 @keyframes wpop{from{opacity:0;transform:translateY(10px) scale(.985)}}
-#wikicard header{flex:none;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;border-bottom:.5px solid var(--line);background:var(--glass)}
+#wikicard header{flex:none;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;border-bottom:.5px solid var(--line);
+  background-image:linear-gradient(var(--cardtop) 0 1px,#0000 1px);background-color:var(--glass)}
 #wikittl{flex:1;min-width:0;font:600 14px var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#wikiout{flex:none;font:600 12px var(--f-body);color:var(--accent);text-decoration:none;padding:6px 10px;border-radius:999px;background:var(--fill)}
-#wikix{flex:none;width:30px;height:30px;border:0;border-radius:50%;background:var(--fill);color:var(--fg);font-size:13px;cursor:pointer}
-#wikix:hover,#wikiout:hover{background:color-mix(in srgb,var(--fill) 80%,var(--fg))}
+#wikiout{flex:none;font:600 12px var(--f-body);color:var(--accent);text-decoration:none;padding:6px 10px;border-radius:999px;background-color:var(--fill)}
+#wikix{flex:none;width:30px;height:30px;border:0;border-radius:50%;background-color:var(--fill);color:var(--fg);font-size:13px;cursor:pointer}
+#wikix:hover,#wikiout:hover{background-color:color-mix(in srgb,var(--fill) 80%,var(--fg))}
 #wikibody{flex:1;min-height:0;position:relative;background:#fff}
 #wikiframe{width:100%;height:100%;border:0;display:block}
 #wikifail{position:absolute;inset:0;display:grid;place-content:center;gap:12px;justify-items:center;text-align:center;padding:24px;margin:0;color:var(--muted);font:400 14px var(--f-body);background:var(--panel)}
@@ -425,8 +432,8 @@ body.open .pcnt{display:none}
 /* every panel minimises from the same corner, where a card's close control is looked for */
 .pmin{all:unset;box-sizing:border-box;cursor:pointer;justify-self:end;flex:none;
   display:grid;place-items:center;width:var(--tap);height:var(--tap);border-radius:50%;
-  color:var(--muted);background:var(--fill2);transition:background .15s,color .15s}
-.pmin:hover{background:color-mix(in srgb,var(--fg) 14%,transparent);color:var(--fg)}
+  color:var(--muted);background-color:var(--fill2);transition:background-color .15s,color .15s}
+.pmin:hover{background-color:color-mix(in srgb,var(--fg) 14%,transparent);color:var(--fg)}
 .pmin:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
 .pmin svg{width:21px;height:21px}
 /* a sidebar has no smaller state to go to, so the control is not offered there */
@@ -540,7 +547,7 @@ body.open .pcnt{display:none}
    is nothing behind you, so the title stays where it is either way */
 .navback{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:6px;
   min-width:var(--tap);max-width:min(32vw,136px);height:var(--tap);padding:0 16px 0 13px;
-  border-radius:999px;cursor:pointer;color:var(--fg);background:var(--fill2)}
+  border-radius:999px;cursor:pointer;color:var(--fg);background-color:var(--fill2)}
 .navback .bklbl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body)}
 .navback .bkmap{display:none;width:20px;height:20px;flex:none}
@@ -670,7 +677,7 @@ body.open .pcnt{display:none}
 .brlbl{font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body)}
 .brbtn .cv{width:15px;height:15px;opacity:.7}
 .brmenu{min-width:252px}
-.brback{position:sticky;top:-5px;z-index:1;background:var(--panel);
+.brback{position:sticky;top:-5px;z-index:1;background-color:var(--panel);
   box-shadow:0 .5px 0 var(--line);border-radius:9px 9px 0 0;color:var(--muted)}
 .brback .nm{font-weight:600;color:var(--fg)}
 .brback .bk{flex:none;display:flex;width:14px;height:14px;opacity:.8}
@@ -680,7 +687,8 @@ body.open .pcnt{display:none}
 .navmenu{--mbg:#f5f5f7; --mfg:#1a1a1c; --mmut:#6a6a70;
   position:absolute;z-index:40;top:calc(100% + 6px);min-width:210px;max-width:min(300px,70vw);
   max-height:min(52vh,380px);overflow:auto;overscroll-behavior:contain;padding:5px;
-  background:var(--mbg);color:var(--mfg);border-radius:12px;
+  background-image:linear-gradient(rgb(255 255 255 / .55) 0 1px,#0000 1px);
+  background-color:var(--mbg);color:var(--mfg);border-radius:12px;
   box-shadow:0 0 0 .5px rgb(0 0 0 / .18),0 12px 32px rgb(0 0 0 / .45)}
 .nav-from .navmenu{left:0}
 .nav-led .navmenu{right:0}
@@ -1141,8 +1149,11 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 #hellocard:focus{outline:0}
 #hellocard{position:relative;width:min(400px,100%);max-height:calc(100% - 8px);overflow:auto;
-  box-sizing:border-box;background:var(--panel);border:.5px solid var(--line);
-  border-radius:22px;padding:24px 20px 18px;box-shadow:0 18px 60px rgb(0 0 0 / .5);
+  box-sizing:border-box;background-color:var(--panel);border:.5px solid var(--line);
+  background-image:linear-gradient(var(--cardtop) 0 1px,#0000 1px),var(--noise);
+  background-size:auto,140px 140px;
+  border-radius:22px;padding:24px 20px 18px;
+  box-shadow:0 0 0 1px var(--cardline),0 18px 60px rgb(0 0 0 / .5);
   animation:helloin .34s cubic-bezier(.32,.72,0,1)}
 @keyframes helloin{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){ #hellocard{animation:none} }
@@ -1340,20 +1351,36 @@ aside{display:flex;flex-direction:column;position:absolute;z-index:30;top:calc(e
 .note:first-child{margin-top:0}
 
 .close{display:none}
+/* Close and back carry the card's own edge at a smaller scale: the hairline ring, the lit
+   top, and a shadow tight enough that a 44px circle still reads as a control rather than
+   as a card. The rim is a background layer, so on a round button it is clipped to the
+   radius and comes out as a short arc at the top, which is what a lit edge looks like on
+   something round. Every one of these had its fill set with the `background` shorthand,
+   which would wipe that layer, so they set background-color now. */
+.pmin,.navback,.brback,#wikix,#wikiout{
+  background-image:linear-gradient(var(--cardtop) 0 1px,#0000 1px);
+  box-shadow:0 0 0 1px var(--cardline),var(--ctlsh)}
+/* The two map circles are filled with --fg, so they are near-black over a light map and
+   near-white over a dark one. A white rim reads on the first and disappears on the second,
+   which is harmless; the ring is what gives both an edge against whatever is behind. */
+#mapSearch,#mapHome{
+  background-image:linear-gradient(rgb(255 255 255 / .22) 0 1px,#0000 1px);
+  box-shadow:0 0 0 1px rgb(0 0 0 / .18),0 2px 10px rgb(0 0 0 / .4),
+    0 6px 18px -6px rgb(0 0 0 / .35)}
 #mapSearch{position:absolute;z-index:24;top:calc(var(--axh,34px) + 12px);right:16px;display:grid;place-items:center;
-  width:42px;height:42px;border:0;border-radius:50%;cursor:pointer;transition:background .15s;
-  background:var(--fg);color:var(--bg);box-shadow:0 2px 10px rgb(0 0 0 / .4)}
+  width:42px;height:42px;border:0;border-radius:50%;cursor:pointer;transition:background-color .15s;
+  background-color:var(--fg);color:var(--bg)}
 #mapSearch svg{width:18px;height:18px}
 /* the way out of a lineage you have walked four taps into */
 /* mirrors #mapSearch: same inset from its edge, same size, same skin, so the two map
    controls read as a pair rather than as one control and one afterthought */
 #navpills{position:absolute;z-index:24;top:calc(var(--axh,34px) + 12px);left:16px;display:flex;align-items:center;gap:8px}
 #mapHome{display:grid;place-items:center;flex:none;width:42px;height:42px;border:0;border-radius:50%;cursor:pointer;
-  transition:background .15s,opacity .15s;
-  background:var(--fg);color:var(--bg);box-shadow:0 2px 10px rgb(0 0 0 / .4)}
+  transition:background-color .15s,opacity .15s;
+  background-color:var(--fg);color:var(--bg)}
 #mapHome[hidden]{display:none}
 #mapHome svg{width:18px;height:18px}
-#mapHome:hover:not(:disabled){background:color-mix(in srgb,var(--fg) 84%,var(--bg))}
+#mapHome:hover:not(:disabled){background-color:color-mix(in srgb,var(--fg) 84%,var(--bg))}
 
 body.searching #navpills{display:none}
 @media (max-width:899px){
