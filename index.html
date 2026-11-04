@@ -1370,19 +1370,16 @@ aside{display:flex;flex-direction:column;position:absolute;z-index:30;top:calc(e
 .close{display:none}
 /* Close and back carry the card's own edge at a smaller scale: the hairline ring, the lit
    top, and a shadow tight enough that a 44px circle still reads as a control rather than
-   as a card. The rim is a background layer, so on a round button it is clipped to the
-   radius and comes out as a short arc at the top, which is what a lit edge looks like on
-   something round. Every one of these had its fill set with the `background` shorthand,
-   which would wipe that layer, so they set background-color now. */
+   as a card. The rim is an inset shadow, not a background layer: as a background gradient
+   it rasterised as a wide pale band across the top of these controls, which read as the
+   button being cut off. An inset shadow follows the border radius and stays 1px. */
 .pmin,.navback,.brback,#wikix,#wikiout{
-  background-image:linear-gradient(var(--cardtop) 0 1px,#0000 1px);
-  box-shadow:0 0 0 1px var(--cardline),var(--ctlsh)}
+  box-shadow:inset 0 1px 0 var(--cardtop),0 0 0 1px var(--cardline),var(--ctlsh)}
 /* The two map circles are filled with --fg, so they are near-black over a light map and
    near-white over a dark one. A white rim reads on the first and disappears on the second,
    which is harmless; the ring is what gives both an edge against whatever is behind. */
 #mapSearch,#mapHome{
-  background-image:linear-gradient(rgb(255 255 255 / .22) 0 1px,#0000 1px);
-  box-shadow:0 0 0 1px rgb(0 0 0 / .18),0 2px 10px rgb(0 0 0 / .4),
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .22),0 0 0 1px rgb(0 0 0 / .18),0 2px 10px rgb(0 0 0 / .4),
     0 6px 18px -6px rgb(0 0 0 / .35)}
 #mapSearch{position:absolute;z-index:24;top:calc(var(--axh,34px) + 12px);right:16px;display:grid;place-items:center;
   width:42px;height:42px;border:0;border-radius:50%;cursor:pointer;transition:background-color .15s;

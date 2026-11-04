@@ -98,10 +98,10 @@ const lum=rgb=>{ const c=(rgb.match(/[\d.]+/g)||[]).slice(0,3).map(Number)
     await c.close();
   }
   // ---- the same edge on every close and back, and on the other panels ----
-  // These all set their fill with the `background` shorthand, which wipes the rim layer,
-  // and .navback and .brback use all:unset, which wipes both the layer and the ring. The
-  // shared rule has to sit after every one of those or it silently does nothing: the first
-  // draft of it sat beside .pmin and .navback came out bare.
+  // .navback and .brback use all:unset, which wipes the whole shadow, so the shared rule
+  // has to sit after every one of those or it silently does nothing: the first draft of it
+  // sat beside .pmin and .navback came out bare. The rim is an inset shadow now, not a
+  // background gradient, which rasterised as a pale band across the top of these controls.
   for(const scheme of ["light","dark"]){
     const c=await b.newContext({viewport:{width:390,height:844},colorScheme:scheme});
     const p=await c.newPage();
@@ -116,9 +116,9 @@ const lum=rgb=>{ const c=(rgb.match(/[\d.]+/g)||[]).slice(0,3).map(Number)
         const e=document.querySelector(sel);
         if(!e){ out[sel]="missing"; continue; }
         const s=getComputedStyle(e);
-        out[sel]={rim:/linear-gradient/.test(s.backgroundImage),
+        out[sel]={rim:/inset/.test(s.boxShadow),
           ring:/0px 0px 0px 1px/.test(s.boxShadow),
-          lifted:s.boxShadow.split(/,(?![^(]*\))/).length>=2,
+          lifted:s.boxShadow.split(/,(?![^(]*\))/).length>=3,
           // the fill still has to be there: splitting the shorthand is where this breaks
           filled:!/rgba\(0, 0, 0, 0\)|transparent/.test(s.backgroundColor)};
       }
