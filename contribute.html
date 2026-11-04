@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light dark">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Add to Offshoots</title>
+<meta name="description" content="Send Offshoots something worth reading, watching or hearing about a style on the map.">
+<style>
+:root{
+  --bg:#f2f2f7; --panel:#ffffff; --fg:#1a1a1c; --muted:#5f5f66; --line:#d8d8dc;
+  --fill:#ebebf0; --accent:#007aff; --accent-fg:#ffffff; --warn:#a05a00;
+  --ring:color-mix(in srgb,var(--accent) 35%,transparent);
+  --f-body:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#000000; --panel:#1c1c1e; --fg:#f5f5f7; --muted:#b0b0b6; --line:#3a3a3c;
+  --fill:#2c2c2e; --accent:#0a84ff; --warn:#ffb340;
+}}
+:root[data-theme="dark"]{
+  --bg:#000000; --panel:#1c1c1e; --fg:#f5f5f7; --muted:#b0b0b6; --line:#3a3a3c;
+  --fill:#2c2c2e; --accent:#0a84ff; --warn:#ffb340;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+main{max-width:600px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px))}
+a{color:var(--accent)}
+.home{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--muted);text-decoration:none;font-weight:600;font-size:13px;letter-spacing:.02em}
+.home svg{width:15px;height:15px}
+h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;margin:4px 0 8px}
+h2{font-size:17px;margin:0 0 6px}
+.lede{color:var(--muted);margin:0 0 20px}
+.card{background:var(--panel);border-radius:14px;padding:18px 16px;margin:0 0 14px}
+.card p{margin:0 0 12px}
+.card p:last-child{margin-bottom:0}
+.mut{color:var(--muted);font-size:14px}
+.mine{border-left:3px solid var(--warn);color:var(--fg)}
+.mine strong{color:var(--warn)}
+.bm{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 18px;border-radius:999px;
+  background:var(--accent);color:var(--accent-fg);font-weight:600;text-decoration:none;cursor:grab;
+  box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 35%,transparent)}
+.bm:active{cursor:grabbing}
+.bm svg{width:16px;height:16px}
+.bm:focus-visible,.btn:focus-visible{outline:0;box-shadow:0 0 0 4px var(--ring)}
+.drop{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:4px 0 12px}
+.nudge{font-size:13px;color:var(--warn);margin:-4px 0 12px}
+.nudge:empty{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:11px;
+  background:var(--fill);color:var(--fg);font-weight:600;text-decoration:none}
+ol{margin:0 0 12px;padding-left:22px}
+ol li{margin:0 0 6px}
+code{font:13px ui-monospace,"SF Mono",Menlo,monospace;background:var(--fill);padding:1px 5px;border-radius:5px;word-break:break-all}
+details summary{cursor:pointer;font-weight:600;min-height:32px}
+details[open] summary{margin-bottom:8px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <a class="home" href="./"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>Offshoots</a>
+  <h1>Add to Offshoots</h1>
+  <p class="lede">Found something worth reading, watching or hearing about a style on the map? Send it in. Everything is read before it goes on, and the best of it ends up under Go deeper.</p>
+
+  <div class="card mine" id="mine" hidden>
+    <p><strong>This page is set up for you.</strong> The button below files what you send as your pick. Keep it to yourself: anyone with this page can send things in your name.</p>
+  </div>
+
+  <section class="card">
+    <h2>On a computer</h2>
+    <p>Drag this button to your bookmarks bar.</p>
+    <div class="drop">
+      <a class="bm" id="bm" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg><span>Offshoots</span></a>
+    </div>
+    <p class="nudge" id="nudge" role="status" aria-live="polite"></p>
+    <p>Then, on any page you want to suggest, click it. A small form opens with the link and title already filled in. Pick the styles it belongs on and send.</p>
+    <p class="mut">No bookmarks bar? Turn it on from the View menu in Safari, Chrome or Firefox.</p>
+  </section>
+
+  <section class="card">
+    <h2>On iPhone or iPad</h2>
+    <p>Copy the link from Safari or the app you're in, then open the form and paste it.</p>
+    <p><a class="btn" id="form" href="suggest">Open the form</a></p>
+    <p class="mut">Or, inside Offshoots, tap Suggest something at the bottom of a style's Go deeper list. That style is filled in for you.</p>
+    <p id="getsc" hidden><a class="btn" id="sclink" href="#">Get the Offshoots Shortcut</a></p>
+    <details id="scsteps">
+      <summary>Add it to the Share menu</summary>
+      <p class="mut">A Shortcut puts Offshoots in the Share menu, so you can send a page without copying anything. It takes a couple of minutes, once.</p>
+      <ol>
+        <li>Open the Shortcuts app and tap <b>+</b>.</li>
+        <li>Add the action <b>URL Encode</b>. Tap its input and choose <b>Shortcut Input</b>.</li>
+        <li>Add the action <b>Text</b> and type <code id="sctext">https://offshoots.netlify.app/suggest#u=</code> then, right after it, insert <b>URL Encoded Text</b> from the variables above the keyboard.</li>
+        <li>Add the action <b>Open URLs</b>. Its input should be <b>Text</b>.</li>
+        <li>Tap the name at the top, call it <b>Offshoots</b>, then turn on <b>Show in Share Sheet</b> and set it to receive <b>URLs</b>.</li>
+      </ol>
+      <p class="mut">Now in Safari: Share, then Offshoots.</p>
+    </details>
+  </section>
+</main>
+<script>
+(()=>{
+// Built here rather than hard-coded so a deploy preview hands out a button that files to
+// the preview, and the live site one that files to the live site.
+const BASE=location.origin+"/";
+// a key added to the address of a page already open is only a hash change, not a new
+// page, so read it again
+addEventListener("hashchange",()=>location.reload());
+// A link set up for one person carries their contributor key in the hash, which never
+// leaves the browser: #k=<key>. Nothing about it is stored.
+const K=(new URLSearchParams(location.hash.slice(1)).get("k")||"");
+const key=/^[A-Za-z0-9_-]{16,128}$/.test(K)?K:"";
+// When there is a shared iCloud link for the Shortcut, it goes here and the steps fold away.
+const SHORTCUT="";
+
+// The bookmarklet reads what the page says about itself (its canonical link, title,
+// publication and date where it publishes them) and opens the form with all of it in
+// the hash. The block body means it returns nothing, which is what stops the browser
+// replacing the page with the result.
+function bookmarklet(k){
+  const src="(()=>{"
+    +"const m=n=>{const e=document.querySelector('meta[property=\"'+n+'\"],meta[name=\"'+n+'\"],meta[itemprop=\"'+n+'\"]');return e&&e.content||\"\"};"
+    +"const c=document.querySelector('link[rel=\"canonical\"]');let u=location.href;"
+    +"try{if(c&&new URL(c.href).hostname===location.hostname)u=c.href}catch(e){}"
+    +"const p=new URLSearchParams({u:u,t:m(\"og:title\")||document.title,p:m(\"og:site_name\"),"
+    +"d:m(\"article:published_time\")||m(\"datePublished\")||m(\"date\")});"
+    +(k?"p.set(\"k\","+JSON.stringify(k)+");":"")
+    +"open("+JSON.stringify(BASE+"suggest#")+"+p,\"offshoots\",\"width=520,height=780\")})()";
+  return "javascript:"+encodeURIComponent(src);
+}
+const bm=document.getElementById("bm");
+bm.href=bookmarklet(key);
+bm.title="Drag me to your bookmarks bar";
+// clicking it here would only suggest this page, so say what to do instead
+bm.addEventListener("click",e=>{ e.preventDefault();
+  document.getElementById("nudge").textContent="Drag it to the bookmarks bar rather than clicking it here."; });
+
+document.getElementById("form").href="suggest"+(key?"#k="+encodeURIComponent(key):"");
+document.getElementById("sctext").textContent=BASE+"suggest#"+(key?"k="+key+"&":"")+"u=";
+document.getElementById("mine").hidden=!key;
+if(SHORTCUT && !key){ document.getElementById("getsc").hidden=false;
+  document.getElementById("sclink").href=SHORTCUT; document.getElementById("scsteps").hidden=true; }
+})();
+</script>
+</body>
+</html>
