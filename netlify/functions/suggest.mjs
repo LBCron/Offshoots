@@ -13,8 +13,8 @@
 // worst a leaked key does is file suggestions that still have to be approved.
 
 const REPO = "bryanbell/Offshoots-submissions";
-// the five media READ already draws, so an approved row needs no translation
-const MEDIA = { read: "Read", book: "Book", watch: "Watch", listen: "Listen", look: "Look" };
+// the media READ draws, so an approved row needs no translation
+const MEDIA = { read: "Read", book: "Book", watch: "Watch", listen: "Listen", look: "Look", site: "Website" };
 const MAX_BODY = 8000;
 // the production domain, the Netlify site it is served from, any deploy preview or
 // branch deploy of that, and netlify dev. The custom domain has to be listed in its own

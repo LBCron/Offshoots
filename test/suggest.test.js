@@ -34,6 +34,8 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
   say("a wrong key is simply anonymous", shape({...base,k:"nope"},{contributors:{[KEY]:"pete"}}).by==="");
   say("javascript: links are refused", !!shape({...base,url:"javascript:alert(1)"},{}).error);
   say("so is an unknown medium", !!shape({...base,medium:"tweet"},{}).error);
+  o=shape({...base,medium:"site"},{});
+  say("a website is a medium of its own", !o.error && /^Website: /.test(o.issue.title));
   o=shape({...base,styles:["nola_rnb","<script>","../x","nola_rnb"]},{});
   say("five at most are kept as suggestions",
     ing.parseRecord(shape({...base,styles:["a","b","c","d","e","f","g"]},{}).issue.body).styles.length===5);
@@ -106,6 +108,7 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
   say("an unknown access is held", bad("access","free"));
   say("a missing publication is held", bad("publication",""));
   say("an impossible year is held", bad("year",1850));
+  say("a website passes ingest as a website", ing.check({...good,medium:"site",kind:"archive"},ctx).errors.length===0);
   say("a 33 1/3 can stand on its record", ing.check({...good,kind:"33 1/3",medium:"book",note:"",record:"Fats Domino"},ctx).errors.length===0);
 
   // ---------- ingest: placing ----------

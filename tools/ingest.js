@@ -25,7 +25,7 @@
 const fs=require("fs"), path=require("path"), {execFileSync}=require("child_process");
 const ROOT=path.join(__dirname,".."), DATA=path.join(ROOT,"src","data.js");
 const REPO="bryanbell/Offshoots-submissions";
-const MEDIA=["read","listen","watch","look","book"];
+const MEDIA=["read","listen","watch","look","book","site"];
 const ACCESS=["","paywall","partial","registration"];
 const ENC=/wikipedia|britannica|fandom|discogs|allmusic|rateyourmusic/i;
 const AIDS=/findingaids|archival_objects|\/repositories\/\d|archivesspace/i;

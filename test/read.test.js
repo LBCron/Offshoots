@@ -82,7 +82,7 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
   say(t.kinds+" kinds of thing, not just articles", t.kinds>=5);
   // the icon promises what you will do with it, so every row has to declare that
   say("every row says what you do with it ("+t.media+")",
-    t.media.split("|").every(m=>["read","listen","watch","look","book"].indexOf(m)>=0));
+    t.media.split("|").every(m=>["read","listen","watch","look","book","site"].indexOf(m)>=0));
   await p.close();
 
   // a style with reads shows them, under a heading, above the share button
