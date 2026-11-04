@@ -55,8 +55,8 @@ export function shape(b, env = {}) {
   const k = typeof b.k === "string" ? b.k : "";
   const by = k && Object.hasOwn(keys, k) && /^[a-z0-9_-]{1,30}$/.test(keys[k]) ? keys[k] : "";
 
-  // a guest's pick can be placed at review; a stranger's suggestion has to say where it goes
-  if (!styles.length && !by) return { error: "Pick at least one style it belongs on." };
+  // Styles are a suggestion, from anyone. Where a piece goes is decided at review, often
+  // on more styles than anyone suggested, so an empty list is fine.
 
   const y = parseInt(String(b.year || "").slice(0, 4), 10);
   const year = y >= 1800 && y <= new Date().getFullYear() + 1 ? y : 0;
@@ -81,11 +81,12 @@ export function shape(b, env = {}) {
     "",
     "| | |", "|---|---|",
     `| What | ${MEDIA[medium]} |`,
-    `| Styles | ${styles.length ? styles.map(s => "`" + s + "`").join(", ") : "to place at review"} |`,
+    `| Suggested styles | ${styles.length ? styles.map(s => "`" + s + "`").join(", ") : "none"} |`,
     `| From | ${by || "anonymous"} |`,
     "",
     "To approve: edit the JSON so it's ready to publish, then swap `pending` for `approved`.",
     "",
+    "- `styles`: where it goes. The suggested ones are a starting point; add or remove any",
     "- `title`, `publication`, and `year` (0 if undated)",
     "- `kind`: longform, oral history, history, review, scene report, obituary, memoir, audio, documentary, photo essay, 33 1/3",
     "- `access`: \"\" if open, or paywall, partial, registration",

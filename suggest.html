@@ -124,7 +124,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,.seg input:focus
         </div>
       </div>
       <div class="field picker">
-        <label for="sq">Belongs on <span class="hint" id="stylehint">up to five styles</span></label>
+        <label for="sq">Where it might fit <span class="hint">optional, pick as many as five</span></label>
         <div class="chips" id="chips"></div>
         <input id="sq" type="search" autocomplete="off" autocapitalize="off" spellcheck="false"
           placeholder="Search styles" role="combobox" aria-expanded="false" aria-controls="res" aria-autocomplete="list">
@@ -169,8 +169,7 @@ for(const [k,v] of new URLSearchParams(location.hash.slice(1))) P.set(k,v);
 const KEY="offshoots.k";
 let key=P.get("k")||"";
 try{ if(key) localStorage.setItem(KEY,key); else key=localStorage.getItem(KEY)||""; }catch(e){}
-const showWho=()=>{ $("who").hidden=!key; $("stylehint").textContent = key
-  ? "optional, can be placed at review" : "up to five styles"; };
+const showWho=()=>{ $("who").hidden=!key; };
 showWho();
 $("forget").onclick=()=>{ key=""; try{localStorage.removeItem(KEY);}catch(e){} showWho(); };
 
@@ -209,7 +208,7 @@ function drawChips(){
     ? `<span class="chip">${esc(s.name)}<button type="button" data-rm="${esc(id)}" aria-label="Remove ${esc(s.name)}">`
       +`<svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 8 8M14 6l-8 8"/></svg></button></span>` : ""; }).join("");
   $("sq").disabled = picked.length>=5;
-  $("sq").placeholder = picked.length>=5 ? "Five is the most" : picked.length ? "Add another" : "Search styles";
+  $("sq").placeholder = picked.length>=5 ? "Five is the most" : picked.length ? "Add another style" : "Search styles";
 }
 $("chips").addEventListener("click",e=>{ const b=e.target.closest("[data-rm]"); if(!b) return;
   picked=picked.filter(x=>x!==b.dataset.rm); drawChips(); $("sq").focus(); });
@@ -232,19 +231,22 @@ function drawRes(){
   $("sq").setAttribute("aria-expanded", hits.length?"true":"false");
   if(hits.length) $("sq").setAttribute("aria-activedescendant","o"+act); else $("sq").removeAttribute("aria-activedescendant");
 }
-function pick(s){ if(!s || picked.includes(s.id) || picked.length>=5) return;
-  picked.push(s.id); $("sq").value=""; hits=[]; drawRes(); drawChips(); }
+// a pick by hand leaves the cursor in the search, so the next style is one word away;
+// the one filled in from the map's link does not take the cursor from the link field
+function pick(s,byHand){ if(!s || picked.includes(s.id) || picked.length>=5) return;
+  picked.push(s.id); $("sq").value=""; hits=[]; drawRes(); drawChips();
+  if(byHand && picked.length<5) $("sq").focus(); }
 $("sq").addEventListener("input",()=>{ hits=search($("sq").value); act=0; drawRes(); });
 $("sq").addEventListener("keydown",e=>{
   if(e.key==="ArrowDown"&&hits.length){ act=(act+1)%hits.length; drawRes(); e.preventDefault(); }
   else if(e.key==="ArrowUp"&&hits.length){ act=(act-1+hits.length)%hits.length; drawRes(); e.preventDefault(); }
-  else if(e.key==="Enter"){ if(hits.length){ pick(hits[act]); } e.preventDefault(); }
+  else if(e.key==="Enter"){ if(hits.length){ pick(hits[act],true); } e.preventDefault(); }
   else if(e.key==="Escape"){ hits=[]; drawRes(); }
   else if(e.key==="Backspace" && !$("sq").value && picked.length){ picked.pop(); drawChips(); }
 });
 // pointerdown, not click, so the choice lands before the input's blur closes the list
 $("res").addEventListener("pointerdown",e=>{ const li=e.target.closest("li"); if(!li) return;
-  e.preventDefault(); pick(hits[+li.dataset.i]); });
+  e.preventDefault(); pick(hits[+li.dataset.i],true); });
 $("sq").addEventListener("blur",()=>setTimeout(()=>{ hits=[]; drawRes(); },120));
 
 fetch("offshoots.json").then(r=>r.json()).then(j=>{
@@ -260,7 +262,6 @@ $("f").addEventListener("submit",async e=>{
   if(u && !/^[a-z]+:\/\//i.test(u)) u="https://"+u;
   try{ const x=new URL(u); if(!/^https?:$/.test(x.protocol)) throw 0; }
   catch(err){ say("Paste the link to the thing itself.",true); $("url").focus(); return; }
-  if(!picked.length && !key){ say("Pick at least one style it belongs on.",true); $("sq").focus(); return; }
   const body={url:u, title:$("title").value.trim(),
     medium:(document.querySelector("input[name=medium]:checked")||{}).value,
     styles:picked, note:$("note").value.trim(),

@@ -26,14 +26,17 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
   say("its JSON block reads back with READ's fields in READ's order",
     Object.keys(rec).join()==="url,title,publication,year,kind,access,note,medium,styles,record,by,at");
   say("kind and access are left for review", rec.kind==="" && rec.access==="");
-  say("a stranger has to name a style", !!shape({...base,styles:[]},{}).error);
+  o=shape({...base,styles:[]},{});
+  say("styles are a suggestion: a stranger can send none", !o.error && /\| Suggested styles \| none \|/.test(o.issue.body));
   o=shape({...base,styles:[],k:KEY},{contributors:{[KEY]:"pete"}});
-  say("a guest with a key does not", !o.error && o.by==="pete");
+  say("and so can a guest", !o.error && o.by==="pete");
   say("and is labelled as theirs", o.issue.labels.join()==="pending,petes-picks");
   say("a wrong key is simply anonymous", shape({...base,k:"nope"},{contributors:{[KEY]:"pete"}}).by==="");
   say("javascript: links are refused", !!shape({...base,url:"javascript:alert(1)"},{}).error);
   say("so is an unknown medium", !!shape({...base,medium:"tweet"},{}).error);
   o=shape({...base,styles:["nola_rnb","<script>","../x","nola_rnb"]},{});
+  say("five at most are kept as suggestions",
+    ing.parseRecord(shape({...base,styles:["a","b","c","d","e","f","g"]},{}).issue.body).styles.length===5);
   say("anything that is not a style id is dropped, and duplicates with it",
     JSON.stringify(ing.parseRecord(o.issue.body).styles)==='["nola_rnb"]');
   o=shape({...base,title:"Hi @octocat"},{});

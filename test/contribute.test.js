@@ -89,12 +89,17 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
   await until(p,()=>document.querySelectorAll("#res li").length>0);
   await p.dispatchEvent("#res li:first-child","pointerdown");
   say("a style is picked from the list", (await p.$$eval(".chip",c=>c.map(x=>x.textContent.trim()))).length===1);
+  say("and the cursor stays in the search for the next one", await p.evaluate(()=>document.activeElement.id==="sq"));
+  await p.fill("#sq","swamp");
+  await until(p,()=>document.querySelectorAll("#res li").length>0);
+  await p.dispatchEvent("#res li:first-child","pointerdown");
+  say("so a second style is one more pick", (await p.$$(".chip")).length===2);
   await p.fill("#note","The night the building shook.");
   await p.click("#go");
   await until(p,()=>!document.getElementById("done").hidden);
   const sent=posts[0]||{};
   say("one request went out", posts.length===1);
-  say("carrying the link, the style and the key", sent.url===B+"fixture/clean" && sent.styles.length===1 && sent.k===KEY);
+  say("carrying the link, both styles and the key", sent.url===B+"fixture/clean" && sent.styles.length===2 && sent.k===KEY);
   say("and what the page said about itself", sent.publication==="Gambit" && sent.year==="2014");
   say("with the honeypot empty", sent.website==="");
   say("and thanks the guest by name", (await p.textContent("#donet"))==="Sent as Pete’s pick");
@@ -110,14 +115,17 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
   say("until they say it isn't them", await p.$eval("#who",e=>e.hidden));
   await gc.close();
 
-  // a stranger with no style is told, and nothing is sent
+  // a stranger can send with no style at all: where it goes is decided at review
   const ctx=await b.newContext({viewport:M}); p=await ctx.newPage(); p.on("pageerror",e=>errs.push(String(e)));
-  const none=[]; await p.route("**/api/suggest",r=>{ none.push(1); r.fulfill({status:500,body:"{}"}); });
+  const none=[]; await p.route("**/api/suggest",r=>{ none.push(JSON.parse(r.request().postData()));
+    r.fulfill({status:201,contentType:"application/json",body:JSON.stringify({ok:true,by:""})}); });
   await p.goto(B+"suggest#u="+encodeURIComponent("https://www.youtube.com/watch?v=x"));
   await p.waitForLoadState("networkidle");
   say("a YouTube link is guessed to be a video", await p.$eval("input[name=medium][value=watch]",e=>e.checked));
   await p.click("#go");
-  say("a stranger has to pick a style", /style/.test(await p.textContent("#msg")) && none.length===0);
+  await until(p,()=>!document.getElementById("done").hidden);
+  say("a stranger can send without picking a style", none.length===1 && none[0].styles.length===0);
+  say("and is thanked plainly", (await p.textContent("#donet"))==="Sent");
   await ctx.close();
 
   // ---------- the link in Go deeper ----------
