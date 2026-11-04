@@ -476,13 +476,21 @@ function draw(){
   document.documentElement.style.setProperty("--stripw",(LABELW-8)+"px");
   $("axis").innerHTML = ax+`</svg><div id="corner" style="width:${LABELW-8}px;transform:translateX(${scroller.scrollLeft}px)"></div>`;
   let s="";
-  // every lane carries a wash of its own family colour: the old alternating neutral was
-  // five levels of luminance off the map and invisible. Two opacities keep the rhythm,
-  // and the two ranges do not overlap, so the alternation cannot invert whichever
-  // families end up adjacent - a light family at the low level stays darker than a
-  // dark family at the high one. test/root.test.js holds that invariant.
+  // The lanes alternate in one neutral ink, not in eighteen family colours.
+  //
+  // The family wash was an answer to a real problem: the neutral it replaced was five
+  // levels of luminance off the map and invisible, so the lanes did not read as lanes.
+  // But colouring them by family paints a fifth of the screen in a hue that means
+  // something, and what it means is already said twice over by the rail on the left and
+  // by the dot on every style. Eighteen washes competing with those is the map telling
+  // you the same thing three times in three strengths, which is what made it hard to
+  // find anything in. So: neutral again, but at a strength that can actually be seen,
+  // which is what the first neutral got wrong.
+  //
+  // One ink at two opacities, so the alternation cannot invert. test/root.test.js holds
+  // that every low row stays darker than every high one.
   lanes.forEach((l,i)=>{
-    s+=`<rect class="band${i%2?"":" b2"}" x="0" y="${l.y0}" width="${W}" height="${l.h}" style="fill:${FAM[l.k].c}"/>`;
+    s+=`<rect class="band${i%2?"":" b2"}" x="0" y="${l.y0}" width="${W}" height="${l.h}"/>`;
     if(i) s+=`<line class="lanedge" x1="0" x2="${W}" y1="${l.y0}" y2="${l.y0}"/>`;
   });
   s+=`<line class="nowline" x1="${xOf(END)}" x2="${xOf(END)}" y1="0" y2="${H}"/>`;
