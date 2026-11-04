@@ -102,6 +102,9 @@ details[open] summary{margin-bottom:8px}
 // Built here rather than hard-coded so a deploy preview hands out a button that files to
 // the preview, and the live site one that files to the live site.
 const BASE=location.origin+"/";
+// a key added to the address of a page already open is only a hash change, not a new
+// page, so read it again
+addEventListener("hashchange",()=>location.reload());
 // A link set up for one person carries their contributor key in the hash, which never
 // leaves the browser: #k=<key>. Nothing about it is stored.
 const K=(new URLSearchParams(location.hash.slice(1)).get("k")||"");

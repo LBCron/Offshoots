@@ -58,6 +58,14 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
   say("and says it is personal", !(await p.$eval("#mine",e=>e.hidden)));
   say("its form link carries the key too", (await p.$eval("#form",a=>a.getAttribute("href")))==="suggest#k="+KEY);
   await p.close();
+  // the key typed onto the end of a contribute page that is already open
+  p=await page();
+  await p.goto(B+"contribute");
+  await p.evaluate(k=>{ location.hash="k="+k; },KEY);
+  await p.waitForLoadState("load");
+  await until(p,()=>!document.getElementById("mine").hidden);
+  say("a key added to an open page is picked up", !(await p.$eval("#mine",e=>e.hidden)));
+  await p.close();
 
   // ---------- running it on a page ----------
   p=await page();
