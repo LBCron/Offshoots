@@ -46,6 +46,11 @@ function normalizeUrl(u){
   }
   if(x.hostname==="m.youtube.com") x.hostname="www.youtube.com";
   const yt=/(^|\.)youtube\.com$/.test(x.hostname), sp=x.hostname==="open.spotify.com";
+  // a watch link picked up mid-playlist carries list, index and pp; the video is v
+  if(yt && x.pathname==="/watch" && x.searchParams.get("v")){
+    const t=x.searchParams.get("t");
+    return "https://www.youtube.com/watch?v="+x.searchParams.get("v")+(t?"&t="+t:"");
+  }
   for(const k of [...x.searchParams.keys()])
     if(TRACK.test(k) || ((yt||sp) && (k==="si"||k==="feature"))) x.searchParams.delete(k);
   return x.href;

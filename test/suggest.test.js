@@ -94,6 +94,8 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
   let c=ing.check(good,ctx);
   say("a finished record passes", c.errors.length===0 || c.errors.join("; "));
   say("with its tracking stripped", c.url==="https://www.npr.org/2019/01/01/x/the-piece");
+  say("a watch link picked up mid-playlist keeps only the video",
+    ing.normalizeUrl("https://www.youtube.com/watch?v=Ht62CQnT1PQ&list=RD1&index=2&pp=x")==="https://www.youtube.com/watch?v=Ht62CQnT1PQ");
   say("youtu.be becomes the watch page", ing.normalizeUrl("https://youtu.be/abc123?si=zzz")==="https://www.youtube.com/watch?v=abc123");
   const bad=(k,v)=>ing.check({...good,[k]:v},ctx).errors.length>0;
   say("http is held", bad("url","http://www.npr.org/x"));

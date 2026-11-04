@@ -112,19 +112,34 @@ const key=/^[A-Za-z0-9_-]{16,128}$/.test(K)?K:"";
 // When there is a shared iCloud link for the Shortcut, it goes here and the steps fold away.
 const SHORTCUT="";
 
-// The bookmarklet reads what the page says about itself (its canonical link, title,
-// publication and date where it publishes them) and opens the form with all of it in
-// the hash. The block body means it returns nothing, which is what stops the browser
-// replacing the page with the result.
+// What runs on the page being suggested. It is turned into text and carried inside the
+// bookmark, so it has to stand alone: nothing from this page, no comments, every statement
+// closed with a semicolon, since its line breaks are folded away.
+//
+// It reads what the page says about itself: canonical link, title, publication, date.
+// YouTube is the exception. It changes videos without loading a new page and leaves that
+// description on the first video watched, so there only the address and the live title
+// are true: the title loses " - YouTube" and the "(3)" notification count, and the date
+// is left for review.
+// It returns nothing, which is what stops the browser replacing the page with a result.
+function onPage(base,k){
+  const m=n=>{const e=document.querySelector('meta[property="'+n+'"],meta[name="'+n+'"],meta[itemprop="'+n+'"]');return e&&e.content||"";};
+  const live=/(^|\.)youtube\.com$/.test(location.hostname);
+  let u=location.href, t, d="";
+  if(live){
+    t=document.title.replace(/^\(\d+\)\s*/,"").replace(/\s+-\s+YouTube\s*$/,"").trim();
+  }else{
+    const c=document.querySelector('link[rel="canonical"]');
+    try{if(c&&new URL(c.href).hostname===location.hostname){u=c.href;}}catch(e){}
+    t=m("og:title")||document.title;
+    d=m("article:published_time")||m("datePublished")||m("date");
+  }
+  const p=new URLSearchParams({u:u,t:t,p:live?"YouTube":m("og:site_name"),d:d});
+  if(k){p.set("k",k);}
+  open(base+"suggest#"+p,"musicatlas","width=520,height=780");
+}
 function bookmarklet(k){
-  const src="(()=>{"
-    +"const m=n=>{const e=document.querySelector('meta[property=\"'+n+'\"],meta[name=\"'+n+'\"],meta[itemprop=\"'+n+'\"]');return e&&e.content||\"\"};"
-    +"const c=document.querySelector('link[rel=\"canonical\"]');let u=location.href;"
-    +"try{if(c&&new URL(c.href).hostname===location.hostname)u=c.href}catch(e){}"
-    +"const p=new URLSearchParams({u:u,t:m(\"og:title\")||document.title,p:m(\"og:site_name\"),"
-    +"d:m(\"article:published_time\")||m(\"datePublished\")||m(\"date\")});"
-    +(k?"p.set(\"k\","+JSON.stringify(k)+");":"")
-    +"open("+JSON.stringify(BASE+"suggest#")+"+p,\"musicatlas\",\"width=520,height=780\")})()";
+  const src="("+String(onPage).replace(/\n\s*/g," ")+")("+JSON.stringify(BASE)+","+JSON.stringify(k||"")+")";
   return "javascript:"+encodeURIComponent(src);
 }
 const bm=document.getElementById("bm");
