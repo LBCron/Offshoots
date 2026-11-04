@@ -126,6 +126,11 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
   await until(p,()=>!document.getElementById("done").hidden);
   say("a stranger can send without picking a style", none.length===1 && none[0].styles.length===0);
   say("and is thanked plainly", (await p.textContent("#donet"))==="Sent");
+  // the bookmarklet clicked again with its window still open changes only the hash
+  await p.evaluate(()=>{ location.hash="u="+encodeURIComponent("https://example.org/second"); });
+  await p.waitForLoadState("load");
+  await until(p,()=>document.getElementById("url").value==="https://example.org/second");
+  say("a second page sent to the open window replaces the first", (await p.inputValue("#url"))==="https://example.org/second");
   await ctx.close();
 
   // ---------- the link in Go deeper ----------
