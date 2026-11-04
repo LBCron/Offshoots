@@ -29,10 +29,16 @@ const clean = (v, n) => typeof v === "string"
 const quiet = s => s.replace(/@/g, "@​");
 
 function contributors() {
+  const raw = (process.env.CONTRIBUTORS || "{}")
+    // a value typed or pasted through an editor can come back with curly quotes
+    .replace(/[\u201c\u201d]/g, '"').trim();
   try {
-    const c = JSON.parse(process.env.CONTRIBUTORS || "{}");
-    return c && typeof c === "object" ? c : {};
-  } catch { return {}; }
+    const c = JSON.parse(raw);
+    return c && typeof c === "object" && !Array.isArray(c) ? c : {};
+  } catch {
+    console.error(`CONTRIBUTORS is not valid JSON (${raw.length} chars, starts ${JSON.stringify(raw.slice(0, 2))})`);
+    return {};
+  }
 }
 
 // Pure so the tests can run it without a network: takes the parsed body and the
@@ -123,8 +129,16 @@ export default async (req) => {
   // the hidden field only a bot fills in: tell it yes and file nothing
   if (b && b.website) return json(200, { ok: true });
 
-  const out = shape(b, { contributors: contributors() });
+  const keys = contributors();
+  const out = shape(b, { contributors: keys });
   if (out.error) return json(400, { ok: false, error: out.error });
+  // A key that arrived and matched nobody. Only the first four characters of each side
+  // are logged: enough to see which key is which, nowhere near enough to use one.
+  if (b.k && !out.by) {
+    const head = k => String(k).slice(0, 4) + "\u2026(" + String(k).length + ")";
+    console.warn(`key not recognised: sent ${head(b.k)}; CONTRIBUTORS has ${Object.keys(keys).length}: `
+      + (Object.keys(keys).map(head).join(", ") || "none"));
+  }
 
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
