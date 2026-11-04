@@ -70,8 +70,11 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   await p.click(".picks .pick"); await at(p,"#"+first);
   say("appears after picking "+first, await shown(p));
   note("label", await label(p));
-  await p.click("#panelBack"); await at(p,"");
-  say("back lands on the overview", (await hash(p))==="");
+  // The mood is what back lands on, as the next check says, and a page has its own
+  // address now: the hash said nothing before because no page ever wrote one, so this
+  // asked for the overview's empty hash while the check under it asked for the mood.
+  await p.click("#panelBack"); await at(p,"#mode:winddown");
+  say("back lands on the mood, and the address says so", (await hash(p))==="#mode:winddown");
   // Back used to stop here, on a clean overview, because the crumb recorded only what was
   // selected and opening a style wipes the page stack. That meant leaving a mood to look
   // at one of its styles cost you the mood and your place in it, and the way out of a

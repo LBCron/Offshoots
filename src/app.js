@@ -1587,7 +1587,8 @@ $("panel").addEventListener("click",e=>{
     if(dc){ copyData(dc); return; } }
   { const ss=e.target.closest("[data-sharesheet]");
     if(ss){ openShareSheet(ss); return; } }
-  if(e.target.closest("[data-share]")){ shareSel(); return; }
+  { const sb=e.target.closest("[data-share]");
+    if(sb){ shareSel(sb); return; } }
   if(e.target.closest("[data-close]")){ closePanel(); return; }
   const m=e.target.closest("[data-mode]"); if(m){ state.mode=m.dataset.mode; select(state.sel,{scroll:false}); }
 });
@@ -1667,7 +1668,7 @@ function openShareSheet(btn){
 
 // ---------- sharing ----------
 // every style has a URL: the page plus #id, which boot() already reads back
-function styleURL(id){ return location.origin + location.pathname + location.search + "#" + encodeURIComponent(id); }
+function styleURL(id){ return location.origin + location.pathname + location.search + "#" + hashOf(id); }
 // "about" is the one hash that is not a style id
 const ABOUT_HASH="about", INSTALL_HASH="install", MODES_HASH="modes", PICKS_HASH="picks";
 // The hashes that open a page rather than select a style. Roots and Most influential are
@@ -1682,8 +1683,9 @@ function openAbout(scroll,hash){
   // deep-links them pushes one
   return pushPage(hash||ABOUT_HASH);
 }
+function hashOf(key){ return encodeURIComponent(key).replace(/%3A/g,":"); }
 function setHash(id){
-  const want = id ? "#"+encodeURIComponent(id) : "";
+  const want = id ? "#"+hashOf(id) : "";
   if((location.hash||"") === want) return;
   // replace, not push: selecting styles shouldn't fill the back button
   try{ history.replaceState(null,"",want || location.pathname+location.search); }catch(e){ if(id) location.hash=want; }
@@ -1748,13 +1750,17 @@ function copyAbout(btn){
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(()=>flash("Link copied"),fallback);
   else fallback();
 }
-function shareSel(){
-  const id=state.sel, n=id?byId[id]:null;
-  // nothing selected: share the map itself rather than doing nothing
-  const url = n ? styleURL(id) : location.origin+location.pathname+location.search;
-  const title = n ? "Offshoots · "+n.name : "Offshoots";
-  const text  = n ? n.name+" on Offshoots" : "Offshoots — what grew out of what in popular music";
-  const btn=document.querySelector("#panel [data-share]");
+function shareSel(btn0){
+  const page = btn0 && btn0.dataset && btn0.dataset.sharekey;
+  const id=state.sel, n=(!page && id)?byId[id]:null;
+  // a page says what it is; otherwise the selected style, and failing that the map itself
+  const url = page ? foldURL(hashOf(page))
+    : n ? styleURL(id)
+    : location.origin+location.pathname+location.search;
+  const nm = page ? (btn0.dataset.sharename||"") : n ? n.name : "";
+  const title = nm ? "Offshoots · "+nm : "Offshoots";
+  const text  = nm ? nm+" on Offshoots" : "Offshoots — what grew out of what in popular music";
+  const btn=btn0 || document.querySelector("#panel [data-share]");
   // the wide button says what happened in words; the round one has no room for words, so
   // .done swaps its glyph for a tick and that is the whole message
   const flash=t=>{ if(!btn) return; const nm=btn.querySelector(".shlbl");
@@ -1784,7 +1790,7 @@ addEventListener("keydown",e=>{
 // the title carries the label now; it is rebuilt on every select, so this only has
 // to catch the case where the panel is left standing
 function syncShare(){
-  const b=document.querySelector("#panel [data-share]"); if(!b) return;
+  const b=document.querySelector("#panel [data-share]:not([data-sharekey])"); if(!b) return;
   const l=state.sel?"Share this style":"Share this app";
   if(!b.classList.contains("done")){ b.setAttribute("aria-label",l); b.setAttribute("title",l);
     const t=b.querySelector(".shlbl"); if(t) t.textContent=l; }
@@ -2185,12 +2191,27 @@ function headTrack(k){
         + `<em class="lrct">${esc(n.name)}</em>${GOCHEV}</button>`:"")
     + `</div>`;
 }
+// The foot of a collection, where the style panel keeps its own: in the flow under
+// everything, so it scrolls away rather than sitting over the list.
+function pageShareBtn(key,name){
+  return `<button type="button" class="shbtn wide" data-share`
+    + ` data-sharekey="${esc(key)}" data-sharename="${esc(name)}"`
+    + ` aria-label="Share ${esc(name)}" title="Share ${esc(name)}">`
+    + SHAREGLYPH + TICKGLYPH + `<span class="shlbl">Share this collection</span></button>`;
+}
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);
   if(!m) return null;
   return {title:m[2], icon:moodArt(m[0])+`<b class="facefb">${MODEICON[m[0]]||""}</b>`,
     iconCls:"hasimg", lv:m[5]||3, lede:m[3], top:headTrack(k)+modeTop(m),
-    html:`<div class="picks">${modePicks(m)}</div>`};
+    html:`<div class="picks">${modePicks(m)}</div>`
+      + pageShareBtn("mode:"+m[0], m[1])};
+}
+function pageExists(key){
+  if(key.indexOf("mode:")===0) return typeof MODES!=="undefined"
+    && MODES.some(m=>m[0]===key.slice(5));
+  if(key.indexOf("med:")===0) return !!mediaPage(key.slice(4));
+  return !!PAGES_DEF[key];
 }
 function pushPage(key){
   if(key.indexOf("mode:")===0) bumpMode(key.slice(5));
@@ -2213,6 +2234,7 @@ function pushPage(key){
     + (d.top||"")
     + `<div class="more pgbody">${d.html}</div>`;
   PSTACK.push({key,title:d.title,scroll:body.scrollTop});
+  setHash(key);
   stack.appendChild(page);
   // Going back is also an instant swap. Animating it hides the outgoing page 240ms later,
   // which takes its height out of the scroller and slides the offset we just restored.
@@ -2234,6 +2256,7 @@ function popPage(){
   if(!stack){ PSTACK=[]; syncBack(); return false; }
   const body=$("panelBody"), cur=stack.lastElementChild, prev=cur.previousElementSibling;
   const was=PSTACK.pop();
+  setHash(PSTACK.length ? PSTACK[PSTACK.length-1].key : (state.sel||""));
   if(prev){ prev.hidden=false; if(!reduce){ prev.classList.add("pgout");
     requestAnimationFrame(()=>prev.classList.remove("pgout")); } }
   if(reduce) cur.remove();
@@ -3089,8 +3112,14 @@ function openTip(){
 
 function boot(){
   lastW=innerWidth; lastH=innerHeight; render(); updZoom();
-  const h=(location.hash||"").slice(1);
-  if(FOLDS[h]){
+  const h=decodeURIComponent((location.hash||"").slice(1));
+  // a collection or a media page: the key is the hash, so it opens the page it names
+  if(/^(mode|med):/.test(h) && pageExists(h)){
+    emptyPanel(); scroller.scrollLeft=0; scroller.scrollTop=0; syncPeek();
+    setOpen(true);
+    setTimeout(()=>pushPage(h),420);
+  }
+  else if(FOLDS[h]){
     emptyPanel(); scroller.scrollLeft=0; scroller.scrollTop=0; syncPeek();
     setOpen(true);                         // the sheet is closed on a phone by default
     setTimeout(()=>openAbout(true,h),420); // after the sheet has finished opening
