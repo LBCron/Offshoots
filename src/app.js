@@ -108,33 +108,39 @@ function xrow(x,id){
     + `<span class="plline"><span class="plsvc"></span><span class="plgo">${OPENGO}</span></span></span></a>`;
 }
 function paintPlay(){
-  document.querySelectorAll("#panelBody a.plrow, #panelBody a.plbtn, #panelBody a.xopen").forEach(a=>{
+  document.querySelectorAll("#panelBody a.plrow, #panelBody a.plbtn, #panelBody a.xopen, #panelBody a.trkbtn").forEach(a=>{
     const ap=a.dataset.ap||"", sp=a.dataset.spid||"", nm=a.dataset.style||"";
     const lbl=a.querySelector(".plsvc"); if(!lbl) return;
-    const url = SVC==="spotify" ? (sp?"https://open.spotify.com/playlist/"+sp:"") : SVC==="apple" ? ap : "";
+    const track=a.classList.contains("trkbtn");
+    const url = SVC==="spotify" ? (sp?(track?sp:"https://open.spotify.com/playlist/"+sp):"")
+      : SVC==="apple" ? ap : "";
     if(url){
       a.classList.remove("off"); a.removeAttribute("aria-disabled");
       // rebuilt rather than toggled, so anything else the row is has to be carried over:
       // a cross-style row lost its own class here and went back to looking like the
       // style's own playlist
-      const base=a.classList.contains("plbtn")?"plbtn"
+      const base=a.classList.contains("trkbtn")?"trkbtn"
+        : a.classList.contains("plbtn")?"plbtn"
         : a.classList.contains("xopen")?"xopen"
         : "plrow"+(a.classList.contains("xplay")?" xplay":"");
       a.className=base+" "+(SVC==="spotify"?"sp":"pl");
       a.href=url; if(SVC==="spotify") a.dataset.sp=sp; else delete a.dataset.sp;
       // the button says where it is going; a row says what it is
       lbl.textContent=(a.dataset.lbl||"Playlist on")+" "+svcName();
-      a.title="Open the "+nm+" playlist in "+svcName();
+      a.title=track ? "Open "+nm+" in "+svcName()
+        : "Open the "+nm+" playlist in "+svcName();
     } else {
       // the row stays so the section keeps its shape; it just can't be played here yet
-      const base2=a.classList.contains("plbtn")?"plbtn"
+      const base2=a.classList.contains("trkbtn")?"trkbtn"
+        : a.classList.contains("plbtn")?"plbtn"
         : a.classList.contains("xopen")?"xopen"
         : "plrow"+(a.classList.contains("xplay")?" xplay":"");
       a.className=base2+" off";
       a.removeAttribute("href"); delete a.dataset.sp;
       a.setAttribute("aria-disabled","true");
       lbl.textContent="Not on "+svcName()+" yet";
-      a.title="No "+svcName()+" playlist for "+nm+" yet";
+      a.title=track ? nm+" is not on "+svcName()+" yet"
+        : "No "+svcName()+" playlist for "+nm+" yet";
     }
   });
 }
@@ -2154,11 +2160,36 @@ function modeTop(m){
     + `<div class="secthead picksort"><h3 class="secttl">Styles that fit</h3>`
     + pickSortHtml() + `</div>`;
 }
+// A collection lists styles. Sometimes one recording is the whole point of it, and
+// burying that in a list of forty-three is the wrong shape: this sits above the list on
+// its own and opens the song rather than a playlist or a style.
+//
+// Its link is a whole URL per service, not the id fragment PLAY and SPLAY keep, because a
+// track is addressed differently from a playlist. paintPlay repoints it with the rest,
+// off .trkbtn, so the service picker moves this too.
+function headTrack(k){
+  const h = (typeof HEADTRACK!=="undefined") && HEADTRACK[k];
+  if(!h) return "";
+  const n = h.style && byId[h.style];
+  return `<div class="trkcard">`
+    + `<a class="trkbtn" target="_blank" rel="noopener"`
+    + ` data-ap="${esc(h.ap||"")}" data-spid="${esc(h.sp||"")}"`
+    + ` data-style="${esc(h.title)}" data-lbl="Play it on">`
+    + `<span class="trktx"><b class="trkttl">${esc(h.title)}</b>`
+    + `<span class="trkby">${esc(h.artist)} · ${h.year}</span>`
+    + `<span class="plline"><span class="plsvc"></span><span class="plgo">${OPENGO}</span></span></span></a>`
+    + (h.why?`<p class="trkwhy">${esc(h.why)}</p>`:"")
+    + (n?`<button type="button" class="listrow trkgo" data-go="${esc(h.style)}"`
+        + ` title="Show ${esc(n.name)} on the map">`
+        + `<span class="lrlbl">Where it sits on the atlas</span>`
+        + `<em class="lrct">${esc(n.name)}</em>${GOCHEV}</button>`:"")
+    + `</div>`;
+}
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);
   if(!m) return null;
   return {title:m[2], icon:moodArt(m[0])+`<b class="facefb">${MODEICON[m[0]]||""}</b>`,
-    iconCls:"hasimg", lv:m[5]||3, lede:m[3], top:modeTop(m),
+    iconCls:"hasimg", lv:m[5]||3, lede:m[3], top:headTrack(k)+modeTop(m),
     html:`<div class="picks">${modePicks(m)}</div>`};
 }
 function pushPage(key){
@@ -2194,6 +2225,7 @@ function pushPage(key){
   body.scrollTop=0; setOpen(true); syncBack(); closeNav();
   body.dispatchEvent(new Event("scroll"));
   amUpgrade();   // a pushed page brings its own artist links, which start life as search URLs
+  paintPlay();   // and its own play links, which have no href until the service is read
   return true;
 }
 function popPage(){
