@@ -78,30 +78,29 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       label:h?h.textContent.trim():"",
       shown:d.getBoundingClientRect().height>0,
       underTitle:!!ttl && !!(ttl.compareDocumentPosition(d)&4),
-      // the description IS the row now, so both read off the one label
-      body:(d.querySelector(".ablbl")||{}).textContent||"",
-      lead:(d.querySelector(".ablead")||{}).textContent||"",
+      body:(d.querySelector(".lrlbl")||{}).textContent||"",
+      sub:(d.querySelector(".lrsub")||{}).textContent||"",
       paras:d.querySelectorAll("p.note").length,
+      rowH:Math.round((d.querySelector(".listrow")||{getBoundingClientRect:()=>({height:0})})
+        .getBoundingClientRect().height),
+      clipped:[...d.querySelectorAll(".lrlbl,.lrsub")].some(x=>x.scrollWidth>x.clientWidth+1),
       more:(d.querySelector("[data-page=\"about\"]")||{}).dataset||{}}; });
   say("About the map is a section, not a fold", !!fold && fold.isFold===false
     && fold.label==="About this map");
-  say("  with its text on the page rather than behind a triangle",
-    !!fold && fold.shown && fold.body.length>80);
-  // It was a paragraph with a row under it that offered to tell you the same thing: the
-  // section said it twice and only the second half could be pressed. One row now, whose
-  // label is the description, so the thing you read is the thing you tap.
-  say("  said once, as the row itself rather than beside it",
-    !!fold && fold.paras===0 && fold.lead==="Read more about this atlas:");
-  // the three things it has to cover, in the brief's own order
-  say("  saying what the map is, how styles connect, and what a playlist is",
-    !!fold && /\bstyles\b/.test(fold.body) && /grew out of/.test(fold.body)
-    && /playlist/.test(fold.body));
-  // and not fencing it off to one continent. Reggae, Dub, Ska, Jungle, Grime, Krautrock,
-  // Bossa Nova, Highlife, Afrobeat, Gqom, Cumbia, Soca, Son Cubano and Italo Disco were
-  // all on the map when this claim was first written, and the lines crossing water is
-  // the point of the thing. It came off once and came back with the restructure.
-  say("  without narrowing it to one continent",
-    !!fold && !/North America/i.test(fold.body));
+  // The job of this section is to raise two questions, not answer them: what am I looking
+  // at, and where did this come from. It briefly answered them in place, carrying the
+  // whole methodology paragraph as the row's own label, which came to eleven lines and
+  // 248px on a phone. The page behind it is organised under exactly those two headings.
+  say("  asking what this is and where it is from, in one row",
+    !!fold && fold.shown && fold.paras===0
+    && /what this is/i.test(fold.body) && /from/i.test(fold.body));
+  say("  short enough to read at a glance ("+(fold&&fold.rowH)+"px)",
+    !!fold && fold.rowH>=44 && fold.rowH<=140);
+  // every other row on this panel clips a label that does not fit. This one asks two
+  // questions and has 185px to ask them in at 320px, so both lines wrap instead.
+  say("  with neither line cut off", !!fold && fold.clipped===false);
+  say("  and the sub saying what is behind it ("+(fold&&fold.sub)+")",
+    !!fold && /sources/i.test(fold.sub) && /data/i.test(fold.sub));
   say("  with the full page one tap on ("+(fold&&fold.more&&fold.more.page)+")",
     !!fold && fold.more.page==="about");
   // and it is a row, like every other way out of this panel: a card, a glyph, a chevron.
@@ -424,10 +423,10 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   say("  and its text is not in the panel until you ask", abRow.anyOpenText===false);
   const abMore=await p.evaluate(()=>{
     const r=document.querySelector('.sect-about [data-page="about"]');
-    return {exists:!!r, label:r?(r.querySelector(".ablead")||{}).textContent:"",
+    return {exists:!!r, label:r?(r.querySelector(".lrlbl")||{}).textContent:"",
       tap:r?Math.round(r.getBoundingClientRect().height):0}; });
   say("opening it offers the rest ("+abMore.label+")",
-    abMore.exists && abMore.label==="Read more about this atlas:");
+    abMore.exists && /where it/i.test(abMore.label));
   say("  tap target "+abMore.tap+"px", abMore.tap>=44);
   await p.click('.sect-about [data-page="about"]'); await onPage(p,"about");
   const ab=await p.evaluate(()=>{
@@ -436,6 +435,17 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       top:Math.round(pg.getBoundingClientRect().top-b.getBoundingClientRect().top),
       scroll:b.scrollTop, stats:(pg.querySelector(".stats")||{}).textContent||""}; });
   say("tapping it pushes the page", ab.up && ab.title==="About this map of what grew out of what");
+  // the claims the section used to make in place are the page's job now: what the map is,
+  // how styles connect, what a playlist is, and under its own heading, where it came from.
+  // Not fenced to one continent either: Reggae, Dub, Ska, Jungle, Grime, Krautrock, Bossa
+  // Nova, Highlife, Afrobeat, Gqom, Cumbia, Soca, Son Cubano and Italo Disco were all on
+  // the map when that claim was first written, and the lines crossing water is the point.
+  const abTx=await p.$eval('.ppage[data-p="about"]',e=>e.textContent);
+  say("  saying what the map is, how styles connect, and what a playlist is",
+    /\bstyles\b/.test(abTx) && /grew out of/.test(abTx) && /playlist/.test(abTx));
+  say("  and where it comes from", /Where it comes from/i.test(abTx)
+    && /compiled by hand/i.test(abTx));
+  say("  without narrowing it to one continent", !/North America/i.test(abTx));
   say("  landing at the top rather than past the fold ("+ab.top+"px, scroll "+ab.scroll+")",
     ab.scroll===0 && ab.top<=80);
   note("  stats line inside", ab.stats);

@@ -2580,25 +2580,18 @@ function pageRow(key,label,count,title){
 // whole thing in the one place nobody opens, and spent the top of the panel on a closed
 // row. It is an ordinary section now, in the body with the others, open: a short
 // paragraph is cheaper to read than a disclosure triangle is to decide about.
+// This section answers two questions and should be the size of two questions: what am I
+// looking at, and where did this come from. It briefly held the whole methodology
+// paragraph as the row's own label, eleven lines of prose on a phone, which is the
+// answer and not the question. The page behind it is already organised under exactly
+// those two headings, so the row points at them and the page does the explaining.
 function aboutMapSect(){
-  const np=playable().length;
-  const body = DATA.length+" music styles, each placed at the year it cohered "
-    + "into a named, recorded scene and joined to the styles it grew out of, so following "
-    + "a line backwards shows you what a sound is made of. "
-    + np+" of them carry an essential playlist, and each one starts just outside its own "
-    + "style, with the records that pushed it into being, and arrives at it.";
-  // One row rather than a paragraph with a row under it. The paragraph and the row went
-  // to the same place and said the same thing twice: the text described the atlas and the
-  // row offered to describe the atlas. As one tappable row the description IS the link,
-  // which is also why the whole paragraph is inside the button rather than beside it.
   return sect("about","About this map",
     `<div class="listgrp abmore">`
-    + `<button type="button" class="listrow abrow" data-page="about"`
-    + ` title="The sources, the colophon and the map as data"`
-    + ` aria-label="Read more about this atlas: ${esc(body)}">`
-    + rowIcon("about")
-    + `<span class="lrlbl ablbl"><b class="ablead">Read more about this atlas:</b> `
-    + esc(body) + `</span>${GOCHEV}</button>`
+    + goRow("about","What this is and where it\u2019s from",
+        "Compiled by hand. The sources, the method, and the map as data.",
+        null,` data-page="about"`,
+        "About this map: what it is for, where it comes from, and what a link claims")
     + `</div>`);
 }
 // The two settings that belong to the whole app rather than to any style: where playlists

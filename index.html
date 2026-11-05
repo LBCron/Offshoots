@@ -542,17 +542,16 @@ body.open .pcnt{display:none}
 .listrow .lrsub{display:block;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);
   color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .listrow.lrtwo .lrct{align-self:center}
-/* About the map is one row whose label is the whole description. The paragraph used to
-   sit above a row that offered to tell you the same thing, so the section said it twice
-   and the row was the only part of it you could press. The text is the link now, which
-   means it has to wrap: every other label on this panel is one line with an ellipsis. */
-.listrow.abrow{min-height:0;padding:14px;align-items:center}
-.listrow .ablbl{white-space:normal;overflow:visible;text-overflow:clip;
-  font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
-.listrow .ablbl .ablead{font-weight:400;color:var(--fg)}
-/* the glyph and the chevron keep their place beside a block of text rather than drifting
-   to the middle of it */
-.listrow.abrow .lrico,.listrow.abrow .lrcv{align-self:center}
+/* About the map is an ordinary two-line row: a label and a line saying what is behind it,
+   the same shape as Most influential. It briefly carried the whole methodology paragraph
+   as its label, which wrapped to eleven lines on a phone and needed rules of its own to
+   do it. A row that needs special rules to hold its text is usually the wrong row. */
+/* Both lines wrap here. Every other row on this panel has a label short enough for one
+   line, and clips what does not fit; this one asks two questions and at 320px there is
+   185px to ask them in, so clipping would cut the second one off. */
+.sect-about .listrow .lrlbl,
+.sect-about .listrow .lrsub{white-space:normal;overflow:visible;text-overflow:clip}
+.sect-about .listrow{padding-top:12px;padding-bottom:12px}
 @media (min-width:900px) and (hover:hover) and (pointer:fine){
   .listgrp{--lrlead:51px}
   .listrow{min-height:46px;padding:0 12px;gap:11px}
@@ -8146,25 +8145,18 @@ function pageRow(key,label,count,title){
 // whole thing in the one place nobody opens, and spent the top of the panel on a closed
 // row. It is an ordinary section now, in the body with the others, open: a short
 // paragraph is cheaper to read than a disclosure triangle is to decide about.
+// This section answers two questions and should be the size of two questions: what am I
+// looking at, and where did this come from. It briefly held the whole methodology
+// paragraph as the row's own label, eleven lines of prose on a phone, which is the
+// answer and not the question. The page behind it is already organised under exactly
+// those two headings, so the row points at them and the page does the explaining.
 function aboutMapSect(){
-  const np=playable().length;
-  const body = DATA.length+" music styles, each placed at the year it cohered "
-    + "into a named, recorded scene and joined to the styles it grew out of, so following "
-    + "a line backwards shows you what a sound is made of. "
-    + np+" of them carry an essential playlist, and each one starts just outside its own "
-    + "style, with the records that pushed it into being, and arrives at it.";
-  // One row rather than a paragraph with a row under it. The paragraph and the row went
-  // to the same place and said the same thing twice: the text described the atlas and the
-  // row offered to describe the atlas. As one tappable row the description IS the link,
-  // which is also why the whole paragraph is inside the button rather than beside it.
   return sect("about","About this map",
     `<div class="listgrp abmore">`
-    + `<button type="button" class="listrow abrow" data-page="about"`
-    + ` title="The sources, the colophon and the map as data"`
-    + ` aria-label="Read more about this atlas: ${esc(body)}">`
-    + rowIcon("about")
-    + `<span class="lrlbl ablbl"><b class="ablead">Read more about this atlas:</b> `
-    + esc(body) + `</span>${GOCHEV}</button>`
+    + goRow("about","What this is and where it\u2019s from",
+        "Compiled by hand. The sources, the method, and the map as data.",
+        null,` data-page="about"`,
+        "About this map: what it is for, where it comes from, and what a link claims")
     + `</div>`);
 }
 // The two settings that belong to the whole app rather than to any style: where playlists

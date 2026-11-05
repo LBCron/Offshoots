@@ -542,17 +542,16 @@ body.open .pcnt{display:none}
 .listrow .lrsub{display:block;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);
   color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .listrow.lrtwo .lrct{align-self:center}
-/* About the map is one row whose label is the whole description. The paragraph used to
-   sit above a row that offered to tell you the same thing, so the section said it twice
-   and the row was the only part of it you could press. The text is the link now, which
-   means it has to wrap: every other label on this panel is one line with an ellipsis. */
-.listrow.abrow{min-height:0;padding:14px;align-items:center}
-.listrow .ablbl{white-space:normal;overflow:visible;text-overflow:clip;
-  font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
-.listrow .ablbl .ablead{font-weight:400;color:var(--fg)}
-/* the glyph and the chevron keep their place beside a block of text rather than drifting
-   to the middle of it */
-.listrow.abrow .lrico,.listrow.abrow .lrcv{align-self:center}
+/* About the map is an ordinary two-line row: a label and a line saying what is behind it,
+   the same shape as Most influential. It briefly carried the whole methodology paragraph
+   as its label, which wrapped to eleven lines on a phone and needed rules of its own to
+   do it. A row that needs special rules to hold its text is usually the wrong row. */
+/* Both lines wrap here. Every other row on this panel has a label short enough for one
+   line, and clips what does not fit; this one asks two questions and at 320px there is
+   185px to ask them in, so clipping would cut the second one off. */
+.sect-about .listrow .lrlbl,
+.sect-about .listrow .lrsub{white-space:normal;overflow:visible;text-overflow:clip}
+.sect-about .listrow{padding-top:12px;padding-bottom:12px}
 @media (min-width:900px) and (hover:hover) and (pointer:fine){
   .listgrp{--lrlead:51px}
   .listrow{min-height:46px;padding:0 12px;gap:11px}
