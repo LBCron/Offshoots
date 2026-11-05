@@ -2364,9 +2364,11 @@ function topGridHtml(){
     return `<button type="button" class="mcirc tcirc" data-go="${esc(id)}"`
       + ` title="Show ${esc(x.name)} on the map"`
       + ` aria-label="${esc(x.name)}. ${x.children.length} styles came out of it.">`
-      + `<i class="mco tco">${cover(id,x,true)}</i>`
-      + `<span class="mclbl">${esc(x.name)}</span>`
-      + `<span class="tcct">${x.children.length}</span></button>`;
+      // the badge sits outside the art's own clip, so the disc can crop its picture
+      // while the count still overlaps the edge of it
+      + `<span class="tart"><i class="mco tco">${cover(id,x,true)}</i>`
+      + `<b class="tcct">${x.children.length}</b></span>`
+      + `<span class="mclbl">${esc(x.name)}</span></button>`;
   }).join("") + `</div>`;
 }
 function styleRows(ids,detail){

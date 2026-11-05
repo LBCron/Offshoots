@@ -111,8 +111,25 @@ const state=p=>p.evaluate(()=>{
 
   // Escape unwinds before it closes the panel
   await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
-  say("  with a count under every one",
-    await p.$$eval('.ppage[data-p="top"] .tcct',e=>e.length===24 && e.every(x=>/^\d+$/.test(x.textContent))));
+  // the count is a badge on the disc now, the way an unread count sits on an app icon.
+  // It has to clear the art's own clip, or it is a number with its top sliced off.
+  const badge=await p.evaluate(()=>{
+    const t=[...document.querySelectorAll('.ppage[data-p="top"] .tcirc')];
+    const r=x=>x.getBoundingClientRect();
+    return {n:t.length,
+      numbers:t.every(x=>/^\d+$/.test((x.querySelector(".tcct")||{}).textContent||"")),
+      round:t.every(x=>getComputedStyle(x.querySelector(".tco")).borderRadius==="50%"),
+      // top right of the art, overlapping it rather than sitting inside or beside it
+      placed:t.every(x=>{const a=r(x.querySelector(".tco")), b=r(x.querySelector(".tcct"));
+        return b.top<a.top && b.right>a.right && b.left>a.left+a.width/2;}),
+      // nothing clipping it: the disc crops its picture, the wrapper must not crop this
+      unclipped:t.every(x=>getComputedStyle(x.querySelector(".tart")).overflow==="visible"),
+      legible:t.every(x=>{const b=r(x.querySelector(".tcct"));
+        return b.width>=20 && b.height>=20;})};});
+  say("  with a count badge on every one", badge.n===24 && badge.numbers);
+  say("    on a round tile, at its top right", badge.round && badge.placed);
+  say("    clear of the art's own clip, at a size you can read",
+    badge.unclipped && badge.legible);
 
   // Most influential and Collections are the same kind of page and are built the same
   // way: a lede, a Sorted by picker, a grid of art, and a link to the page itself. This
