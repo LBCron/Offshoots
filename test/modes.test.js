@@ -106,9 +106,8 @@ const spell=n=>n<=20?WORDS[n]
   // Phosphor is MIT, which wants its notice carried with the work. The map is one file
   // that anyone can save, so the notice lives on the About page inside it.
   say("  and the set it came from is credited", await (async()=>{
-    await p.$eval(".ovfold summary",e=>{ if(!e.parentElement.open) e.click(); });
     await settle(p);
-    await p.click('.ovfold [data-page="about"]'); await onPage(p,"about");
+    await p.click('.sect-about [data-page="about"]'); await onPage(p,"about");
     const t=await p.evaluate(()=>(document.querySelector(".ppage:not([hidden])")||{}).textContent||"");
     const ok=/Phosphor/.test(t) && /MIT/.test(t);
     await p.click("#panelBack"); await onPage(p,"root");

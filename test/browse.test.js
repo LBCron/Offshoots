@@ -70,7 +70,7 @@ const state=p=>p.evaluate(()=>{
   // About moved into a fold under the title and Install into the footer, so the two that
   // were a colophon at the foot are now in two different places and neither is a row
   const col=await p.evaluate(()=>({
-    about:!!document.querySelector('.ovfold [data-page="about"]'),
+    about:!!document.querySelector('.sect-about [data-page="about"]'),
     install:!!document.querySelector('.sect-appset [data-page="install"]'),
     old:document.querySelectorAll(".sect-learn").length}));
   say("About is in the fold and Install in the footer",
@@ -133,8 +133,7 @@ const state=p=>p.evaluate(()=>{
     (await p.$$eval('.ppage[data-p="install"] .subh',e=>e.length))>=4);
   say("  and About is not pushed with it", (await p.$$('.ppage[data-p="about"]')).length===0);
   await p.click("#panelBack"); await onPage(p,"root");
-  await p.$eval(".ovfold summary",e=>e.click()); await settle(p);
-  await p.click('.ovfold [data-page="about"]'); await onPage(p,"about");
+  await p.click('.sect-about [data-page="about"]'); await onPage(p,"about");
   say("About pushes its own", (await state(p)).key==="about");
   say("  carrying the app icon and the stats line",
     (await p.$$('.ppage[data-p="about"] .abouthd .appicon')).length===1

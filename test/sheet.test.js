@@ -412,10 +412,23 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     return {overlap:Math.round(Math.min(s.bottom,pan.bottom)-Math.max(s.top,pan.top)), mapH:Math.round(s.height)};});
   const g1=await geo();
   say("the map runs behind the sheet ("+g1.overlap+"px)", g1.overlap>100);
-  const frost=await p.evaluate(()=>{const cs=getComputedStyle(document.getElementById("panel"));
-    return [cs.backdropFilter||cs.webkitBackdropFilter||"none", cs.backgroundColor];});
+  const frost=await p.evaluate(()=>{const e=document.getElementById("panel");
+    const cs=getComputedStyle(e), af=getComputedStyle(e,"::after");
+    const a=(cs.backgroundColor.match(/[\/,]\s*(0?\.\d+|0|1)\s*\)?$/)||[])[1];
+    return [cs.backdropFilter||cs.webkitBackdropFilter||"none", cs.backgroundColor,
+      a===undefined?1:parseFloat(a), af.mixBlendMode];});
   say("its ground is frosted: "+frost[0], /blur/.test(frost[0]));
   say("and translucent: "+frost[1], /rgba|\/ 0\./.test(frost[1]));
+  // 0.96 was translucent on paper and solid to look at: a twentieth of the map came
+  // through, so the blur under it was work nobody saw.
+  say("  enough to see the map through ("+frost[2]+")", frost[2]<=0.85);
+  // And the blur has to actually blur. A mix-blend-mode on the grain layer composites
+  // against the backdrop, which silently defeats backdrop-filter on the sheet above it:
+  // the filter was declared, reported by getComputedStyle, and did nothing. Map labels
+  // came through sharp enough to read at any radius, 120px included. Nothing but a
+  // screenshot shows it, so this checks the cause rather than the symptom.
+  say("  with nothing blending over it to defeat the blur ("+frost[3]+")",
+    frost[3]==="normal");
   await raise(p); await opened();
   const g2=await geo();
   say("opening no longer resizes the map ("+g1.mapH+" -> "+g2.mapH+")", g1.mapH===g2.mapH);

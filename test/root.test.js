@@ -35,26 +35,30 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   await raise(p); await opened(p);
 
   // ---- order on the page ----
-  // Explore is four sections now, in the order you would want them: what the map itself
-  // will do for you, then the collections, then the reading, then the app's own settings.
+  // Collections lead. They are the thing most people want and the only section whose
+  // contents are pictures, so they are also what the minimised sheet peeks at. Then what
+  // the map itself will do for you, then what the map is, then the reading, then the
+  // app's own settings. About used to be a fold under the title, which spent the top of
+  // the panel on a closed row and hid the one paragraph explaining the whole thing.
   const order=await p.$eval("#panelBody",e=>[...e.querySelectorAll(
-    ".ovcard,.ovfold,.sect-onmap,.sect-modes,.sect-deeper,.sect-appset,.more > .shbtn,.ovhint")]
-    .map(x=>x.className.split(" ").find(c=>/ovcard|ovfold|sect-onmap|sect-modes|sect-deeper|sect-appset|shbtn|ovhint/.test(c))));
+    ".ovcard,.sect-modes,.sect-onmap,.sect-about,.sect-deeper,.sect-appset,.more > .shbtn,.ovhint")]
+    .map(x=>x.className.split(" ").find(c=>/ovcard|sect-onmap|sect-modes|sect-about|sect-deeper|sect-appset|shbtn|ovhint/.test(c))));
   note("reading order", order.join(" \u2192 "));
-  say("the collections come after the map shortcuts and before the reading",
-    order.indexOf("sect-onmap")<order.indexOf("sect-modes")
-    && order.indexOf("sect-modes")<order.indexOf("sect-deeper"));
+  say("Collections first, then the map shortcuts, then About, then the reading",
+    order.indexOf("sect-modes")<order.indexOf("sect-onmap")
+    && order.indexOf("sect-onmap")<order.indexOf("sect-about")
+    && order.indexOf("sect-about")<order.indexOf("sect-deeper"));
   say("  the app's own settings last, with Share under them",
     order.indexOf("sect-appset")>order.indexOf("sect-deeper")
     && order.indexOf("shbtn")===order.length-1);
   // Every section says what it is now. The panel used to leave the first list unlabelled
   // on the grounds that the title covered it, which worked while there was one list.
   const groups=await p.$$eval("#panelBody .sect .secttl",e=>e.map(x=>x.textContent));
-  say("three section headings: "+groups.join(" / "),
-    groups.join("/")==="On the atlas/Collections/Go deeper");
+  say("four section headings: "+groups.join(" / "),
+    groups.join("/")==="Collections/Exploring the Atlas/About this map/Go deeper");
   say("  not Find: these are for when you do not know what you want", !/find/i.test(groups.join(" ")));
   say("  and Collections is called that here too, the way its own page is",
-    groups[1]==="Collections");
+    groups[0]==="Collections");
   // Only Go deeper keeps a line under it. The other two had captions for things that
   // already say what they are: two labelled rows, and a row of pictures of a cat asleep,
   // a nightcap and a coffee shop.
@@ -63,20 +67,23 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     ledes.length===1 && ledes[0]==="Stories and context behind the music.");
   say("  and none are left loose", (await p.$$eval("#panelBody > .more > [data-page]",e=>e.length))===0);
 
-  // ---- About, folded under the title ----
-  // It was a row at the foot of the panel, which is the last place anyone looks for the
-  // thing explaining the first screen they saw. Shut by default: it is read once.
-  const fold=await p.evaluate(()=>{ const d=document.querySelector(".ovfold");
+  // ---- About, a section in the body ----
+  // It was a fold directly under the title: a closed row at the top of the panel, with
+  // the one paragraph explaining the whole thing behind a triangle nobody turns. It is
+  // an ordinary open section now, between Exploring the Atlas and Go deeper.
+  const fold=await p.evaluate(()=>{ const d=document.querySelector(".sect-about");
     if(!d) return null;
-    const sm=d.querySelector("summary"), ttl=document.querySelector(".ovcard .bigttl");
-    return {open:d.open, label:sm.textContent.replace(/\s+/g," ").trim(),
-      tap:Math.round(sm.getBoundingClientRect().height),
+    const h=d.querySelector(".secttl"), ttl=document.querySelector(".ovcard .bigttl");
+    return {isFold:d.tagName==="DETAILS"||!!d.querySelector("summary"),
+      label:h?h.textContent.trim():"",
+      shown:d.getBoundingClientRect().height>0,
       underTitle:!!ttl && !!(ttl.compareDocumentPosition(d)&4),
       body:(d.querySelector(".note")||{}).textContent||"",
       more:(d.querySelector("[data-page=\"about\"] .lrlbl")||{}).textContent||""}; });
-  say("About the atlas is folded under the title", !!fold && fold.open===false
-    && /About this map of what grew out of what/.test(fold.label) && fold.underTitle);
-  say("  and its control clears the tap floor ("+(fold&&fold.tap)+"px)", !!fold && fold.tap>=44);
+  say("About the map is a section, not a fold", !!fold && fold.isFold===false
+    && fold.label==="About this map");
+  say("  with its text on the page rather than behind a triangle",
+    !!fold && fold.shown && fold.body.length>80);
   // the three things it has to cover, in the brief's own order
   say("  saying what the map is, how styles connect, and what a playlist is",
     !!fold && /\bstyles\b/.test(fold.body) && /grew out of/.test(fold.body)
@@ -92,10 +99,9 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // and it is a row, like every other way out of this panel: a card, a glyph, a chevron.
   // It was a line of text with a chevron after it, which is not a shape this panel uses
   // anywhere else.
-  { await p.$eval(".ovfold summary",e=>{ if(!e.parentElement.open) e.click(); });
-    await settle(p);
+  {    await settle(p);
     const row=await p.evaluate(()=>{
-      const r=document.querySelector('.ovfold [data-page="about"]');
+      const r=document.querySelector('.sect-about [data-page="about"]');
       if(!r) return null;
       const g=r.closest(".listgrp"), pete=document.querySelector('[data-page="picks"]');
       const same=(a,b,k)=>getComputedStyle(a)[k]===getComputedStyle(b)[k];
@@ -248,9 +254,8 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // the app icon left the header and moved into About, so check both ends of that:
   // a bare .appicon count would now find the one inside the collapsed details
   say("no app icon in the header", (await p.$$(".ovcard .navrow .appicon")).length===0);
-  { await p.$eval(".ovfold summary",e=>{ if(!e.parentElement.open) e.click(); });
-    await settle(p);
-    await p.click('.ovfold [data-page="about"]'); await onPage(p,"about");
+  {    await settle(p);
+    await p.click('.sect-about [data-page="about"]'); await onPage(p,"about");
     say("it moved onto the About page", (await p.$$('.ppage[data-p="about"] .abouthd .appicon')).length===1);
     await p.click("#panelBack"); await onPage(p,"root");
     await p.evaluate(()=>{document.getElementById("panelBody").scrollTop=0;}); await settle(p); }
@@ -394,29 +399,23 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     await mini.close(); }
 
   // ---- 5: the full About, still a pushed page ----
-  // It was a fold at the bottom of the panel, then a row at the bottom, and is now a fold
-  // under the title with the full page behind it. The fold holds the short version; the
-  // page holds the sources, the colophon and the data link, and is still pushed rather
-  // than unrolled in place, where opening it laid text out below the fold and the tap
-  // looked like it had done nothing.
-  const abRow=await p.evaluate(()=>{
-    const d=document.querySelector(".ovfold");
-    // a shut <details> collapses with content-visibility, so its children still report a
-    // size: open is the only honest reading of whether it is shut
-    return {shut:!!d && !d.open,
-      inside:!!document.querySelector('.ovfold [data-page="about"]'),
-      anyOpenText:!!document.querySelector(".ppage .abouthd")}; });
-  say("the full About is behind the fold, not on the panel", abRow.shut && abRow.inside);
+  // The section carries the short version. The full one, with the sources, the colophon
+  // and the data link, is still a pushed page rather than unrolled in place, where
+  // opening it laid text out below the fold and the tap looked like it had done nothing.
+  const abRow=await p.evaluate(()=>({
+    inside:!!document.querySelector('.sect-about [data-page="about"]'),
+    anyOpenText:!!document.querySelector(".ppage .abouthd")}));
+  say("the full About is a page behind the section, not laid out on the panel",
+    abRow.inside);
   say("  and its text is not in the panel until you ask", abRow.anyOpenText===false);
-  await p.$eval(".ovfold summary",e=>e.click()); await settle(p);
   const abMore=await p.evaluate(()=>{
-    const r=document.querySelector('.ovfold [data-page="about"]');
+    const r=document.querySelector('.sect-about [data-page="about"]');
     return {exists:!!r, label:r?r.querySelector(".lrlbl").textContent:"",
       tap:r?Math.round(r.getBoundingClientRect().height):0}; });
   say("opening it offers the rest ("+abMore.label+")",
     abMore.exists && abMore.label==="Read more about this atlas");
   say("  tap target "+abMore.tap+"px", abMore.tap>=44);
-  await p.click('.ovfold [data-page="about"]'); await onPage(p,"about");
+  await p.click('.sect-about [data-page="about"]'); await onPage(p,"about");
   const ab=await p.evaluate(()=>{
     const pg=document.querySelector('.ppage[data-p="about"]'), b=document.getElementById("panelBody");
     return {up:!!pg&&!pg.hidden, title:(pg.querySelector(".bigttl .mn")||{}).textContent,

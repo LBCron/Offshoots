@@ -1962,7 +1962,7 @@ function appShareBtn(){
 // itself is still at #roots for anyone who had it.
 function onMapSect(){
   const top=topIds();
-  return sect("onmap","On the atlas",
+  return sect("onmap","Exploring the Atlas",
     `<div class="listgrp sep">`
     + goRow("top","Most influential","Explore musical crossroads",top.length,
         ` data-page="top"`,`The ${top.length} styles that led to the most`)
@@ -2518,10 +2518,14 @@ function pageRow(key,label,count,title){
 // anyone looks for the thing that explains the first screen they saw. Short on purpose:
 // the full page is one tap further on, and it still holds the sources, the colophon and
 // the data link.
-function aboutMapFold(){
+// It was a fold directly under the title, which put the one paragraph explaining the
+// whole thing in the one place nobody opens, and spent the top of the panel on a closed
+// row. It is an ordinary section now, in the body with the others, open: a short
+// paragraph is cheaper to read than a disclosure triangle is to decide about.
+function aboutMapSect(){
   const np=playable().length;
-  return `<details class="xfold aboutfold ovfold"><summary><span>About this map of what grew out of what</span>${FOLDTRI}</summary>`
-    + `<div class="xfoldb"><p class="note">`
+  return sect("about","About this map",
+    `<p class="note">`
     + esc(DATA.length+" music styles, each placed at the year it cohered "
       + "into a named, recorded scene and joined to the styles it grew out of, so following "
       + "a line backwards shows you what a sound is made of. "
@@ -2533,7 +2537,7 @@ function aboutMapFold(){
     + `<div class="listgrp abmore">`
     + pageRow("about","Read more about this atlas",null,
         "The sources, the colophon and the map as data")
-    + `</div></div></details>`;
+    + `</div>`);
 }
 // The two settings that belong to the whole app rather than to any style: where playlists
 // open, and how to keep the map to hand. Compact and at the foot, because you set the
@@ -2548,16 +2552,17 @@ function ovFooter(){
 function emptyPanel(){
   setTint("");
   syncBack();                      // so the map pill is in its home state from the first paint
-  setExpandLabel("", "About this map of what grew out of what", "About");
+  setExpandLabel("", "What grew out of what", "Explore");
   setPbar("Music Atlas", FAMS.length+" families · "+nodes.length+" styles");
   syncPull();
   const top=[...nodes].sort((a,b)=>b.children.length-a.children.length||a.year-b.year).slice(0,12);
   const np=playable().length;
   const withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
   resetPages();
-  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Music Atlas</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Music Atlas</span></h1>${aboutMapFold()}<div class="more">
-    ${onMapSect()}
+  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Music Atlas</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Music Atlas</span></h1><div class="more">
     ${modeSect()}
+    ${onMapSect()}
+    ${aboutMapSect()}
     ${deeperSect()}
     ${ovFooter()}
     ${appShareBtn()}</div></div>`;

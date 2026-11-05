@@ -44,26 +44,17 @@ const CHV=/M181\.66,133\.66l-80,80a8,8,0,0,1-11\.32-11\.32L164\.69,128/;
   note("folds on the root panel", v.folds.length);
   for(const f of v.folds) note("  "+f.label, (TRI.test(f.d)?"triangle":CHV.test(f.d)?"chevron":"other")
     +(f.open?", open":", shut"));
-  say("every fold control is the solid triangle",
-    v.folds.length>=1 && v.folds.every(f=>TRI.test(f.d))
+  // The root has no folds at all now: About was the last one, and it is a plain section.
+  // So this says what it can here, that nothing on it is a fold wearing a chevron, and
+  // the triangle itself is checked on the style panel below, which still has five.
+  say("no fold on the root wears anything but the triangle",
+    v.folds.every(f=>TRI.test(f.d))
       ? true : v.folds.filter(f=>!TRI.test(f.d)).map(f=>f.label).join(" | "));
   note("row carets on the root panel", v.rows.length);
   say("every row that opens a panel is the chevron",
     v.rows.length>=4 && v.rows.every(r=>CHV.test(r.d))
       ? true : v.rows.filter(r=>!CHV.test(r.d)).map(r=>r.label).join(" | "));
   say("no duotone glyph is left on it ("+v.duo+")", v.duo===0);
-
-  // a triangle that does not turn when the fold opens is a triangle pointing the wrong way
-  const turned=await p.evaluate(()=>{
-    const d=[...document.querySelectorAll("details")].find(x=>!x.open);
-    if(!d) return "every fold was already open";
-    const g=d.querySelector("summary svg");
-    const was=getComputedStyle(g).transform;
-    d.open=true;
-    return {was, now:getComputedStyle(g).transform};
-  });
-  say("and it turns to face down when the fold opens",
-    typeof turned==="object" && turned.was!==turned.now ? true : JSON.stringify(turned));
 
   // the style panel has its own folds and its own rows
   // a fresh page, because goto to another hash on the same document does not reload and
@@ -77,6 +68,18 @@ const CHV=/M181\.66,133\.66l-80,80a8,8,0,0,1-11\.32-11\.32L164\.69,128/;
   note("folds on a style panel", v.folds.length);
   for(const f of v.folds) note("  "+f.label, (TRI.test(f.d)?"triangle":CHV.test(f.d)?"chevron":"other")
     +(f.open?", open":", shut"));
+  // a triangle that does not turn when the fold opens is a triangle pointing the wrong
+  // way. Checked here rather than on the root, which has no folds left to turn.
+  const turned=await q.evaluate(()=>{
+    const d=[...document.querySelectorAll("details")].find(x=>!x.open);
+    if(!d) return "every fold was already open";
+    const g=d.querySelector("summary svg");
+    const was=getComputedStyle(g).transform;
+    d.open=true;
+    return {was, now:getComputedStyle(g).transform};
+  });
+  say("it turns to face down when the fold opens",
+    typeof turned==="object" && turned.was!==turned.now ? true : JSON.stringify(turned));
   say("a style panel folds use the triangle too",
     v.folds.length>=1 && v.folds.every(f=>TRI.test(f.d))
       ? true : v.folds.map(f=>f.label+": "+(CHV.test(f.d)?"chevron":"other")).join(" | "));

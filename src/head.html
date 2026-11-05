@@ -1548,11 +1548,23 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
     /* the lists used to sit on their own shaded cards, which gave the type something
        opaque to stand on and let the sheet itself stay well back. Unboxed, the rows sit
        straight on the glass, so the glass carries more of the ground and blurs harder:
-       what shows through should read as weather behind the sheet, not as labels. */
-    background:color-mix(in srgb,var(--panel) 96%,transparent);
-    -webkit-backdrop-filter:saturate(165%) blur(36px);backdrop-filter:saturate(165%) blur(36px)}
+       what shows through should read as weather behind the sheet, not as labels.
+       78%, not 96%. At 96 only a twentieth of the map came through and the sheet read as
+       solid, so the blur under it was work nobody saw. The blur goes up with it: at 36px
+       a style label behind the glass was still a smear with the shape of a word in it,
+       and the point is colour and line, not text you half recognise. */
+    background:color-mix(in srgb,var(--panel) 78%,transparent);
+    -webkit-backdrop-filter:saturate(165%) blur(44px);backdrop-filter:saturate(165%) blur(44px)}
   /* the family wash goes translucent too, over its own ground rather than the root's */
-  aside#panel.tinted{background:color-mix(in srgb,var(--panel) 96%,transparent)}
+  aside#panel.tinted{background:color-mix(in srgb,var(--panel) 78%,transparent)}
+  /* The grain has to stop blending here. mix-blend-mode on a child composites against the
+     backdrop, and that defeats the backdrop-filter on the sheet above it: the blur was
+     wired up, declared, reported by getComputedStyle, and doing nothing. Map labels came
+     through the glass sharp enough to read, at any blur radius — 120px left them crisp.
+     Nobody could see it at 96% ground, which is why it survived the depth pass that
+     introduced it. Plain noise instead, a little stronger to make up for not blending,
+     and the sheet is the only surface that gives it up: every solid panel keeps overlay. */
+  aside#panel::after{mix-blend-mode:normal;opacity:calc(var(--grain) * 1.4)}
   /* no backdrop-filter support: fall back to the solid ground rather than a see-through sheet */
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
     aside#panel{background:var(--panel)}
