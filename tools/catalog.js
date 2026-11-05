@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Offshoots as data, for a reader that is not a person.
+// Music Atlas as data, for a reader that is not a person.
 //
 // The map is a picture, and a picture is the one thing a language model cannot read. This
 // writes the same contents as one JSON file someone can point a model at and ask for
@@ -10,7 +10,7 @@
 // written at build time rather than fetched at runtime: the page stays one file that
 // works with no connection, and this sits beside it like the art folders do.
 //
-//   node tools/catalog.js      ->  writes offshoots.json at the repo root
+//   node tools/catalog.js      ->  writes musicatlas.json at the repo root
 const fs=require("fs"), path=require("path");
 const ROOT=path.join(__dirname,"..");
 const D=require(path.join(ROOT,"src","data.js"));
@@ -41,7 +41,7 @@ const apple=p=>p?"https://music.apple.com"+p:undefined;
 const spotify=i=>i?"https://open.spotify.com/playlist/"+i:undefined;
 const wiki=r=>(r[7]||[]).find(s=>/wikipedia\.org\/wiki\//.test(s));
 
-const SITE="https://offshoots.netlify.app";
+const SITE="https://musicatlas.us";
 const styles=D.DATA.map(r=>{
   const id=r[0], note=r[5]||"";
   const key=[...new Set([...noteNames(note), ...((D.ART||{})[id]||[])])];
@@ -74,10 +74,10 @@ const crossings=(D.XPLAY||[]).map(x=>({
 }));
 
 const out={
-  name:"Offshoots",
+  name:"Music Atlas",
   description:"A hand-compiled map of popular music styles, each placed at the year it "
     + "cohered into a named, recorded scene and joined to the styles it grew out of.",
-  url:"https://offshoots.netlify.app",
+  url:"https://musicatlas.us",
   generated:new Date().toISOString().slice(0,10),
   // what someone pointing a model at this file is actually trying to do
   readMe:{
@@ -112,10 +112,10 @@ const out={
   crossStylePlaylists:crossings
 };
 
-const file=path.join(ROOT,"offshoots.json");
+const file=path.join(ROOT,"musicatlas.json");
 // Compact, not pretty-printed. The reader is a model with a context window, and the
 // indentation was 160 KB of spaces it would have to pay for.
 fs.writeFileSync(file, JSON.stringify(out));
 const kb=Math.round(fs.statSync(file).size/1024);
-console.log("wrote offshoots.json — "+kb+" KB, "+out.counts.styles+" styles, "
+console.log("wrote musicatlas.json — "+kb+" KB, "+out.counts.styles+" styles, "
   + out.counts.withPlaylists+" with a playlist");

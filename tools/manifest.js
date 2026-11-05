@@ -1,6 +1,6 @@
 // Reads a School of Listening update manifest and says what it would change.
 //
-// The manifest is the spreadsheet's own account of a batch of classes: the Offshoots node
+// The manifest is the spreadsheet's own account of a batch of classes: the Music Atlas node
 // id, the two public playlist URLs, the playlist title, the artists and the ordered songs.
 // It is written for a person, so this parses it rather than trusting a shape, and it
 // reports before it writes: a manifest is often a re-issue of one already applied, and the
@@ -14,7 +14,7 @@ const SRC=path.join(__dirname,"..","src","data.js");
 function parse(txt){
   const out=[];
   for(const block of txt.split(/^={10,}$/m)){
-    const id=(block.match(/^Offshoots node ID:\s*(\S+)/m)||[])[1];
+    const id=(block.match(/^(?:Offshoots|Music Atlas) node ID:\s*(\S+)/m)||[])[1];
     if(!id) continue;
     const title=(block.match(/^([0-9][0-9.]*\s+.+·.+)$/m)||[])[1];
     const ap=(block.match(/^Apple Music URL:\s*(\S+)/m)||[])[1]||"";

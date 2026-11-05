@@ -67,6 +67,12 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
   r=await call({...base,styles:[],k:KEY});
   say("a guest's key is honoured from CONTRIBUTORS", r.status===201 && (await r.json()).by==="pete");
   say("a deploy preview may send", (await call(base,{origin:"https://deploy-preview-7--offshoots.netlify.app"})).status===201);
+  // The custom domain has to be allowed in its own right. The form posts from whatever
+  // host served the page, so on musicatlas.us every suggestion would have come back 403
+  // from an allowlist that only knew the netlify.app name, and nothing would have said so
+  // except the form failing for everyone.
+  say("the custom domain may send", (await call(base,{origin:"https://musicatlas.us"})).status===201);
+  say("  and its www", (await call(base,{origin:"https://www.musicatlas.us"})).status===201);
   sent.length=0;
   say("another site may not", (await call(base,{origin:"https://evil.example"})).status===403 && sent.length===0);
   say("only POST", (await call(null,{method:"GET"})).status===405);

@@ -9,7 +9,7 @@ const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
 const {settle,until,shown,arm}=require("./_wait");
 const D=require(path.join(__dirname,"..","src","data.js"));
-const FILE=path.join(__dirname,"..","offshoots.json");
+const FILE=path.join(__dirname,"..","musicatlas.json");
 const URL="file://"+path.join(__dirname,"..","index.html");
 // Anything that is not true is a failure. A check that answered with its detail instead
 // of false used to print with no prefix at all, so the runner counted it as no check and
@@ -22,7 +22,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
 (async()=>{
   if(!fs.existsSync(FILE)){
-    say("offshoots.json is written by the build", false);
+    say("musicatlas.json is written by the build", false);
     process.exitCode=1; return;
   }
   const raw=fs.readFileSync(FILE,"utf8");
@@ -123,7 +123,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       url:(document.querySelectorAll('.ppage[data-p="about"] .dataurl')[i]||{}).textContent||"",
       label:a.textContent.replace(/\s+/g," ").trim()})));
   say("About offers it (\""+(rows[0]&&rows[0].label)+"\")",
-    rows.length===1 && rows[0].file==="offshoots.json");
+    rows.length===1 && rows[0].file==="musicatlas.json");
   say("  as a control, clearing the tap floor ("+(rows[0]&&rows[0].tap)+"px)",
     !!rows[0] && rows[0].tag==="BUTTON" && rows[0].tap>=44);
   const link=rows[0];
@@ -190,7 +190,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     app.anchors===0);
   say("  and the row itself never navigates", web.navs===0 && app.navs===0);
   say("either way it copies the absolute URL (\""+app.clip+"\")",
-    /^http:\/\/127\.0\.0\.1:8753\/offshoots\.json$/.test(app.clip)
+    /^http:\/\/127\.0\.0\.1:8753\/musicatlas\.json$/.test(app.clip)
     && app.clip===web.clip);
   say("  and says so (\""+app.said+"\")", app.said==="Link copied" && web.said===app.said);
   say("  without leaving the page", /index\.html#about$/.test(app.here));

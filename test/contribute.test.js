@@ -1,6 +1,6 @@
 // The way a suggestion travels: bookmarklet -> /suggest -> POST /api/suggest.
 //
-// The other suites load index.html over file://, but /suggest fetches offshoots.json and
+// The other suites load index.html over file://, but /suggest fetches musicatlas.json and
 // a fetch from file:// is refused, so this one serves the repo over a local port the way
 // Netlify does, rewrites included. GitHub is never involved: /api/suggest is answered by
 // the test, which also keeps what the page sent so the body can be checked field by field.

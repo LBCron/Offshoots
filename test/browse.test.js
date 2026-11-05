@@ -83,7 +83,7 @@ const state=p=>p.evaluate(()=>{
   say("Most influential pushes a page ("+st.title+")",
     st.key==="top" && st.title==="Most influential");
   say("  two pages exist but only one is shown", st.pages===2 && st.shown===1);
-  say("  back appears, naming where it goes ("+st.backLbl+")", st.back && st.backLbl==="Offshoots");
+  say("  back appears, naming where it goes ("+st.backLbl+")", st.back && st.backLbl==="Music Atlas");
   say("  and the name is actually painted",
     await p.evaluate(()=>{const l=document.querySelector("#panelBack .bklbl");
       return getComputedStyle(l).display!=="none" && l.getBoundingClientRect().width>20;}));
@@ -102,7 +102,7 @@ const state=p=>p.evaluate(()=>{
 
   await p.click("#panelBack"); await onPage(p,"root");
   st=await state(p);
-  say("back pops it", st.pages===1 && st.key==="root" && st.title==="Offshoots");
+  say("back pops it", st.pages===1 && st.key==="root" && st.title==="Music Atlas");
   say("  and takes the back button with it", st.back===false);
 
   // Escape unwinds before it closes the panel
@@ -147,7 +147,7 @@ const state=p=>p.evaluate(()=>{
   await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
   st=await state(p);
   say("the sidebar pushes pages the same way", st.key==="top" && st.shown===1);
-  say("  and the back button is there too", st.back && st.backLbl==="Offshoots");
+  say("  and the back button is there too", st.back && st.backLbl==="Music Atlas");
   const fits=await p.evaluate(()=>{
     const pg=document.querySelector('.ppage[data-p="top"]'), b=document.getElementById("panelBody");
     return Math.round(pg.getBoundingClientRect().width)<=Math.round(b.getBoundingClientRect().width);});
@@ -166,7 +166,7 @@ const state=p=>p.evaluate(()=>{
     const dl=await fresh(b,M,hash);
     const d=await state(dl);
     say(hash+" lands on its own page", d.key===key);
-    say("  with a way back to the map ("+d.backLbl+")", d.back && d.backLbl==="Offshoots");
+    say("  with a way back to the map ("+d.backLbl+")", d.back && d.backLbl==="Music Atlas");
     if(rows) say("  carrying all "+rows,
       (await dl.$$eval('.ppage:not([hidden]) .listrow',e=>e.length))===rows);
     await dl.close();

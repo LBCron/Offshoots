@@ -268,8 +268,8 @@ const spell=n=>n<=20?WORDS[n]
   // scripts on every navigation, so the row always sees the tally it is being tested on.
   const seeded=async use=>{
     const q=await b.newPage({viewport:M});
-    await q.addInitScript(u=>{ try{ u ? localStorage.setItem("offshoots.modeuse",JSON.stringify(u))
-      : localStorage.removeItem("offshoots.modeuse"); }catch(e){} }, use);
+    await q.addInitScript(u=>{ try{ u ? localStorage.setItem("musicatlas.modeuse",JSON.stringify(u))
+      : localStorage.removeItem("musicatlas.modeuse"); }catch(e){} }, use);
     await q.goto(URL); await ready(q);
     await raise(q);
     await q.waitForSelector(".mcirc",{state:"attached",timeout:8000}).catch(()=>{});
@@ -332,7 +332,7 @@ const spell=n=>n<=20?WORDS[n]
   // there was, and a count written into the test is a count that stops being true
   say("  listing "+pg.picks+" picks", pg.picks===MODESIZE(String(pg.key||"").replace("mode:","")));
   say("  starting at the top", pg.top===0);
-  say("  and a way back ("+pg.backLbl+")", pg.back && pg.backLbl==="Offshoots");
+  say("  and a way back ("+pg.backLbl+")", pg.back && pg.backLbl==="Music Atlas");
   // every pick carries its playlist's cover, or, where there is no file, the same square
   // filled with the family colour and the style's initials. Never a gap: the three lines
   // of text are laid out against that column.
@@ -481,7 +481,7 @@ const spell=n=>n<=20?WORDS[n]
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
       return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>(x.getAttribute("aria-label")||"").split(".")[0]),
         labels:[...u.querySelectorAll(".moderow .lrlbl")].map(x=>x.textContent),
-        stored:(()=>{try{return localStorage.getItem("offshoots.modesort")}catch(e){return null}})()};});
+        stored:(()=>{try{return localStorage.getItem("musicatlas.modesort")}catch(e){return null}})()};});
 
     const start=await read();
       say("the page counts the collections correctly ("+spell(DATA.MODES.length)+")",
@@ -522,7 +522,7 @@ const spell=n=>n<=20?WORDS[n]
 
   // the stored choice is honoured when the page is built, not just when it is clicked
   { const s2=await b.newPage({viewport:M});
-    await s2.addInitScript(()=>{ try{ localStorage.setItem("offshoots.modesort","az"); }catch(e){} });
+    await s2.addInitScript(()=>{ try{ localStorage.setItem("musicatlas.modesort","az"); }catch(e){} });
     await s2.goto(URL+"#modes"); await ready(s2); await landed(s2,"modes");
     const r=await s2.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
@@ -534,7 +534,7 @@ const spell=n=>n<=20?WORDS[n]
 
   // a stored value that is not one of the four must not strand the page on an empty list
   { const s3=await b.newPage({viewport:M});
-    await s3.addInitScript(()=>{ try{ localStorage.setItem("offshoots.modesort","nonsense"); }catch(e){} });
+    await s3.addInitScript(()=>{ try{ localStorage.setItem("musicatlas.modesort","nonsense"); }catch(e){} });
     await s3.goto(URL+"#modes"); await ready(s3); await landed(s3,"modes");
     const r=await s3.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];

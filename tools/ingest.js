@@ -156,7 +156,7 @@ function token(){
 async function gh(T, method, url, body){
   const r=await fetch("https://api.github.com"+url,{method, headers:{
     authorization:"Bearer "+T, accept:"application/vnd.github+json",
-    "x-github-api-version":"2022-11-28", "user-agent":"offshoots-ingest",
+    "x-github-api-version":"2022-11-28", "user-agent":"musicatlas-ingest",
     ...(body?{"content-type":"application/json"}:{})}, body:body?JSON.stringify(body):undefined});
   if(!r.ok) throw new Error(method+" "+url+" -> "+r.status+" "+(await r.text()).slice(0,300));
   return r.status===204 ? null : r.json();
@@ -196,7 +196,7 @@ async function main(){
     for(const [i,c] of ready){
       // landed means on every style it names, which is also true of one that was already there
       if(!c.all.every(id=>(ctx.read[id]||[]).some(r=>r[0]===c.url))){ console.log("  #"+i.number+" not in data.js yet, left open"); continue; }
-      await gh(T,"POST","/repos/"+REPO+"/issues/"+i.number+"/comments",{body:"Added to Offshoots in "+sha+"."});
+      await gh(T,"POST","/repos/"+REPO+"/issues/"+i.number+"/comments",{body:"Added to Music Atlas in "+sha+"."});
       await gh(T,"PATCH","/repos/"+REPO+"/issues/"+i.number,{state:"closed",state_reason:"completed"});
       console.log("  #"+i.number+" closed"); n++;
     }

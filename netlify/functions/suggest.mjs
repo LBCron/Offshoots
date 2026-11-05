@@ -16,8 +16,11 @@ const REPO = "bryanbell/Offshoots-submissions";
 // the five media READ already draws, so an approved row needs no translation
 const MEDIA = { read: "Read", book: "Book", watch: "Watch", listen: "Listen", look: "Look" };
 const MAX_BODY = 8000;
-// the production site, any deploy preview or branch deploy of it, and netlify dev
-const ORIGIN = /^https:\/\/([a-z0-9-]+--)?offshoots\.netlify\.app$|^http:\/\/localhost:\d+$/;
+// the production domain, the Netlify site it is served from, any deploy preview or
+// branch deploy of that, and netlify dev. The custom domain has to be listed in its own
+// right: the form posts from whatever host the page was served on, so a request from
+// musicatlas.us is rejected by an allowlist that only knows the netlify.app name.
+const ORIGIN = /^https:\/\/(www\.)?musicatlas\.us$|^https:\/\/([a-z0-9-]+--)?musicatlas\.netlify\.app$|^https:\/\/([a-z0-9-]+--)?offshoots\.netlify\.app$|^http:\/\/localhost:\d+$/;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
   status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }
@@ -152,7 +155,7 @@ export default async (req) => {
       authorization: `Bearer ${token}`,
       accept: "application/vnd.github+json",
       "x-github-api-version": "2022-11-28",
-      "user-agent": "offshoots-suggest",
+      "user-agent": "musicatlas-suggest",
       "content-type": "application/json"
     },
     body: JSON.stringify(out.issue)

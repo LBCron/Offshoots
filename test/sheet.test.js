@@ -523,8 +523,8 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // is decided. This one goes through CDP, which is the real input path.
   { const tc=await b.newContext({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
     const q=await tc.newPage();
-    await q.addInitScript(()=>{ try{ localStorage.setItem("offshoots.seen","1");
-      localStorage.setItem("offshoots.tip","1"); }catch(e){} });
+    await q.addInitScript(()=>{ try{ localStorage.setItem("musicatlas.seen","1");
+      localStorage.setItem("musicatlas.tip","1"); }catch(e){} });
     const cdp=await tc.newCDPSession(q);
     const dragUp=async(x,y)=>{
       await cdp.send("Input.dispatchTouchEvent",{type:"touchStart",touchPoints:[{x,y}]});
@@ -646,8 +646,8 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   for(const w of [320,360,375,390,414,430]){
     const nc=await b.newContext({viewport:{width:w,height:844},isMobile:true,hasTouch:true});
     const q=await nc.newPage();
-    await q.addInitScript(()=>{ try{ localStorage.setItem("offshoots.seen","1");
-      localStorage.setItem("offshoots.tip","1"); }catch(e){} });
+    await q.addInitScript(()=>{ try{ localStorage.setItem("musicatlas.seen","1");
+      localStorage.setItem("musicatlas.tip","1"); }catch(e){} });
     await q.goto(URL); await shown(q,"#chart .n");
     await raise(q);
     await q.waitForSelector(".sect-modes",{state:"attached",timeout:8000}).catch(()=>{});
@@ -686,8 +686,8 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   for(const w of [700,760,820,880,899,900,1100]){
     const nc=await b.newContext({viewport:{width:w,height:900}});
     const q=await nc.newPage();
-    await q.addInitScript(()=>{ try{ localStorage.setItem("offshoots.seen","1");
-      localStorage.setItem("offshoots.tip","1"); }catch(e){} });
+    await q.addInitScript(()=>{ try{ localStorage.setItem("musicatlas.seen","1");
+      localStorage.setItem("musicatlas.tip","1"); }catch(e){} });
     await q.goto(URL+"#install"); await shown(q,"#chart .n"); await settle(q);
     await q.waitForTimeout(500);
     const r=await q.evaluate(()=>{

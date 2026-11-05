@@ -1,4 +1,4 @@
-# Working on Offshoots
+# Working on Music Atlas
 
 README.md says how the data and the build work. This file is the short list of rules
 that keep one session from undoing another's work.

@@ -1,11 +1,11 @@
-# Offshoots
+# Music Atlas
 
 Interactive map of popular music styles: trace what any style grew out of
 and what grew out of it. The spine is American, but the lines cross oceans —
 Jamaica, the UK, Brazil, West Africa, Cuba and more are all in here, because
 the music does not stay put. Built for the School of Listening class.
 
-Live: https://offshoots.netlify.app/
+Live: https://musicatlas.us/
 
 460 styles across 16 families, 1,130 parent-to-child connections, 277 written
 descriptions, and 270 styles with a playlist on Apple Music and Spotify.

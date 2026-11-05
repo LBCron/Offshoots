@@ -27,7 +27,7 @@ const ART_DIR="art/", STYLE_DIR="styles/", XPLAY_DIR="xplay/", ART_EXT=".jpg";
 // hand a model a URL is almost never the server but the reader, which caps or times out
 // long before that. The artists and songs live in the app, behind the playlists.
 const CATALOG=[
-  {file:"offshoots.json", name:"offshoots.json", kb:"190 KB",
+  {file:"musicatlas.json", name:"musicatlas.json", kb:"190 KB",
    label:"Copy the data link", sub:"Every style, its lineage and its page"}
 ];
 // two letters for a style with no art file, so the row keeps its shape
@@ -537,7 +537,7 @@ let HEADH = 0;
 function mapHeadHTML(){
   // a label on the map rather than a masthead: no blurb, nothing to click, and set quietly
   // enough that it does not compete with the style names a few pixels below it.
-  return '<h1 class="mh">Offshoots</h1>'
+  return '<h1 class="mh">Music Atlas</h1>'
     + '<p class="mmeta">'+nodes.length+' styles · '+playable().length+' playlists</p>';
 }
 function measureHead(){
@@ -798,7 +798,7 @@ function syncBack(){
   const b=$("panelBack"); if(!b) return;
   // a pushed page owns the back button while it is up: it is the nearer thing to leave
   if(PSTACK.length){
-    const under = PSTACK.length>1 ? PSTACK[PSTACK.length-2].title : (state.sel ? byId[state.sel].name : "Offshoots");
+    const under = PSTACK.length>1 ? PSTACK[PSTACK.length-2].title : (state.sel ? byId[state.sel].name : "Music Atlas");
     b.hidden=false; b.setAttribute("aria-label","Back to "+under); b.setAttribute("title","Back to "+under);
     const t0=b.querySelector(".bklbl"); if(t0) t0.textContent=under;
     b.classList.remove("tomap"); b.classList.add("topage");
@@ -1049,7 +1049,7 @@ function dismissSheet(){ WASOPEN=OPEN; syncPull(); document.body.classList.add("
 function restoreSheet(){ document.body.classList.remove("sheetgone"); if(WASOPEN) setOpen(true); }
 function syncPull(){ const el=$("sheetpull"); if(!el) return; const l=el.querySelector(".plbl"); if(!l) return;
   const n=state.sel&&byId[state.sel];
-  l.textContent = n ? n.name : "Offshoots";
+  l.textContent = n ? n.name : "Music Atlas";
   el.setAttribute("aria-label", n ? "Show details for "+n.name : "Show the map details");
   el.setAttribute("title", l.textContent);
   // wear the family ground the panel is painted with; its inline vars survive display:none
@@ -1678,7 +1678,7 @@ function shareStep(){ return canShareSheet()
   : ""; }
 function openShareSheet(btn){
   const lbl=btn.querySelector("span");
-  navigator.share({title:"Offshoots", url:hereURL()}).catch(()=>{
+  navigator.share({title:"Music Atlas", url:hereURL()}).catch(()=>{
     // a dismissed sheet rejects exactly like a refused one, so only say something
     // if it is still here to be said to
     if(lbl) lbl.textContent="Use the Share button at the bottom of the screen";
@@ -1777,8 +1777,8 @@ function shareSel(btn0){
     : n ? styleURL(id)
     : location.origin+location.pathname+location.search;
   const nm = page ? (btn0.dataset.sharename||"") : n ? n.name : "";
-  const title = nm ? "Offshoots · "+nm : "Offshoots";
-  const text  = nm ? nm+" on Offshoots" : "Offshoots — what grew out of what in popular music";
+  const title = nm ? "Music Atlas · "+nm : "Music Atlas";
+  const text  = nm ? nm+" on Music Atlas" : "Music Atlas — what grew out of what in popular music";
   const btn=btn0 || document.querySelector("#panel [data-share]");
   // the wide button says what happened in words; the round one has no room for words, so
   // .done swaps its glyph for a tick and that is the whole message
@@ -1994,7 +1994,7 @@ const MODEICON={"system":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" ari
 // entries, which is too many to read down every time, so the sort offers what this browser
 // keeps coming back to. Local, never sent anywhere, and the sort falls back to the
 // relevance order where there is nothing to go on, which is every first visit.
-const STYLEUSE_KEY="offshoots.styleuse";
+const STYLEUSE_KEY="musicatlas.styleuse";
 function styleUse(){
   try{ const r=localStorage.getItem(STYLEUSE_KEY);
     const o=r?JSON.parse(r):null;
@@ -2009,7 +2009,7 @@ function bumpStyle(k){
     localStorage.setItem(STYLEUSE_KEY,JSON.stringify(o));
   }catch(e){}
 }
-const MODEUSE_KEY="offshoots.modeuse";
+const MODEUSE_KEY="musicatlas.modeuse";
 function modeUse(){
   try{ const r=localStorage.getItem(MODEUSE_KEY);
     const o=r?JSON.parse(r):null;
@@ -2040,7 +2040,7 @@ function modeOrder(adaptive){
 // hunting a name you already know. So the list gets the choice stated out loud: quiet to
 // loud, loud to quiet, what this browser opens most, or plain A to Z. Quietest stays the
 // default, so nothing moves until it is asked to.
-const MODESORT_KEY="offshoots.modesort";
+const MODESORT_KEY="musicatlas.modesort";
 const MODESORTS=[
   ["quiet","Quietest","Quietest first",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M163.51,24.81a8,8,0,0,0-8.42.88L85.25,80H40A16,16,0,0,0,24,96v64a16,16,0,0,0,16,16H85.25l69.84,54.31A8,8,0,0,0,168,224V32A8,8,0,0,0,163.51,24.81ZM152,207.64,92.91,161.69A7.94,7.94,0,0,0,88,160H40V96H88a7.94,7.94,0,0,0,4.91-1.69L152,48.36ZM208,104v48a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>`],
   ["loud","Loudest","Loudest first",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M163.51,24.81a8,8,0,0,0-8.42.88L85.25,80H40A16,16,0,0,0,24,96v64a16,16,0,0,0,16,16H85.25l69.84,54.31A8,8,0,0,0,168,224V32A8,8,0,0,0,163.51,24.81ZM152,207.64,92.91,161.69A7.94,7.94,0,0,0,88,160H40V96H88a7.94,7.94,0,0,0,4.91-1.69L152,48.36ZM208,104v48a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm32-16v80a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z\"/></svg>`],
@@ -2133,7 +2133,7 @@ function resetPages(){ PSTACK=[]; }
 // Twelve picks fitted on a screen and needed no order but the one they were written in.
 // Forty do not, so the order is stated and chosen. Relevance is that written order, which
 // is the collection's own argument about what fits it best, and stays the default.
-const PICKSORT_KEY="offshoots.picksort";
+const PICKSORT_KEY="musicatlas.picksort";
 const PICKSORTS=[
   ["fit","Relevance","Best fit for this collection first","<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M32,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H40A8,8,0,0,1,32,64Zm8,72H96a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16Zm72,48H40a8,8,0,0,0,0,16h72a8,8,0,0,0,0-16Zm125.09-40.22-22.52,18.59,6.86,27.71a8,8,0,0,1-11.82,8.81L184,183.82l-25.61,15.07a8,8,0,0,1-11.82-8.81l6.85-27.71-22.51-18.59a8,8,0,0,1,4.47-14.14l29.84-2.31,11.43-26.5a8,8,0,0,1,14.7,0l11.43,26.5,29.84,2.31a8,8,0,0,1,4.47,14.14Zm-25.47.28-14.89-1.15a8,8,0,0,1-6.73-4.8l-6-13.92-6,13.92a8,8,0,0,1-6.73,4.8l-14.89,1.15,11.11,9.18a8,8,0,0,1,2.68,8.09l-3.5,14.12,13.27-7.81a8,8,0,0,1,8.12,0l13.27,7.81-3.5-14.12a8,8,0,0,1,2.68-8.09Z\"/></svg>"],
   ["az","A\u2013Z","By name, A to Z","<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M87.24,52.59a8,8,0,0,0-14.48,0l-64,136a8,8,0,1,0,14.48,6.81L39.9,160h80.2l16.66,35.4a8,8,0,1,0,14.48-6.81ZM47.43,144,80,74.79,112.57,144ZM200,96c-12.76,0-22.73,3.47-29.63,10.32a8,8,0,0,0,11.26,11.36c3.8-3.77,10-5.68,18.37-5.68,13.23,0,24,9,24,20v3.22A42.76,42.76,0,0,0,200,128c-22.06,0-40,16.15-40,36s17.94,36,40,36a42.73,42.73,0,0,0,24-7.25,8,8,0,0,0,16-.75V132C240,112.15,222.06,96,200,96Zm0,88c-13.23,0-24-9-24-20s10.77-20,24-20,24,9,24,20S213.23,184,200,184Z\"/></svg>"],
@@ -2336,7 +2336,7 @@ const PAGES_DEF={
     html:styleRows(topIds(), x=>x.children.length)}),
   about:()=>{ const np=playable().length,
       withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
-    return {title:"About this interactive musical atlas", html:`
+    return {title:"About this map of what grew out of what", html:`
     <div class="about"><div class="abouthd"><img class="appicon" alt="" src="${ICONSRC()}"><p class="stats">${$("stats").textContent} · ${np} with a playlist</p></div>
     <h4 class="subh">What it is for</h4>
     <p>Every style here is placed at the year it cohered into a named, recorded scene, and joined to the styles it grew out of. Time runs left to right, so following a line backwards shows you what a sound is made of.</p>
@@ -2358,7 +2358,7 @@ const PAGES_DEF={
     <h4 class="subh">Reading the map</h4>
     <p>A play triangle inside a dot marks a style with a playlist, linked in its panel. The bigger the name, the more styles grew out of it. Everything before 1950 sits left of the divider, on its own compressed scale, and is set in italic. Zoomed out, the styles that led nowhere show as plain dots.</p>
     <button type="button" class="aboutcopy" data-aboutcopy="about"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 11.6a3.2 3.2 0 0 0 4.6 0l2.6-2.6a3.2 3.2 0 0 0-4.6-4.6l-1 1"/><path d="M11.6 8.4a3.2 3.2 0 0 0-4.6 0L4.4 11a3.2 3.2 0 0 0 4.6 4.6l1-1"/></svg><span class="lbl">Copy a link to this</span></button></div>`}; },
-  install:()=>({title:"How to install it", html:`<div class="about">${openInRow()}<p>Offshoots is a web page, so there is nothing to download and no app store. Every platform below can pin it to a home screen or dock, where it opens full screen with no browser chrome around it.</p><h4 class="subh">iPhone and iPad</h4><ol class="steps"><li>Open this page in <b>Safari</b>. Chrome and Firefox on iOS cannot do this.</li><li>Tap the <b>Share</b> button, the square with an arrow coming out of it: ${SHAREGLYPH}${shareStep()}</li><li>Scroll down the list and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol><h4 class="subh">Android</h4><ol class="steps"><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>three dots</b> at the top right.</li><li>Tap <b>Add to Home screen</b>, then <b>Install</b> or <b>Add</b>. Samsung Internet and Firefox have the same item in their own menus.</li></ol><h4 class="subh">Mac</h4><ol class="steps"><li>In <b>Safari</b>, choose <b>File &rsaquo; Add to Dock</b>, then <b>Add</b>. It lands in the Dock and opens in its own window.</li><li>In <b>Chrome</b>, the same thing is under the three dots at <b>Cast, Save and Share &rsaquo; Install page as app</b>.</li></ol><h4 class="subh">Windows</h4><ol class="steps"><li>In <b>Edge</b> or <b>Chrome</b>, look for the <b>install icon</b> at the right-hand end of the address bar, a monitor with an arrow in it, and click it.</li><li>No icon there? Open the <b>three dots</b> menu and choose <b>Apps &rsaquo; Install this site as an app</b> in Edge, or <b>Cast, Save and Share &rsaquo; Install page as app</b> in Chrome.</li><li>Tick <b>Pin to taskbar</b> when it offers, and it behaves like any other app.</li></ol><details class="xfold"><summary class="subh"><span>Linux: Ubuntu and Linux Mint</span>${FOLDTRI}</summary><div class="xfoldb"><p class="note">Both ship <b>Firefox</b> as the default browser, and Firefox on the desktop cannot do this at all: it dropped the feature years ago and has no Install or Add to Home Screen item in any menu. You need a Chromium-based browser for this part. On Ubuntu, <code>sudo snap install chromium</code>; on Mint, <code>sudo apt install chromium</code>. Google Chrome and Edge work the same way.</p><ol class="steps"><li>Open this page in <b>Chromium</b>, <b>Chrome</b> or <b>Edge</b>.</li><li>Look for the <b>install icon</b> at the right-hand end of the address bar, a monitor with an arrow in it, and click it. Otherwise open the <b>three dots</b> menu and choose <b>Cast, Save and Share &rsaquo; Install page as app</b>.</li><li>Click <b>Install</b>. It is added to your applications menu like anything installed from a package.</li><li>To keep it to hand: on <b>Ubuntu</b>, open <b>Show Applications</b>, right-click it and choose <b>Pin to Dash</b>. On <b>Mint</b>, find it in the menu, right-click and choose <b>Add to panel</b> or <b>Add to desktop</b>.</li></ol><p class="note">Ubuntu's Chromium is a snap, which is confined and keeps its own storage. That changes nothing here, but it does mean the installed copy is sandboxed separately from Firefox and will not see anything saved in it.</p></div></details><h4 class="subh">What you get</h4><p>The whole map is a single file, so once it has loaded it keeps working without a connection. The playlist links still need one, since those open Apple Music or Spotify.</p><button type="button" class="aboutcopy" data-aboutcopy="install"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 11.6a3.2 3.2 0 0 0 4.6 0l2.6-2.6a3.2 3.2 0 0 0-4.6-4.6l-1 1"/><path d="M11.6 8.4a3.2 3.2 0 0 0-4.6 0L4.4 11a3.2 3.2 0 0 0 4.6 4.6l1-1"/></svg><span class="lbl">Copy a link to this</span></button></div>`})
+  install:()=>({title:"How to install it", html:`<div class="about">${openInRow()}<p>Music Atlas is a web page, so there is nothing to download and no app store. Every platform below can pin it to a home screen or dock, where it opens full screen with no browser chrome around it.</p><h4 class="subh">iPhone and iPad</h4><ol class="steps"><li>Open this page in <b>Safari</b>. Chrome and Firefox on iOS cannot do this.</li><li>Tap the <b>Share</b> button, the square with an arrow coming out of it: ${SHAREGLYPH}${shareStep()}</li><li>Scroll down the list and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li></ol><h4 class="subh">Android</h4><ol class="steps"><li>Open this page in <b>Chrome</b>.</li><li>Tap the <b>three dots</b> at the top right.</li><li>Tap <b>Add to Home screen</b>, then <b>Install</b> or <b>Add</b>. Samsung Internet and Firefox have the same item in their own menus.</li></ol><h4 class="subh">Mac</h4><ol class="steps"><li>In <b>Safari</b>, choose <b>File &rsaquo; Add to Dock</b>, then <b>Add</b>. It lands in the Dock and opens in its own window.</li><li>In <b>Chrome</b>, the same thing is under the three dots at <b>Cast, Save and Share &rsaquo; Install page as app</b>.</li></ol><h4 class="subh">Windows</h4><ol class="steps"><li>In <b>Edge</b> or <b>Chrome</b>, look for the <b>install icon</b> at the right-hand end of the address bar, a monitor with an arrow in it, and click it.</li><li>No icon there? Open the <b>three dots</b> menu and choose <b>Apps &rsaquo; Install this site as an app</b> in Edge, or <b>Cast, Save and Share &rsaquo; Install page as app</b> in Chrome.</li><li>Tick <b>Pin to taskbar</b> when it offers, and it behaves like any other app.</li></ol><details class="xfold"><summary class="subh"><span>Linux: Ubuntu and Linux Mint</span>${FOLDTRI}</summary><div class="xfoldb"><p class="note">Both ship <b>Firefox</b> as the default browser, and Firefox on the desktop cannot do this at all: it dropped the feature years ago and has no Install or Add to Home Screen item in any menu. You need a Chromium-based browser for this part. On Ubuntu, <code>sudo snap install chromium</code>; on Mint, <code>sudo apt install chromium</code>. Google Chrome and Edge work the same way.</p><ol class="steps"><li>Open this page in <b>Chromium</b>, <b>Chrome</b> or <b>Edge</b>.</li><li>Look for the <b>install icon</b> at the right-hand end of the address bar, a monitor with an arrow in it, and click it. Otherwise open the <b>three dots</b> menu and choose <b>Cast, Save and Share &rsaquo; Install page as app</b>.</li><li>Click <b>Install</b>. It is added to your applications menu like anything installed from a package.</li><li>To keep it to hand: on <b>Ubuntu</b>, open <b>Show Applications</b>, right-click it and choose <b>Pin to Dash</b>. On <b>Mint</b>, find it in the menu, right-click and choose <b>Add to panel</b> or <b>Add to desktop</b>.</li></ol><p class="note">Ubuntu's Chromium is a snap, which is confined and keeps its own storage. That changes nothing here, but it does mean the installed copy is sandboxed separately from Firefox and will not see anything saved in it.</p></div></details><h4 class="subh">What you get</h4><p>The whole map is a single file, so once it has loaded it keeps working without a connection. The playlist links still need one, since those open Apple Music or Spotify.</p><button type="button" class="aboutcopy" data-aboutcopy="install"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.4 11.6a3.2 3.2 0 0 0 4.6 0l2.6-2.6a3.2 3.2 0 0 0-4.6-4.6l-1 1"/><path d="M11.6 8.4a3.2 3.2 0 0 0-4.6 0L4.4 11a3.2 3.2 0 0 0 4.6 4.6l1-1"/></svg><span class="lbl">Copy a link to this</span></button></div>`})
 };
 // the link that puts a page's own URL on the clipboard, which About and How to install
 // already ended with. Any page in FOLDS can be opened straight from that link.
@@ -2498,7 +2498,7 @@ function pageRow(key,label,count,title){
 // the data link.
 function aboutMapFold(){
   const np=playable().length;
-  return `<details class="xfold aboutfold ovfold"><summary><span>About this interactive musical atlas</span>${FOLDTRI}</summary>`
+  return `<details class="xfold aboutfold ovfold"><summary><span>About this map of what grew out of what</span>${FOLDTRI}</summary>`
     + `<div class="xfoldb"><p class="note">`
     + esc(DATA.length+" music styles, each placed at the year it cohered "
       + "into a named, recorded scene and joined to the styles it grew out of, so following "
@@ -2520,20 +2520,20 @@ function ovFooter(){
   return `<div class="sect sect-appset nohead"><div class="secbody">`
     + `<div class="svcline"><span class="svclbl">Music service</span>${svcPicker("inline")}</div>`
     + `<button type="button" class="instlink" data-page="install"`
-    + ` aria-label="How to install Offshoots">Install Offshoots${GOCHEV}</button>`
+    + ` aria-label="How to install Music Atlas">Install Music Atlas${GOCHEV}</button>`
     + `</div></div>`;
 }
 function emptyPanel(){
   setTint("");
   syncBack();                      // so the map pill is in its home state from the first paint
-  setExpandLabel("", "About this interactive musical atlas", "About");
-  setPbar("Offshoots", FAMS.length+" families · "+nodes.length+" styles");
+  setExpandLabel("", "About this map of what grew out of what", "About");
+  setPbar("Music Atlas", FAMS.length+" families · "+nodes.length+" styles");
   syncPull();
   const top=[...nodes].sort((a,b)=>b.children.length-a.children.length||a.year-b.year).slice(0,12);
   const np=playable().length;
   const withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
   resetPages();
-  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Offshoots</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Offshoots</span></h1>${aboutMapFold()}<div class="more">
+  $("panelBody").innerHTML=`<div class="pcard ovcard"><div class="navrow"><div class="navleft"><button id="panelBack" class="navback" type="button" hidden aria-label="Back" title="Back"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 10H4.6"/><path d="M9.4 4.6L4 10l5.4 5.4"/></svg><span class="bklbl"></span><svg class="bkmap" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.8 5.4L7.4 3.4v11.2L2.8 16.6z"/><path d="M7.4 3.4l5.2 2v11.2l-5.2-2z"/><path d="M12.6 5.4l4.6-2v11.2l-4.6 2z"/></svg></button></div><div class="navttl navgap ovttl"><span class="mn">Music Atlas</span></div>${CLOSEBTN}</div><h1 class="bigttl"><span class="mn">Music Atlas</span></h1>${aboutMapFold()}<div class="more">
     ${onMapSect()}
     ${modeSect()}
     ${deeperSect()}
@@ -3001,7 +3001,7 @@ addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{
 // Shown once per browser, and never to somebody arriving on a shared link: they came for
 // a particular style, not for an explanation of the map. A browser that refuses storage
 // gets it once this session rather than on every reload.
-const HELLO_KEY="offshoots.seen", TIP_KEY="offshoots.tip";
+const HELLO_KEY="musicatlas.seen", TIP_KEY="musicatlas.tip";
 let helloShown=false, tipShown=false;
 function helloSeen(){
   if(helloShown) return true;

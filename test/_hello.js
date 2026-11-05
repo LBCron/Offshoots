@@ -6,7 +6,7 @@ module.exports = function seen(browser){
   const mark = async target => {
     if(target && target.addInitScript)
       await target.addInitScript(() => {
-        try{ localStorage.setItem("offshoots.seen","1"); }catch(e){}
+        try{ localStorage.setItem("musicatlas.seen","1"); }catch(e){}
       });
     return target;
   };

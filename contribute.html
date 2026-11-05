@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="color-scheme" content="light dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Add to Offshoots</title>
-<meta name="description" content="Send Offshoots something worth reading, watching or hearing about a style on the map.">
+<title>Add to Music Atlas</title>
+<meta name="description" content="Send Music Atlas something worth reading, watching or hearing about a style on the map.">
 <style>
 :root{
   --bg:#f2f2f7; --panel:#ffffff; --fg:#1a1a1c; --muted:#5f5f66; --line:#d8d8dc;
@@ -58,8 +58,8 @@ details[open] summary{margin-bottom:8px}
 </head>
 <body>
 <main>
-  <a class="home" href="./"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>Offshoots</a>
-  <h1>Add to Offshoots</h1>
+  <a class="home" href="./"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>Music Atlas</a>
+  <h1>Add to Music Atlas</h1>
   <p class="lede">Found something worth reading, watching or hearing about a style on the map? Send it in. Everything is read before it goes on, and the best of it ends up under Go deeper.</p>
 
   <div class="card mine" id="mine" hidden>
@@ -70,7 +70,7 @@ details[open] summary{margin-bottom:8px}
     <h2>On a computer</h2>
     <p>Drag this button to your bookmarks bar.</p>
     <div class="drop">
-      <a class="bm" id="bm" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg><span>Offshoots</span></a>
+      <a class="bm" id="bm" href="#"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg><span>Music Atlas</span></a>
     </div>
     <p class="nudge" id="nudge" role="status" aria-live="polite"></p>
     <p>Then, on any page you want to suggest, click it. A small form opens with the link and title already filled in. Pick the styles it belongs on and send.</p>
@@ -81,19 +81,19 @@ details[open] summary{margin-bottom:8px}
     <h2>On iPhone or iPad</h2>
     <p>Copy the link from Safari or the app you're in, then open the form and paste it.</p>
     <p><a class="btn" id="form" href="suggest">Open the form</a></p>
-    <p class="mut">Or, inside Offshoots, tap Suggest something at the bottom of a style's Go deeper list. That style is filled in for you.</p>
-    <p id="getsc" hidden><a class="btn" id="sclink" href="#">Get the Offshoots Shortcut</a></p>
+    <p class="mut">Or, inside Music Atlas, tap Suggest something at the bottom of a style's Go deeper list. That style is filled in for you.</p>
+    <p id="getsc" hidden><a class="btn" id="sclink" href="#">Get the Music Atlas Shortcut</a></p>
     <details id="scsteps">
       <summary>Add it to the Share menu</summary>
-      <p class="mut">A Shortcut puts Offshoots in the Share menu, so you can send a page without copying anything. It takes a couple of minutes, once.</p>
+      <p class="mut">A Shortcut puts Music Atlas in the Share menu, so you can send a page without copying anything. It takes a couple of minutes, once.</p>
       <ol>
         <li>Open the Shortcuts app and tap <b>+</b>.</li>
         <li>Add the action <b>URL Encode</b>. Tap its input and choose <b>Shortcut Input</b>.</li>
-        <li>Add the action <b>Text</b> and type <code id="sctext">https://offshoots.netlify.app/suggest#u=</code> then, right after it, insert <b>URL Encoded Text</b> from the variables above the keyboard.</li>
+        <li>Add the action <b>Text</b> and type <code id="sctext">https://musicatlas.us/suggest#u=</code> then, right after it, insert <b>URL Encoded Text</b> from the variables above the keyboard.</li>
         <li>Add the action <b>Open URLs</b>. Its input should be <b>Text</b>.</li>
-        <li>Tap the name at the top, call it <b>Offshoots</b>, then turn on <b>Show in Share Sheet</b> and set it to receive <b>URLs</b>.</li>
+        <li>Tap the name at the top, call it <b>Music Atlas</b>, then turn on <b>Show in Share Sheet</b> and set it to receive <b>URLs</b>.</li>
       </ol>
-      <p class="mut">Now in Safari: Share, then Offshoots.</p>
+      <p class="mut">Now in Safari: Share, then Music Atlas.</p>
     </details>
   </section>
 </main>
@@ -124,7 +124,7 @@ function bookmarklet(k){
     +"const p=new URLSearchParams({u:u,t:m(\"og:title\")||document.title,p:m(\"og:site_name\"),"
     +"d:m(\"article:published_time\")||m(\"datePublished\")||m(\"date\")});"
     +(k?"p.set(\"k\","+JSON.stringify(k)+");":"")
-    +"open("+JSON.stringify(BASE+"suggest#")+"+p,\"offshoots\",\"width=520,height=780\")})()";
+    +"open("+JSON.stringify(BASE+"suggest#")+"+p,\"musicatlas\",\"width=520,height=780\")})()";
   return "javascript:"+encodeURIComponent(src);
 }
 const bm=document.getElementById("bm");

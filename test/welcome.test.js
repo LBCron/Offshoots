@@ -146,7 +146,7 @@ const toStep=async(q,n)=>{
     await act(q); await gone(q,"#hello"); await settle(q);
     say(name+" dismisses it too", (await up(q))===false);
     say("  and that counts as seen", await q.evaluate(()=>{
-      try{ return localStorage.getItem("offshoots.seen")==="1"; }catch(e){ return true; }}));
+      try{ return localStorage.getItem("musicatlas.seen")==="1"; }catch(e){ return true; }}));
     await c2.close();
   }
 
@@ -258,7 +258,7 @@ const toStep=async(q,n)=>{
     await gone(q,"#tip"); await settle(q);
     say("Not now puts it away", (await tipUp())===false);
     say("  and remembers that", await q.evaluate(()=>{
-      try{ return localStorage.getItem("offshoots.tip")==="1"; }catch(e){ return true; }}));
+      try{ return localStorage.getItem("musicatlas.tip")==="1"; }catch(e){ return true; }}));
     await c.close(); }
 
   // Show me how goes where it says

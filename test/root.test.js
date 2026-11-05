@@ -73,7 +73,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       body:(d.querySelector(".note")||{}).textContent||"",
       more:(d.querySelector("[data-page=\"about\"] .lrlbl")||{}).textContent||""}; });
   say("About the atlas is folded under the title", !!fold && fold.open===false
-    && /About this interactive musical atlas/.test(fold.label) && fold.underTitle);
+    && /About this map of what grew out of what/.test(fold.label) && fold.underTitle);
   say("  and its control clears the tap floor ("+(fold&&fold.tap)+"px)", !!fold && fold.tap>=44);
   // the three things it has to cover, in the brief's own order
   say("  saying what the map is, how styles connect, and what a playlist is",
@@ -131,7 +131,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   say("the service picker is at the foot ("+(foot&&foot.svcLbl)+")",
     !!foot && foot.svc && foot.svcLbl==="Music service");
   say("  with how to install beside it ("+(foot&&foot.inst)+")",
-    !!foot && /^Install Offshoots/.test(foot.inst) && foot.instTap>=44);
+    !!foot && /^Install Music Atlas/.test(foot.inst) && foot.instTap>=44);
   say("  and Share full width under both ("+(foot&&foot.shLbl)+")",
     !!foot && foot.shLbl==="Share this app" && foot.shOut && foot.shWide && foot.shTap>=44);
   say("  in blue, and the only blue on the panel", !!foot && foot.shBlue && foot.onlyBlue===0);
@@ -268,7 +268,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       belowRow:Math.round(tb.top-rb.bottom), inRow:!!row.querySelector(".bigttl"),
       controls:[...row.querySelectorAll("button")].filter(b=>!b.hidden).length,
       rowH:Math.round(rb.height)}; });
-  say("the root is titled "+(hdr&&hdr.name), !!hdr && hdr.name==="Offshoots");
+  say("the root is titled "+(hdr&&hdr.name), !!hdr && hdr.name==="Music Atlas");
   say("  left-aligned under the row, "+(hdr&&hdr.belowRow)+"px below it",
     !!hdr && hdr.align==="left" && hdr.belowRow>=0 && hdr.inRow===false);
   say("  flush with the section headings ("+(hdr&&hdr.flush)+"px)", !!hdr && Math.abs(hdr.flush)<=1);
@@ -420,7 +420,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     return {up:!!pg&&!pg.hidden, title:(pg.querySelector(".bigttl .mn")||{}).textContent,
       top:Math.round(pg.getBoundingClientRect().top-b.getBoundingClientRect().top),
       scroll:b.scrollTop, stats:(pg.querySelector(".stats")||{}).textContent||""}; });
-  say("tapping it pushes the page", ab.up && ab.title==="About this interactive musical atlas");
+  say("tapping it pushes the page", ab.up && ab.title==="About this map of what grew out of what");
   say("  landing at the top rather than past the fold ("+ab.top+"px, scroll "+ab.scroll+")",
     ab.scroll===0 && ab.top<=80);
   note("  stats line inside", ab.stats);
@@ -436,7 +436,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   await p.click("#panelBack"); await onPage(p,"root");
   await p.evaluate(()=>{document.getElementById("panelBody").scrollTop=0;});
   say("back returns to Explore",
-    (await p.$eval('.ppage[data-p="root"] .bigttl .mn',e=>e.textContent))==="Offshoots");
+    (await p.$eval('.ppage[data-p="root"] .bigttl .mn',e=>e.textContent))==="Music Atlas");
   note("families stated once", (await p.$eval("#panelBody",e=>e.textContent)).split("families").length-1);
 
   // ---- 6: the heading is the way to the full set ----

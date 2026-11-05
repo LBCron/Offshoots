@@ -75,6 +75,6 @@ const read=p=>p.evaluate(()=>{
   await settle(p); await new Promise(r=>setTimeout(r,250));
   const r1=await read(p);
   say("the root card still hands its title over (\""+r1.text+"\")",
-    r0.vis===0 && r1.vis===1 && r1.text==="Offshoots");
+    r0.vis===0 && r1.vis===1 && r1.text==="Music Atlas");
   await b.close();
 })();

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Fetch artist photos from Wikimedia Commons, via Wikidata, for Offshoots' key artists.
+Fetch artist photos from Wikimedia Commons, via Wikidata, for Music Atlas' key artists.
 
-Why Commons and not Spotify or Apple: Offshoots is one file plus a folder you drag to
+Why Commons and not Spotify or Apple: Music Atlas is one file plus a folder you drag to
 Netlify, and it works offline. Spotify's and Apple's images may be displayed from their
 servers but not downloaded and redistributed, so using them would mean hotlinking, which
 breaks the installed copy and tells every one of those services who is reading. Commons
@@ -29,7 +29,7 @@ import json, os, re, sys, time, unicodedata, urllib.parse, urllib.request, urlli
 
 # Wikimedia's policy asks for a contact in the User-Agent and blocks agents that do not
 # carry one. Put a real address here before a long run.
-UA = "Offshoots/1.1 (https://offshoots.netlify.app; artist portraits; contact: me@bryanbell.com)"
+UA = "MusicAtlas/1.1 (https://musicatlas.us; artist portraits; contact: me@bryanbell.com)"
 WD = "https://www.wikidata.org/w/api.php"
 COMMONS = "https://commons.wikimedia.org/w/api.php"
 

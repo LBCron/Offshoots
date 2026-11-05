@@ -132,7 +132,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("  Most used falls back to relevance on a browser with no history",
       JSON.stringify(un)===JSON.stringify(v.names));
     // and once something has been opened it leads
-    await p.evaluate(()=>localStorage.setItem("offshoots.styleuse",
+    await p.evaluate(()=>localStorage.setItem("musicatlas.styleuse",
       JSON.stringify({tropicalia:9})));
     await p.click('[data-psort="fit"]'); await settle(p);
     await p.click('[data-psort="used"]'); await settle(p);

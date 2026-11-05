@@ -1,4 +1,4 @@
-// Offshoots is served as one self-contained page, but it is not written as one.
+// Music Atlas is served as one self-contained page, but it is not written as one.
 // This joins the three sources into that page:
 //
 //   head.html   CSS and markup

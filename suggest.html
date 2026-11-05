@@ -5,9 +5,9 @@
 <meta name="color-scheme" content="light dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Suggest for Offshoots</title>
+<title>Suggest for Music Atlas</title>
 <style>
-/* The map's own palette and type, so the form reads as part of Offshoots and not as a
+/* The map's own palette and type, so the form reads as part of Music Atlas and not as a
    third-party widget bolted onto it. Light by default, dark with the system. */
 :root{
   --bg:#f2f2f7; --panel:#ffffff; --fg:#1a1a1c; --muted:#5f5f66; --line:#d8d8dc;
@@ -94,7 +94,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,.seg input:focus
 </head>
 <body>
 <main>
-  <a class="home" href="./"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>Offshoots</a>
+  <a class="home" href="./"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>Music Atlas</a>
   <h1>Suggest something</h1>
   <p class="lede">Something worth reading, watching or hearing about a style on the map. Every suggestion is read before it goes on.</p>
 
@@ -150,7 +150,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,.seg input:focus
     <div class="row">
       <button class="btn" type="button" id="again">Suggest another</button>
       <button class="btn" type="button" id="close" hidden>Close</button>
-      <a class="btn" href="./" id="back">Back to Offshoots</a>
+      <a class="btn" href="./" id="back">Back to Music Atlas</a>
     </div>
   </div>
 </main>
@@ -169,7 +169,7 @@ addEventListener("hashchange",()=>location.reload());
 // ---------- the contributor key ----------
 // Remembered once seen, so a guest who opened this from their own bookmarklet is still
 // credited when they come back through the map's own Suggest link.
-const KEY="offshoots.k";
+const KEY="musicatlas.k";
 let key=P.get("k")||"";
 try{ if(key) localStorage.setItem(KEY,key); else key=localStorage.getItem(KEY)||""; }catch(e){}
 const showWho=()=>{ $("who").hidden=!key; };
@@ -200,7 +200,7 @@ document.querySelectorAll("input[name=medium]").forEach(r=>r.addEventListener("c
 $("url").addEventListener("input",()=>{ if(!touched){ const m=guess($("url").value); setMedium(m||"read"); } });
 
 // ---------- the style picker ----------
-// offshoots.json is written by every build, so the list can never name a style the map
+// musicatlas.json is written by every build, so the list can never name a style the map
 // does not have.
 let STYLES=[], picked=[], hits=[], act=0;
 const fold=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
@@ -252,7 +252,7 @@ $("res").addEventListener("pointerdown",e=>{ const li=e.target.closest("li"); if
   e.preventDefault(); pick(hits[+li.dataset.i],true); });
 $("sq").addEventListener("blur",()=>setTimeout(()=>{ hits=[]; drawRes(); },120));
 
-fetch("offshoots.json").then(r=>r.json()).then(j=>{
+fetch("musicatlas.json").then(r=>r.json()).then(j=>{
   STYLES=(j.styles||[]).map(s=>Object.assign(s,{_f:fold(s.name)}));
   for(const id of (P.get("s")||"").split(",")) if(byId(id)) pick(byId(id));
 }).catch(()=>{ say("Couldn't load the list of styles. Check your connection and reload.",true); });
