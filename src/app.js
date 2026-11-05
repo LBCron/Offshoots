@@ -3043,22 +3043,16 @@ function openHello(){
   const c=$("hellocard"); if(c) setTimeout(()=>c.focus({preventScroll:true}),60);
 }
 
-// ---------- step two: the four ways to start ----------
-// Each one opens a real view rather than setting a preference, so the card is the last
-// thing you see rather than the first of several.
-// Two, not four. Four destinations made the question harder than the map: Roots and Most
-// influential are both things to read, and somebody on their first minute cannot tell
-// which they want. The real fork is whether you want to be handed something to play or
-// left alone with the map, and everything else is reachable from either.
-const STARTS={
-  modes: ()=>{ setOpen(true); setTimeout(()=>pushPage("modes"),120); },
-  // Look around the map used to open nothing because the sheet was already down. The app
-  // opens on Explore now, so doing nothing hands someone who asked for the map a panel
-  // over two thirds of it. This is the one place that asks for the peek by name.
-  map:   ()=>{ setOpen(false); }
-};
+// ---------- how the card ends ----------
+// It used to end on a third step asking where you wanted to start, offering a view of
+// playlists or the bare map. That question confused people, and it deserved to: the two
+// destinations are one tap apart in the live app, so the fork was never real, and the
+// step's own subtitle ("the whole map is one tap behind it") was the screen apologising
+// for itself. Worse, the two choices were the only way out of the card. Someone who
+// wanted neither had Back, the backdrop and Escape, none of which look like a way in.
+// The card ends on the service picker now, with one button that closes it.
 
-// ---------- step three: keeping it ----------
+// ---------- after the card: keeping it ----------
 // Offered after the view you asked for is on screen, not before: an install prompt makes
 // no sense until there is something worth installing, and one that interrupts the first
 // thing you chose to look at is an advert. Never to a browser that already has it, and
@@ -3098,12 +3092,10 @@ function openTip(){
       // the markup rather than in a chain of handlers that have to agree with it
       { const to=e.target.closest("[data-to]");
         if(to){ helloStep(+to.dataset.to); return; } }
-      { const st=e.target.closest("[data-start]");
-        if(st){ const go=STARTS[st.dataset.start];
-          closeHello(()=>{ if(go) go();
-            // once what you asked for is actually on screen, and not a moment before.
-            // "Look around the map" opens nothing, so there is nothing to wait for.
-            setTimeout(openTip, st.dataset.start==="map" ? 700 : 1500); });
+      // the one way out. Nothing to navigate to: the app already boots onto Explore, with
+      // the map behind it, which is where both of the old destinations led anyway.
+      { if(e.target.closest("[data-hstart]")){
+          closeHello(()=>setTimeout(openTip,1200));
           return; } }
     });
     document.addEventListener("keydown",e=>{

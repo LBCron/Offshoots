@@ -38,7 +38,7 @@ const ready=async q=>{ await arm(q); await shown(q,"#chart .n"); await booted(q)
 // the picker writes the app's own setting, and marks the button it wrote
 const picked=(q,svc)=>until(q,s=>{const b=document.querySelector('#hello [data-svc="'+s+'"]');
   return !!b && b.getAttribute("aria-checked")==="true";},svc);
-// the card is three steps, so most checks start by walking to the one they are about.
+// the card is two steps, so most checks start by walking to the one they are about.
 // Clicking the Continue that belongs to the step showing, not a global id, because the
 // buttons are per step and a stale id would silently click nothing.
 const atStep=(q,n)=>until(q,k=>{const t=document.querySelector('.hstep[data-step="'+k+'"]');
@@ -127,9 +127,9 @@ const toStep=async(q,n)=>{
   await p.click('#hello [data-svc="apple"]'); await picked(p,"apple"); await settle(p);
 
   // ---------- it goes away, and stays away ----------
-  await toStep(p,3);
-  await p.click('[data-start="map"]'); await gone(p,"#hello"); await settle(p);
-  say("Look around dismisses it", (await up(p))===false);
+  await toStep(p,2);
+  await p.click("[data-hstart]"); await gone(p,"#hello"); await settle(p);
+  say("Start exploring dismisses it", (await up(p))===false);
   say("  and the map is usable underneath",
     (await p.$$eval("#chart .n",e=>e.length))>400);
   await p.reload(); await ready(p);
@@ -150,97 +150,88 @@ const toStep=async(q,n)=>{
     await c2.close();
   }
 
-  // ---------- the three steps ----------
-  // The card asks three things, and they are three steps because they are three
-  // questions. What matters: Continue moves on without losing an earlier answer, Back
-  // steps back one rather than all the way out, and each way in opens a real view.
+  // ---------- the two steps ----------
+  // The card asks two things, and they are two steps because they are two questions. What
+  // matters: Continue moves on without losing an earlier answer, and Back steps back one
+  // rather than all the way out.
+  // There used to be a third, asking where you wanted to start. It confused people, and
+  // the two destinations it offered are one tap apart in the live app, so the question was
+  // not real. It was also the only way out of the card, which made the card a gate.
   { const c3=await b.newContext(M); const q=await c3.newPage();
     await q.goto(URL); await ready(q);
     const stepNow=()=>q.evaluate(()=>({
       on:[...document.querySelectorAll(".hstep")].filter(x=>!x.hidden).map(x=>x.dataset.step),
+      all:[...document.querySelectorAll(".hstep")].map(x=>x.dataset.step),
       dots:[...document.querySelectorAll(".hdots i")].map(d=>d.classList.contains("on")?1:0),
-      starts:[...document.querySelectorAll("[data-start]")].map(x=>x.dataset.start),
-      tall:[...document.querySelectorAll("[data-start]")]
-        .every(x=>x.getBoundingClientRect().height>=44)}));
+      starts:[...document.querySelectorAll("[data-start]")].length,
+      tall:(()=>{const g=document.querySelector("[data-hstart]");
+        return !!g && g.getBoundingClientRect().height>=44;})()}));
 
     const one=await stepNow();
-    say("the card opens on the first of three steps", one.on.join()==="1" && one.dots.join()==="1,0,0");
+    say("the card opens on the first of two steps",
+      one.on.join()==="1" && one.all.join()==="1,2" && one.dots.join()==="1,0");
+    say("  and the step that asked where to start is gone", one.starts===0);
 
-    // the choice made on step two has to survive step three, or the step cost something
+    // the choice made on step two has to survive a step back, or the step cost something
     await toStep(q,2);
     await q.click('#hello [data-svc="spotify"]');
     await until(q,()=>localStorage.getItem("svc")==="spotify");
-    await toStep(q,3);
     const two=await stepNow();
-    say("Continue moves through to the third ("+two.starts.join(", ")+")",
-      two.on.join()==="3" && two.dots.join()==="0,0,1" && two.starts.length===2);
-    say("  both ways in are real tap targets", two.tall);
+    say("Continue moves through to the second and last",
+      two.on.join()==="2" && two.dots.join()==="0,1");
+    say("  ending on one button that closes the card, at a real tap size", two.tall);
 
-    await q.click('.hstep[data-step="3"] [data-to="2"]');
-    await atStep(q,2); await settle(q);
+    await q.click('.hstep[data-step="2"] [data-to="1"]');
+    await atStep(q,1); await settle(q);
     const back=await stepNow();
-    say("Back steps back one", back.on.join()==="2" && back.dots.join()==="0,1,0");
+    say("Back steps back one", back.on.join()==="1" && back.dots.join()==="1,0");
     say("  with the service still chosen", await q.evaluate(()=>
       document.querySelector('#hello [data-svc="spotify"]').getAttribute("aria-checked")==="true"));
 
     // Escape on a later step is a step back, not a way out: the card is questions deep
-    await q.click('.hstep[data-step="2"] [data-to="3"]'); await atStep(q,3);
+    await q.click('.hstep[data-step="1"] [data-to="2"]'); await atStep(q,2);
     await q.keyboard.press("Escape"); await settle(q);
     const esc=await stepNow();
     say("Escape on a later step goes back rather than out",
-      esc.on.join()==="2" && (await up(q))===true);
+      esc.on.join()==="1" && (await up(q))===true);
     await c3.close(); }
 
-  // the guided way in opens the view it names
+  // Start exploring leaves you where the app boots anyway: Explore up, nothing pushed on
+  // top of it, nothing selected, the whole map behind it. That is what makes the old
+  // third step unnecessary rather than merely confusing. Both of its destinations are
+  // reachable from here without a question being asked first.
   { const c=await b.newContext(M); const q=await c.newPage();
     await q.goto(URL); await ready(q);
-    await toStep(q,3);
-    await q.click('[data-start="modes"]');
-    await until(q,()=>{const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
-      return !!u && u.dataset.p==="modes" && document.body.classList.contains("open");});
-    await settle(q);
-    const where=await q.evaluate(()=>{
-      const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
-      return {page:u?u.dataset.p:null, rows:u?u.querySelectorAll(".listrow").length:0,
-        gone:document.getElementById("hello").hidden};});
-    say('"modes" opens '+where.page+" ("+where.rows+" rows), card gone",
-      where.page==="modes" && where.gone && where.rows>0);
-    await c.close(); }
-
-  // and the other one opens nothing at all, which is the point of it: the card goes away
-  // and leaves the map exactly as it was, with no panel pushed and nothing selected
-  { const c=await b.newContext(M); const q=await c.newPage();
-    await q.goto(URL); await ready(q);
-    await toStep(q,3);
-    await q.click('[data-start="map"]');
+    await toStep(q,2);
+    await q.click("[data-hstart]");
     await gone(q,"#hello"); await settle(q);
-    // the Explore panel's own root page is always there, minimised; what matters is that
-    // nothing was pushed on top of it, the sheet was not raised, and nothing was selected
     const left=await q.evaluate(()=>({
       pages:[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden).map(x=>x.dataset.p),
       open:document.body.classList.contains("open"),
       hash:location.hash, cur:!!document.querySelector("#chart .n.cur"),
+      modes:!!document.querySelector(".sect-modes"),
       nodes:document.querySelectorAll("#chart .n").length}));
-    say('"map" leaves the map alone ('+left.nodes+" styles, nothing selected, sheet down)",
-      left.pages.join()==="root" && left.open===false
+    say("Start exploring lands on Explore with nothing chosen for you ("+left.nodes+" styles)",
+      left.pages.join()==="root" && left.open===true
       && left.hash==="" && left.cur===false && left.nodes>400);
+    say("  with the collections a tap away on it, which is where the old step led",
+      left.modes);
     await c.close(); }
 
-  // ---------- step three: keeping it ----------
-  // Offered after the view you asked for is on screen, never before it, never twice, and
-  // never to a browser that already has the thing installed.
+  // ---------- after the card: keeping it ----------
+  // Offered once the app itself is on screen, never before it, never twice, and never to
+  // a browser that already has the thing installed.
   { const c=await b.newContext(M); const q=await c.newPage();
     await q.goto(URL); await ready(q);
     const tipUp=()=>q.evaluate(()=>!document.getElementById("tip").hidden);
     say("no install offer while the card is still up", (await tipUp())===false);
-    await toStep(q,3);
-    await q.click('[data-start="modes"]');
-    await until(q,()=>{const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
-      return !!u && u.dataset.p==="modes";});
-    say("  nor the moment the view opens", (await tipUp())===false);
+    await toStep(q,2);
+    await q.click("[data-hstart]");
+    await gone(q,"#hello");
+    say("  nor the moment the card closes", (await tipUp())===false);
     await until(q,()=>!document.getElementById("tip").hidden, null, 6000);
     await settle(q);
-    say("the install offer arrives once the chosen view is up", await tipUp());
+    say("the install offer arrives once the app itself is up", await tipUp());
     const shape=await q.evaluate(()=>{
       const c=document.getElementById("tipcard"), r=c.getBoundingClientRect();
       return {h:Math.round(r.height), frac:+(r.height/innerHeight).toFixed(2),
@@ -249,10 +240,10 @@ const toStep=async(q,n)=>{
         labelled:!!c.getAttribute("aria-labelledby")};});
     say("  a half sheet, not another modal ("+shape.h+"px, "+Math.round(shape.frac*100)+"% of the screen)",
       shape.frac<0.35 && shape.onScreen && shape.icon && shape.labelled);
-    // it sits over the view rather than replacing it: the thing you chose is still there
-    say("  with the view you chose still behind it", await q.evaluate(()=>{
+    // it sits over the app rather than replacing it: Explore is still there behind it
+    say("  with Explore still behind it", await q.evaluate(()=>{
       const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
-      return !!u && u.dataset.p==="modes" && !!u.querySelector(".listrow");}));
+      return !!u && u.dataset.p==="root" && !!u.querySelector(".listrow");}));
 
     await q.click("#tipno");
     await gone(q,"#tip"); await settle(q);
@@ -264,8 +255,8 @@ const toStep=async(q,n)=>{
   // Show me how goes where it says
   { const c=await b.newContext(M); const q=await c.newPage();
     await q.goto(URL); await ready(q);
-    await toStep(q,3);
-    await q.click('[data-start="modes"]');
+    await toStep(q,2);
+    await q.click("[data-hstart]");
     await until(q,()=>!document.getElementById("tip").hidden, null, 8000);
     await q.click("#tiphow");
     await until(q,()=>{const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
@@ -286,8 +277,8 @@ const toStep=async(q,n)=>{
         : real(s);
     });
     await q.goto(URL); await ready(q);
-    await toStep(q,3);
-    await q.click('[data-start="modes"]');
+    await toStep(q,2);
+    await q.click("[data-hstart]");
     await until(q,()=>{const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
       return !!u && u.dataset.p==="modes";});
     // wait past when it would have come up, then check it did not
@@ -312,8 +303,8 @@ const toStep=async(q,n)=>{
     await q.goto(URL); await ready(q);
     await toStep(q,2);
     await q.click('#hello [data-svc="spotify"]'); await picked(q,"spotify");
-    await toStep(q,3);
-    await q.click('[data-start="map"]'); await gone(q,"#hello"); await settle(q);
+    await toStep(q,2);
+    await q.click("[data-hstart]"); await gone(q,"#hello"); await settle(q);
     // tap a style on the map rather than reloading on a hash: it keeps the check on the
     // running page, where the choice was just made, instead of on whether file:// held
     // onto localStorage across a navigation — which it does not reliably do
