@@ -3111,7 +3111,6 @@ function closeHello(then){
 }
 function openHello(){
   const w=$("hello"); if(!w) return;
-  const ic=$("helloicon"); if(ic) ic.src=ICONSRC();
   const n=$("hellon"); if(n) n.textContent=nodes.length;
   const p=$("hellop"); if(p) p.textContent=playable().length;
   // the service picker shows what is already stored rather than a blank set of three:

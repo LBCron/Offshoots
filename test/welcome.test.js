@@ -73,15 +73,31 @@ const toStep=async(q,n)=>{
       styles:(document.getElementById("hellon")||{}).textContent,
       lists:(document.getElementById("hellop")||{}).textContent,
       points:document.querySelectorAll(".hellolist li").length,
-      icons:document.querySelectorAll(".hellolist .helloi svg").length,
-      appicon:!!(document.getElementById("helloicon")||{}).getAttribute("src"),
+      // the same icon component the rows on Explore wear, each in its own colour: they
+      // were three blue tiles, the only icons in the app sitting on one
+      icons:document.querySelectorAll(".hellolist .lrico svg").length,
+      inked:[...document.querySelectorAll(".hellolist .lrico")]
+        .map(x=>getComputedStyle(x).color),
+      appicon:!!document.getElementById("helloicon"),
+      go:(()=>{const g=document.querySelector(".hellogo .shbtn.wide");
+        if(!g) return null; const cs=getComputedStyle(g);
+        return {bg:cs.backgroundColor, weight:cs.fontWeight,
+          h:Math.round(g.getBoundingClientRect().height)};})(),
       modal:c.getAttribute("role")==="dialog" && c.getAttribute("aria-modal")==="true"
         && !!c.getAttribute("aria-labelledby"),
       fits:r.height<=body.height && r.top>=-1,
       scrolls:document.documentElement.scrollWidth<=innerWidth+1};});
   say("  titled "+JSON.stringify(card.title), (card.title||"").length>6);
   say("  with "+card.points+" points, each with a mark", card.points>=2 && card.icons===card.points);
-  say("  and the app's own icon on it", card.appicon);
+  // The app icon came off: the card is the first thing anyone sees and does not need to
+  // introduce the app with a picture of the app.
+  say("  and no app icon above the title", card.appicon===false);
+  say("  each mark in its own colour, not three of one",
+    new Set(card.inked).size===card.points);
+  // the one way forward on this card, so it is filled rather than tinted
+  say("  with a filled button to go on ("+(card.go&&card.go.bg)+")",
+    !!card.go && card.go.h>=48 && +card.go.weight>=700
+    && !/rgba\(.*0(\.\d+)?\)$/.test(card.go.bg));
   say("  announced as a dialog", card.modal);
   say("  fitting the screen without pushing it sideways", card.fits && card.scrolls);
 
