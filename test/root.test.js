@@ -434,7 +434,9 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     return {up:!!pg&&!pg.hidden, title:(pg.querySelector(".bigttl .mn")||{}).textContent,
       top:Math.round(pg.getBoundingClientRect().top-b.getBoundingClientRect().top),
       scroll:b.scrollTop, stats:(pg.querySelector(".stats")||{}).textContent||""}; });
-  say("tapping it pushes the page", ab.up && ab.title==="About this map of what grew out of what");
+  // the page is "About this map", the same words the section that opens it uses: the old
+  // title repeated the app's own tagline back at you and wrapped to two lines doing it
+  say("tapping it pushes the page", ab.up && ab.title==="About this map");
   // the claims the section used to make in place are the page's job now: what the map is,
   // how styles connect, what a playlist is, and under its own heading, where it came from.
   // Not fenced to one continent either: Reggae, Dub, Ska, Jungle, Grime, Krautrock, Bossa

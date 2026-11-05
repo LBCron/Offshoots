@@ -506,11 +506,9 @@ body.open .pcnt{display:none}
    halves of a design. Each row keeps its own colour, because a column of identical grey
    tiles is a column you read by text alone, which is what the icon was there to save. */
 /* No disc: the glyph itself, in its own colour, grown into the space a disc would have
-   taken. This went round twice. A coloured glyph on neutral grey kept the rows quiet but
-   left the ghost layer doing nothing; a filled circle matched the big mode circles but
-   made every list a row of badges, and at 34px the disc was mostly disc. Without one,
-   duotone draws its 20% layer in the hue straight onto the panel, which is the weight
-   working as intended, and the glyph gets the whole box.
+   taken. This went round twice. A filled circle matched the big mode circles but made
+   every list a row of badges, and at 34px the disc was mostly disc. Without one the glyph
+   gets the whole box, which is what makes a 30px line drawing readable at this size.
    The 34px box stays whatever is in it, so the rows and the separator inset hold still. */
 .listrow .lrico{flex:none;display:grid;place-items:center;width:34px;height:34px;
   color:var(--lrc,var(--fg))}

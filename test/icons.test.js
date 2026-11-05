@@ -55,6 +55,13 @@ const CHV=/M181\.66,133\.66l-80,80a8,8,0,0,1-11\.32-11\.32L164\.69,128/;
     v.rows.length>=4 && v.rows.every(r=>CHV.test(r.d))
       ? true : v.rows.filter(r=>!CHV.test(r.d)).map(r=>r.label).join(" | "));
   say("no duotone glyph is left on it ("+v.duo+")", v.duo===0);
+  // nor does the app still tell anyone they are. About said "Phosphor, the Duotone
+  // weight" for weeks after the icons stopped being duotone: the drawings changed and
+  // the sentence describing them did not, and nothing here was looking at the prose.
+  say("and nothing in the app still says they are",
+    !/duotone/i.test(require("fs").readFileSync(
+      path.join(__dirname,"..","index.html"),"utf8"))
+      ? true : "the word is still in the built page");
 
   // the style panel has its own folds and its own rows
   // a fresh page, because goto to another hash on the same document does not reload and
