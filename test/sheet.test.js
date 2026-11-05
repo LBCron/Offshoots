@@ -419,8 +419,11 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   await raise(p); await opened();
   const g2=await geo();
   say("opening no longer resizes the map ("+g1.mapH+" -> "+g2.mapH+")", g1.mapH===g2.mapH);
-  // a tinted style panel frosts over its own family ground, not the root's.
-  // On a fresh page: a hash change on a page already loaded is a same-document
+  // A style panel carries its family as an accent, not as a ground: the wash across the
+  // whole sheet made the panel read as a colour before it read as a page. The skin still
+  // ships a ground for either palette, because that is what the accent was picked against
+  // and what the label on a filled accent button is set in, but the sheet itself is the
+  // app's own neutral. On a fresh page: a hash change on a page already loaded is a same-document
   // navigation, so the app does not re-select and the panel never tints.
   const tp=await ctx.newPage();
   await tp.goto(URL+"#disco");   // the tint is set from the selection, so the page is ready when a style is current
@@ -433,11 +436,17 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       // go on inline and the stylesheet picks, so the one in use is the resolved value
       // rather than either of the inline ones, which is what the panel is painted with.
       ground:cs.getPropertyValue("--tint").trim(),
+      neutral:cs.getPropertyValue("--panel").trim(),
+      acc:cs.getPropertyValue("--acc").trim(),
+      accfg:cs.getPropertyValue("--accfg").trim(),
       pair:["--tint-d","--tint-l"].map(n=>el.style.getPropertyValue(n).trim())};});
-  say("the style panel is tinted ("+tint.ground+")", tint.tinted && !!tint.ground);
+  say("the style panel is skinned ("+tint.acc+")", tint.tinted && !!tint.acc);
   say("  carrying a ground for either palette ("+tint.pair.join(", ")+")",
     tint.pair.every(v=>/^#[0-9a-f]{6}$/i.test(v)) && tint.pair[0]!==tint.pair[1]);
-  say("  and using one of them", tint.pair.indexOf(tint.ground)>=0);
+  say("  but standing on the app's own neutral, not on one of them ("+tint.ground+")",
+    tint.ground===tint.neutral && tint.pair.indexOf(tint.ground)<0);
+  say("  with the family ground kept for the label on a filled accent button ("+tint.accfg+")",
+    tint.pair.indexOf(tint.accfg)>=0);
   say("and frosted over it", /blur/.test(tint.bf) && /rgba|\/ 0\./.test(tint.bg));
   await tp.close();
   // 1. a style chosen with the sheet open must land in the band still showing

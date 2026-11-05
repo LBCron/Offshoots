@@ -399,7 +399,18 @@ function dims(){
   // and zooming out still shrinks, because the factor is fixed at 100% rather than
   // recomputed against the current zoom
   const FILL = room>0 ? Math.max(1, room/span) : 1;
-  PX*=k*FILL; ROOTW*=k*FILL;
+  // Zooming out shrank the year scale as hard as everything else, so the thing you zoom
+  // out to do — take in the whole atlas — was the thing it was worst at: names landed on
+  // top of each other long before the rows ran out of room, and the LOD had to drop them.
+  // The horizontal scale is damped instead, so every step out leaves the years wider apart
+  // than a straight scale would and the labels keep their lane. Zooming in is untouched:
+  // past 100% the two scales are the same again, which is what makes a zoom feel like a
+  // magnifier rather than a stretch. The damping is on Z and not on k: k is Z*BASE and
+  // BASE is .576, so a test on k would have damped 100% as well and widened the map
+  // everybody sees by default.  At the 70% floor the years sit 22% further apart than a
+  // straight scale puts them, which is most of a decade of extra room on a 1400px window.
+  const KX = (Z<1 ? Math.pow(Z,0.45) : Z) * BASE;
+  PX*=KX*FILL; ROOTW*=KX*FILL;
 }
 const xOf = y=> y<1950 ? X0+(Math.max(y,1895)-1895)/55*ROOTW : X0+ROOTW+(y-1950)*PX;
 const mctx = document.createElement("canvas").getContext("2d");

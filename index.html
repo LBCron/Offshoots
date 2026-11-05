@@ -1525,7 +1525,7 @@ aside#panel::after{content:"";position:absolute;inset:0;z-index:-1;pointer-event
    now lands between 1.11 and 1.13 against white where they used to run 9.2 to 19.4, so no
    family is heavier than another. The pair is chosen here rather than in script, like
    every other palette in this file. */
-aside#panel.tinted{ --tint:var(--tint-l); --ink:var(--ink-l); --acc:var(--acc-l);
+aside#panel.tinted{ --tint:var(--panel); --ink:var(--fg); --acc:var(--acc-l); --accfg:var(--tint-l);
   /* the disc a silhouette sits on, and the figure on it. A third of the family's accent
      stirred into its ground: solid, a plain step away from the panel so the circle is
      always there to see, and the same hue so it belongs to the family rather than being
@@ -1533,26 +1533,25 @@ aside#panel.tinted{ --tint:var(--tint-l); --ink:var(--ink-l); --acc:var(--acc-l)
   --fbdisc:color-mix(in srgb,var(--acc) 30%,var(--tint)); --fbink:var(--acc); }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) aside#panel.tinted{
-    --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d);
+    --tint:var(--panel); --ink:var(--fg); --acc:var(--acc-d); --accfg:var(--tint-d);
     /* a fifth, not a third, and the type rather than the accent: four families carry a
        bright accent in the dark and a disc of it would be the loudest thing on the page */
     --fbdisc:color-mix(in srgb,var(--ink) 20%,var(--tint)); --fbink:var(--ink); } }
 :root[data-theme="dark"] aside#panel.tinted{
-  --tint:var(--tint-d); --ink:var(--ink-d); --acc:var(--acc-d);
+  --tint:var(--panel); --ink:var(--fg); --acc:var(--acc-d); --accfg:var(--tint-d);
   --fbdisc:color-mix(in srgb,var(--ink) 20%,var(--tint)); --fbink:var(--ink); }
-/* --tint is the ground, --ink the type, --acc the link colour; the rest is derived */
+/* The ground and the type are the app's own neutrals; the family only supplies --acc.
+   The wash used to run across the whole sheet, which made a panel read first as a colour
+   and only then as a page, and made the same list look like a different component in each
+   family. Neutral ground, family accent: the colour now lands on the links, the buttons
+   and the silhouette discs, where it says which family you are in without tinting the
+   paper under it. --tint and --ink stay as names so the derived values below and the
+   --fbdisc mixes above read the same as they always did. */
 aside#panel.tinted{
-  --panel:var(--tint); --fg:var(--ink); --accent:var(--acc); --accent-fg:var(--tint);
-  --muted:color-mix(in srgb,var(--ink) 72%,var(--tint));
-  --line:color-mix(in srgb,var(--ink) 30%,var(--tint));
-  --sep:color-mix(in srgb,var(--ink) 16%,transparent);
-  --sectline:color-mix(in srgb,var(--ink) 38%,var(--tint)); --sectw:1px;
-  /* 16 and 11, not 20 and 13. On the families whose accent is the cream type itself,
-     a fill of a fifth of it lifted the ground far enough that a link in that same cream
-     came out at 4.48 against it, which is AA by eye and not by the number. Nothing was
-     measuring the tinted panels until now. */
-  --fill:color-mix(in srgb,var(--acc) 16%,var(--tint));
-  --fill2:color-mix(in srgb,var(--acc) 11%,var(--tint));
+  /* the label on a filled accent button keeps the family's own ground, which is what
+     that accent was picked against; the neutral panel colour is not always dark or light
+     enough to hold it (metal's dark accent came out at 3.48 on it). */
+  --accent:var(--acc); --accent-fg:var(--accfg);
   background:var(--tint);color:var(--ink)}
 body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
 #panelBody{flex:1 1 auto;min-height:0}
@@ -2198,9 +2197,9 @@ a.am .amgo{display:none}
   box-shadow:0 0 0 1px var(--cardline),var(--cardsh)}
 .trkbtn{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;
   min-height:var(--tap);padding:12px 16px;border-radius:12px;text-decoration:none;
-  cursor:pointer;background:var(--acc,var(--blue));color:var(--tint,var(--accent-fg));
+  cursor:pointer;background:var(--acc,var(--blue));color:var(--accfg,var(--accent-fg));
   transition:filter .15s}
-.trkbtn:hover{filter:brightness(1.08);color:var(--tint,var(--accent-fg))}
+.trkbtn:hover{filter:brightness(1.08);color:var(--accfg,var(--accent-fg))}
 .trkbtn.off{background:var(--fill);color:var(--muted);cursor:default;filter:none}
 .trktx{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
 .trkttl{font:700 var(--t-head)/1.2 var(--f-body);letter-spacing:-.014em}
@@ -2219,10 +2218,10 @@ a.am .amgo{display:none}
 .plbtn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
   box-sizing:border-box;min-height:var(--tap);padding:13px 18px;border-radius:14px;
   text-decoration:none;cursor:pointer;
-  background:var(--acc,var(--blue));color:var(--tint,var(--accent-fg));
+  background:var(--acc,var(--blue));color:var(--accfg,var(--accent-fg));
   font:600 var(--t-body)/1.2 var(--f-body);letter-spacing:-.01em;
   transition:filter .15s}
-.plbtn:hover{filter:brightness(1.08);color:var(--tint,var(--accent-fg))}
+.plbtn:hover{filter:brightness(1.08);color:var(--accfg,var(--accent-fg))}
 .plbtn:active{filter:brightness(.94)}
 .plbtn .plbgo{flex:none;display:grid;place-items:center;width:17px;height:17px}
 .plbtn .plbgo svg{width:17px;height:17px}
@@ -5953,7 +5952,18 @@ function dims(){
   // and zooming out still shrinks, because the factor is fixed at 100% rather than
   // recomputed against the current zoom
   const FILL = room>0 ? Math.max(1, room/span) : 1;
-  PX*=k*FILL; ROOTW*=k*FILL;
+  // Zooming out shrank the year scale as hard as everything else, so the thing you zoom
+  // out to do — take in the whole atlas — was the thing it was worst at: names landed on
+  // top of each other long before the rows ran out of room, and the LOD had to drop them.
+  // The horizontal scale is damped instead, so every step out leaves the years wider apart
+  // than a straight scale would and the labels keep their lane. Zooming in is untouched:
+  // past 100% the two scales are the same again, which is what makes a zoom feel like a
+  // magnifier rather than a stretch. The damping is on Z and not on k: k is Z*BASE and
+  // BASE is .576, so a test on k would have damped 100% as well and widened the map
+  // everybody sees by default.  At the 70% floor the years sit 22% further apart than a
+  // straight scale puts them, which is most of a decade of extra room on a 1400px window.
+  const KX = (Z<1 ? Math.pow(Z,0.45) : Z) * BASE;
+  PX*=KX*FILL; ROOTW*=KX*FILL;
 }
 const xOf = y=> y<1950 ? X0+(Math.max(y,1895)-1895)/55*ROOTW : X0+ROOTW+(y-1950)*PX;
 const mctx = document.createElement("canvas").getContext("2d");

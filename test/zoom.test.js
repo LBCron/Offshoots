@@ -48,6 +48,13 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     Math.abs((far.max/one.max)-(far.w/one.w))<0.25);
   say("zooming out makes them smaller ("+one.max.toFixed(1)+" → "+out.max.toFixed(1)+"px)",
     out.max<one.max*0.85);
+  // but the years do NOT close up at the same rate. Zooming out is how you take in the
+  // whole atlas, and a straight scale made that the view the names were worst in. The
+  // horizontal scale is damped, so 70% keeps the canvas wider than 70% of itself.
+  say("  while the years stay further apart than a straight scale would put them ("
+    + (out.w/one.w).toFixed(2)+"× wide at 0.70× zoom)",
+    out.w/one.w > 0.74 && out.w/one.w < 0.95
+      ? true : "ratio "+(out.w/one.w).toFixed(3));
 
   // and the reason the sizes were pinned in the first place
   say("  but none of them goes under the floor ("+out.min.toFixed(1)+"px at 70%)",
