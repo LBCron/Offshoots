@@ -458,7 +458,7 @@ const spell=n=>n<=20?WORDS[n]
   await d.screenshot({path:__dirname+"/screens/d-modes.png"});
   say("no desktop page errors", d._errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);
 
-  // ---------- the sort on the Ways in page ----------
+  // ---------- the sort on the Collections page ----------
   // The circle row learns on its own; this list does what it is told instead. Four orders,
   // quietest the default, and the choice is remembered. What matters: all twenty-six
   // survive every sort (a sort that drops a mode is worse than no sort), the orders are
@@ -482,7 +482,7 @@ const spell=n=>n<=20?WORDS[n]
       say("the page counts the collections correctly ("+spell(DATA.MODES.length)+")",
       new RegExp("\\b"+spell(DATA.MODES.length)+"\\b","i")
         .test(await s.$eval(".pglede",e=>e.textContent)));
-  say("the ways in page has a sort, defaulting to quietest",
+  say("the collections page has a sort, defaulting to quietest",
       start.on.length===1 && start.on[0]==="Quietest");
 
     const seen={quiet:start.labels.join("|")};
@@ -490,7 +490,7 @@ const spell=n=>n<=20?WORDS[n]
     // the real count, not a number typed here: a mode added later must not read as a bug
     const want=await s.evaluate(()=>MODES.length);
     let kept=total===want, named=true;
-    for(const [k,lbl] of [["loud","Loudest"],["used","Most used"],["az","A–Z"]]){
+    for(const [k,lbl] of [["used","Most used"],["az","A–Z"]]){
       // wait on the control actually flipping rather than on a stopwatch: under a loaded
       // machine a fixed pause is a coin toss, and a half-rendered list reads as a bug
       await s.click(`[data-msort="${k}"]`);
@@ -505,8 +505,11 @@ const spell=n=>n<=20?WORDS[n]
     }
     say("  all "+total+" modes survive every sort", kept && total===want);
     say("  and the control marks and stores the one that is on", named);
-    say("  quietest and loudest are mirror images",
-      seen.quiet===seen.loud.split("|").reverse().join("|"));
+    // Loudest-first is gone: it was the same axis read backwards, and as an icon it was
+    // the same speaker with one more wave on it. A browser that stored it falls back.
+    say("  there is one intensity order, not two",
+      await s.evaluate(()=>document.querySelectorAll("[data-msort]").length===3
+        && !document.querySelector('[data-msort="loud"]')));
     say("  A–Z really is alphabetical", seen.az===seen.az.split("|").slice()
       .sort((x,y)=>x.localeCompare(y)).join("|"));
     // nothing has been opened in this browser, so "most used" has no tally to go on and
@@ -542,6 +545,7 @@ const spell=n=>n<=20?WORDS[n]
   // the control has to survive the narrowest phone without clipping a label
   { const s4=await b.newPage({viewport:{width:320,height:700,isMobile:true,hasTouch:true}});
     await s4.goto(URL+"#modes"); await ready(s4); await landed(s4,"modes");
+    const nSorts=await s4.evaluate(()=>document.querySelectorAll("[data-msort]").length);
     // It used to be four words in a track that filled the panel and then scrolled, so the
     // last option sat off the edge. Icons fit outright at 320, beside the heading, which
     // is the whole reason for the change: reachable now means on screen, not scrollable to.
@@ -558,8 +562,12 @@ const spell=n=>n<=20?WORDS[n]
         besideHead:!!head && !!seg && Math.abs(r(head).top-r(seg).top)<r(head).height,
         headOneLine:!!head && r(head).height<parseFloat(getComputedStyle(head).lineHeight)*1.5,
         nopush:document.documentElement.scrollWidth<=320+1};});
+    // the count comes off the control, not off a number typed here: dropping an order
+    // should not read as this check breaking, which is exactly what it did
     say("at 320px all "+fit.n+" sit on screen beside the heading, no scrolling",
-      fit.n===4 && fit.onScreen && fit.noScroll && fit.nopush);
+      fit.n===nSorts && fit.onScreen && fit.noScroll && fit.nopush
+        ? true
+        : JSON.stringify({...fit, want:nSorts}));
     say("  with the heading still on one line and the taps big enough",
       fit.besideHead && fit.headOneLine && fit.tall);
     await s4.screenshot({path:__dirname+"/screens/m-modesort.png"});

@@ -2038,12 +2038,14 @@ function modeOrder(adaptive){
 // The row learns on its own and the list did not, which is the right split for the row but
 // leaves the list with one order whether you are reading down it to pick a feeling or
 // hunting a name you already know. So the list gets the choice stated out loud: quiet to
-// loud, loud to quiet, what this browser opens most, or plain A to Z. Quietest stays the
-// default, so nothing moves until it is asked to.
+// loud, what this browser opens most, or plain A to Z. Quietest stays the default, so
+// nothing moves until it is asked to.
+// Loudest-first went: it is the same axis as Quietest read backwards, and as an icon it
+// was the same speaker with one more wave on it, which is not a difference you can see at
+// 18px. One intensity order is enough, and a stored "loud" falls back to it below.
 const MODESORT_KEY="musicatlas.modesort";
 const MODESORTS=[
   ["quiet","Quietest","Quietest first",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M163.51,24.81a8,8,0,0,0-8.42.88L85.25,80H40A16,16,0,0,0,24,96v64a16,16,0,0,0,16,16H85.25l69.84,54.31A8,8,0,0,0,168,224V32A8,8,0,0,0,163.51,24.81ZM152,207.64,92.91,161.69A7.94,7.94,0,0,0,88,160H40V96H88a7.94,7.94,0,0,0,4.91-1.69L152,48.36ZM208,104v48a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>`],
-  ["loud","Loudest","Loudest first",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M163.51,24.81a8,8,0,0,0-8.42.88L85.25,80H40A16,16,0,0,0,24,96v64a16,16,0,0,0,16,16H85.25l69.84,54.31A8,8,0,0,0,168,224V32A8,8,0,0,0,163.51,24.81ZM152,207.64,92.91,161.69A7.94,7.94,0,0,0,88,160H40V96H88a7.94,7.94,0,0,0,4.91-1.69L152,48.36ZM208,104v48a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm32-16v80a8,8,0,0,1-16,0V88a8,8,0,0,1,16,0Z\"/></svg>`],
   ["used","Most used","What this browser opens most",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z\"/></svg>`],
   ["az","A–Z","By name, A to Z",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M87.24,52.59a8,8,0,0,0-14.48,0l-64,136a8,8,0,1,0,14.48,6.81L39.9,160h80.2l16.66,35.4a8,8,0,1,0,14.48-6.81ZM47.43,144,80,74.79,112.57,144ZM200,96c-12.76,0-22.73,3.47-29.63,10.32a8,8,0,0,0,11.26,11.36c3.8-3.77,10-5.68,18.37-5.68,13.23,0,24,9,24,20v3.22A42.76,42.76,0,0,0,200,128c-22.06,0-40,16.15-40,36s17.94,36,40,36a42.73,42.73,0,0,0,24-7.25,8,8,0,0,0,16-.75V132C240,112.15,222.06,96,200,96Zm0,88c-13.23,0-24-9-24-20s10.77-20,24-20,24,9,24,20S213.23,184,200,184Z\"/></svg>`]];
 function modeSort(){
@@ -2054,7 +2056,6 @@ function modeSort(){
 function setModeSort(v){ try{ localStorage.setItem(MODESORT_KEY,v); }catch(e){} }
 function modeOrderBy(how){
   const lv=m=>m[5]||3, quiet=MODES.slice().sort((a,b)=>lv(a)-lv(b));
-  if(how==="loud") return quiet.slice().reverse();
   if(how==="az")   return MODES.slice().sort((a,b)=>a[1].localeCompare(b[1]));
   if(how==="used"){
     // ties fall back to the quiet order, so an untouched browser still reads quiet to loud
@@ -2065,15 +2066,19 @@ function modeOrderBy(how){
   }
   return quiet;
 }
+// Icon-only read as four unlabelled buttons with no way to tell which axis you were on
+// without pressing one. The chosen one carries its name now, which costs the width of one
+// short word and says both what the control does and where it currently stands; the rest
+// stay glyphs, so the whole thing still sits on the heading's line.
 function modeSortHtml(){
   const now=modeSort();
-  return `<div class="secthead picksort"><h3 class="secttl">Collections</h3>`
+  return `<div class="secthead picksort"><h3 class="secttl">Sort by</h3>`
     + `<div class="segctl segicon" role="tablist" aria-label="Sort the collections">`
     + MODESORTS.map(([k,lbl,hint,ico])=>
         `<button type="button" role="tab" class="segopt segi"`
         + ` data-msort="${k}" aria-selected="${k===now}"`
         + ` aria-label="${esc(lbl)}. ${esc(hint)}" title="${esc(lbl)}: ${esc(hint)}">`
-        + ico + `</button>`).join("")
+        + ico + `<span class="seglbl">${esc(lbl)}</span></button>`).join("")
     + `</div></div>`;
 }
 // How far a case leans, derived from its own name rather than drawn fresh.
@@ -2328,8 +2333,8 @@ const PAGES_DEF={
         + `<h3 class="secttl">Listen on ${svcPicker("inline")}</h3></div></div>`,
       html:`<div class="listgrp sep amlist">${all.map(row).join("")}</div>`};
   },
-  modes:()=>({title:"Ways in",
-    lede:"Twenty-eight moods, places and tasks, each opening the styles that suit it. The circles on the way in reorder themselves around the ones you open.",
+  modes:()=>({title:"Collections",
+    lede:"Twenty-eight moods, places and tasks, each opening the styles that suit it.",
     top:modeSortHtml(),
     html:modeListHtml()+copyRow("modes")}),
   picks:()=>picksPage("pete"),

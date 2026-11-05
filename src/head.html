@@ -982,20 +982,27 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 .modetop{margin:2px 0 16px}
 .secthead.picksort{margin:0 0 10px}
 /* Three words did not fit the panel, so the control scrolled and the third order sat off
-   the edge. Icon-only, it is as narrow as three tap targets, which is narrow enough to sit
-   beside the heading instead of taking a line of its own. */
+   the edge. Glyphs with only the chosen one named, it is narrow enough to sit beside the
+   heading instead of taking a line of its own. */
 .secthead.picksort .secttl{white-space:nowrap;min-width:0;overflow:hidden;
   text-overflow:ellipsis}
 /* min-width:100% is for the scrolling word version, which has to fill the panel before it
-   scrolls. This one is as wide as its three targets and no wider, so it can sit on the
-   heading's line. The height stays a tap target: narrow is about width. */
+   scrolls. This one is as wide as its targets and no wider, so it can sit on the heading's
+   line. The height stays a tap target: narrow is about width. */
 .segctl.segicon{flex:none;gap:0;padding:2px;min-width:0}
-.segopt.segi{flex:none;width:42px;padding:0}
-.segopt.segi svg{width:18px;height:18px}
+.segopt.segi{flex:none;width:42px;padding:0;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.segopt.segi svg{width:18px;height:18px;flex:none}
+/* Unlabelled glyphs left you guessing which axis the list was on. The chosen one says its
+   name; the others stay glyphs, which is what keeps the control on the heading's line. */
+.segopt.segi .seglbl{display:none}
+.segopt.segi[aria-selected="true"]{width:auto;padding:0 11px 0 9px}
+.segopt.segi[aria-selected="true"] .seglbl{display:block}
 @media (max-width:420px){ .segopt.segi{width:40px} }
-/* four of them on a 320px phone is the tightest this gets, and the heading beside them
-   has to keep its one line */
-@media (max-width:360px){ .segopt.segi{width:37px} }
+/* a 320px phone is the tightest this gets, and the heading beside them has to keep its
+   one line */
+@media (max-width:360px){ .segopt.segi{width:36px}
+  .segopt.segi[aria-selected="true"]{padding:0 9px 0 7px;gap:5px} }
 /* The page of collections wears the same circles as the row on the root, so the two read
    as one thing seen two ways rather than as a row of pictures and a list of thumbnails.
    The tiles size themselves off the same 84px disc; only the layout differs, a grid that
@@ -2319,7 +2326,7 @@ span.xcov b{font:700 19px var(--f-body);color:#fff;opacity:.92}
    A browser's own stylesheet sets user-select:none on a button, because a control is
    something you press, not something you read. all:unset discards that along with the
    borders and padding it was reaching for, so every control in this app had selectable
-   type on it: a tap held a fraction too long put iOS selection handles around "Ways in"
+   type on it: a tap held a fraction too long put iOS selection handles around a page title
    and the button stopped answering until the selection was dismissed.
    Listed rather than inferred, because all:unset sits at class specificity and a bare
    `button` rule loses to it. It also has to come AFTER every one of them: same selectors,

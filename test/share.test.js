@@ -342,10 +342,18 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   const fold2=await p.evaluate(async()=>{
     const d=document.querySelector(".aboutfold"); if(!d) return null;
     const sm=d.querySelector("summary"), cv=sm.querySelector("svg");
-    sm.click(); await new Promise(z=>setTimeout(z,260));
-    const open=getComputedStyle(cv).transform;
-    sm.click(); await new Promise(z=>setTimeout(z,260));
-    return {open, shut:getComputedStyle(cv).transform, isOpen:d.open};});
+    // Wait for the turn to finish rather than for 260ms. The transition is .18s, so on a
+    // loaded machine the stopwatch read the chevron mid-rotation and the check failed on
+    // a transform 1.5 degrees off the one it wanted.
+    const rested=async el=>{ let last=null, same=0;
+      for(let i=0;i<60 && same<3;i++){
+        await new Promise(z=>requestAnimationFrame(()=>z()));
+        const now=getComputedStyle(el).transform;
+        same = now===last ? same+1 : 0; last=now; }
+      return last; };
+    sm.click(); const open=await rested(cv);
+    sm.click(); const shut=await rested(cv);
+    return {open, shut, isOpen:d.open};});
   say("opening the fold turns its chevron ("+(fold2&&fold2.open)+")",
     !!fold2 && fold2.open!=="none");
   say("  and closing turns it back ("+(fold2&&fold2.shut)+")",
