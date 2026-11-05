@@ -130,6 +130,12 @@ const state=p=>p.evaluate(()=>{
   say("    on a round tile, at its top right", badge.round && badge.placed);
   say("    clear of the art's own clip, at a size you can read",
     badge.unclipped && badge.legible);
+  // the sleeves carry a worn paper edge, lighter than the art inside them, which a round
+  // crop turns into a bright rim. The art is scaled past it rather than cropped at it.
+  say("    with the art scaled past the sleeve's own edge",
+    await p.$$eval('.ppage[data-p="top"] .tco img', e=>e.length>0 && e.every(x=>{
+      const m=getComputedStyle(x).transform.match(/matrix\(([-\d.]+)/);
+      return !!m && parseFloat(m[1])>=1.08;})));
 
   // Most influential and Collections are the same kind of page and are built the same
   // way: a lede, a Sorted by picker, a grid of art, and a link to the page itself. This
