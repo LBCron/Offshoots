@@ -2102,16 +2102,21 @@ function modeSect(){
     `<div class="mrow" role="list">${circles}</div>`,
     "", "modes", "By mood, place or task.", true);
 }
-// the same set as a page you can read down, which is what the row's heading opens
+// the same set as a page, which is what the row's heading opens. The same tiles too:
+// this was a two-column list of 28px thumbnails in a shaded card, so the one picture per
+// collection — the thing that tells you what a collection is before the label does — was
+// printed at a third of the size the row upstairs prints it at, and the card around it
+// made the page read as a different component from the row it came from. Same circle,
+// same label, laid out as a grid instead of a scroller, on the panel rather than in a box.
 function modeListHtml(){
   if(typeof MODES==="undefined") return "";
-  const rows=modeOrderBy(modeSort()).map(m=>
-    `<button type="button" class="listrow moderow lv${m[5]||3}" data-mode="${esc(m[0])}"`
+  const tiles=modeOrderBy(modeSort()).map(m=>
+    `<button type="button" class="mcirc lv${m[5]||3}" data-mode="${esc(m[0])}"`
     + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}">`
-    + `<i class="lrico mi hasimg">${moodArt(m[0])}`
+    + `<i class="mco mi hasimg">${moodArt(m[0])}`
     + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
-    + `<span class="lrlbl">${esc(m[1])}</span>${GOCHEV}</button>`).join("");
-  return `<div class="listgrp modelist two">${rows}</div>`;
+    + `<span class="mclbl">${esc(m[1])}</span></button>`).join("");
+  return `<div class="modelist modegrid" role="list">${tiles}</div>`;
 }
 
 // ---------- the panel as a stack of pages ----------

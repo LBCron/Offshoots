@@ -167,8 +167,11 @@ const state=p=>p.evaluate(()=>{
     const d=await state(dl);
     say(hash+" lands on its own page", d.key===key);
     say("  with a way back to the map ("+d.backLbl+")", d.back && d.backLbl==="Music Atlas");
+    // the collections page is a grid of circles rather than a list of rows, so count
+    // whichever of the two that page is made of
     if(rows) say("  carrying all "+rows,
-      (await dl.$$eval('.ppage:not([hidden]) .listrow',e=>e.length))===rows);
+      (await dl.$$eval('.ppage:not([hidden]) .listrow, .ppage:not([hidden]) .modegrid .mcirc',
+        e=>e.length))===rows);
     await dl.close();
   }
 
