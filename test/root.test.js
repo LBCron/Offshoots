@@ -51,14 +51,16 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // on the grounds that the title covered it, which worked while there was one list.
   const groups=await p.$$eval("#panelBody .sect .secttl",e=>e.map(x=>x.textContent));
   say("three section headings: "+groups.join(" / "),
-    groups.join("/")==="On the atlas/Listening collections/Go deeper");
+    groups.join("/")==="On the atlas/Collections/Go deeper");
   say("  not Find: these are for when you do not know what you want", !/find/i.test(groups.join(" ")));
-  // and each one says in a line what it is for, rather than leaving the heading to carry it
+  say("  and Collections is called that here too, the way its own page is",
+    groups[1]==="Collections");
+  // Only Go deeper keeps a line under it. The other two had captions for things that
+  // already say what they are: two labelled rows, and a row of pictures of a cat asleep,
+  // a nightcap and a coffee shop.
   const ledes=await p.$$eval("#panelBody .sect .sectlede",e=>e.map(x=>x.textContent));
-  say("  each with a line saying what it is for", ledes.length===3
-    && ledes[0]==="Choose a style to hear its essential playlist."
-    && ledes[1]==="By mood, place or task."
-    && ledes[2]==="Stories and context behind the music.");
+  say("  one line, under the one section whose contents are not self-evident",
+    ledes.length===1 && ledes[0]==="Stories and context behind the music.");
   say("  and none are left loose", (await p.$$eval("#panelBody > .more > [data-page]",e=>e.length))===0);
 
   // ---- About, folded under the title ----

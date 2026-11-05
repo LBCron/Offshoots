@@ -61,7 +61,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
 
     const look=()=>p.evaluate(()=>{
       const pg=document.querySelector('.ppage[data-p="mode:dinner"]');
-      const btn=pg.querySelector("[data-pickany]"), seg=pg.querySelector(".segctl.segicon");
+      const btn=pg.querySelector("[data-pickany]"), seg=pg.querySelector(".sortpick");
       const lede=pg.querySelector(".pglede"), list=pg.querySelector(".picks");
       const r=x=>x?x.getBoundingClientRect():null;
       return {names:[...pg.querySelectorAll(".pknm")].map(x=>x.textContent),
@@ -81,12 +81,10 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
           return h&&seg ? Math.abs(r(h).top-r(seg).top)<r(h).height : null; })(),
         segW: seg?Math.round(r(seg).width):null,
         aboveFirst: seg&&list ? r(seg).bottom<=r(list).top+1 : null,
-        tabTap: Math.min(...[...pg.querySelectorAll("[data-psort]")]
-          .map(x=>Math.round(r(x).height))),
-        worded:[...pg.querySelectorAll("[data-psort]")].filter(x=>x.textContent.trim()).length,
-        sorts:[...pg.querySelectorAll("[data-psort]")].map(x=>
-          (x.getAttribute("aria-label")||"").split(".")[0]
-          +(x.getAttribute("aria-selected")==="true"?"*":""))};
+        tabTap: seg?Math.round(r(seg).height):0,
+        cur: seg?(seg.querySelector(".sortx")||{}).textContent:"",
+        sorts:(()=>{const sel=seg&&seg.querySelector("select");
+          return sel?[...sel.options].map(o=>o.text+(o.selected?"*":"")):[];})()};
     });
     const v=await look();
     const dinner=D.MODES.find(m=>m[0]==="dinner");
@@ -105,12 +103,12 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       JSON.stringify(v.sorts)===JSON.stringify(["Relevance*","A–Z","Most used"]));
     say("  with the sort inside the page ("+v.spill+"px)", v.spill<=0);
     // Three words were wider than the panel, so the control scrolled and the third order
-    // sat off the edge where nobody would find it. Icons, and no wider than their targets.
-    say("  as icons, with no word left in the control ("+v.segW+"px wide)",
-      v.worded===0 && v.segW<=150);
-    say("    each still a tap target ("+v.tabTap+"px)", v.tabTap>=36);
-    say("    and each still named for anyone who needs the word",
-      JSON.stringify(v.sorts)===JSON.stringify(["Relevance*","A\u2013Z","Most used"]));
+    // sat off the edge. Then it was three glyphs you had to press to identify. It is one
+    // inline picker now, the same control the Listen on row uses: the order it is on said
+    // in a word, and the other two in the platform's own list behind it.
+    say("  as one picker naming the order it is on (\""+v.cur+"\", "+v.segW+"px wide)",
+      v.cur==="Relevance" && v.segW<=180);
+    say("    still a tap target ("+v.tabTap+"px)", v.tabTap>=36);
     // the sort is the order of the list, so it belongs on the list's heading, not adrift
     // under the lede where it read as another fact about the collection
     say("  on one line with a heading for the list (\""+v.headTx+"\")",
@@ -120,26 +118,26 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("  relevance is the order the collection was written in",
       JSON.stringify(v.names)===JSON.stringify(dinner[4].map(([id])=>
         D.DATA.find(r=>r[0]===id)[1])));
-    await p.click('[data-psort="az"]'); await settle(p);
+    await p.selectOption('.psortsel','az'); await settle(p);
     const az=(await look()).names;
     say("  A–Z sorts by name ("+az.slice(0,2).join(", ")+" … "+az.slice(-1)+")",
       az.length===v.names.length
       && az.every((n,i)=>i===0||az[i-1].localeCompare(n)<=0));
     // nothing has been opened in this browser, so there is nothing to go on and the order
     // must fall back rather than scramble
-    await p.click('[data-psort="used"]'); await settle(p);
+    await p.selectOption('.psortsel','used'); await settle(p);
     const un=(await look()).names;
     say("  Most used falls back to relevance on a browser with no history",
       JSON.stringify(un)===JSON.stringify(v.names));
     // and once something has been opened it leads
     await p.evaluate(()=>localStorage.setItem("musicatlas.styleuse",
       JSON.stringify({tropicalia:9})));
-    await p.click('[data-psort="fit"]'); await settle(p);
-    await p.click('[data-psort="used"]'); await settle(p);
+    await p.selectOption('.psortsel','fit'); await settle(p);
+    await p.selectOption('.psortsel','used'); await settle(p);
     const un2=(await look()).names;
     say("    and puts what this browser opens most at the top (\""+un2[0]+"\")",
       un2[0]==="Tropicália" && un2.length===v.names.length);
-    await p.click('[data-psort="fit"]'); await settle(p);
+    await p.selectOption('.psortsel','fit'); await settle(p);
 
     // the control's one promise: it lands you on something from this collection
     const inHere=new Set(dinner[4].map(([id])=>id));

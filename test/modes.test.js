@@ -474,7 +474,7 @@ const spell=n=>n<=20?WORDS[n]
 
     const read=()=>s.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
-      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>(x.getAttribute("aria-label")||"").split(".")[0]),
+      return {on:[...u.querySelectorAll(".sortx")].map(x=>x.textContent),
         labels:[...u.querySelectorAll(".modegrid .mclbl")].map(x=>x.textContent),
         stored:(()=>{try{return localStorage.getItem("musicatlas.modesort")}catch(e){return null}})()};});
 
@@ -493,10 +493,10 @@ const spell=n=>n<=20?WORDS[n]
     for(const [k,lbl] of [["used","Most used"],["az","A–Z"]]){
       // wait on the control actually flipping rather than on a stopwatch: under a loaded
       // machine a fixed pause is a coin toss, and a half-rendered list reads as a bug
-      await s.click(`[data-msort="${k}"]`);
+      await s.selectOption(".msortsel",k);
       await s.waitForFunction(key=>{
-        const b=document.querySelector(`[data-msort="${key}"]`);
-        return b && b.getAttribute("aria-selected")==="true";
+        const sel=document.querySelector(".msortsel");
+        return sel && sel.value===key;
       },k,{timeout:5000});
       const r=await read();
       seen[k]=r.labels.join("|");
@@ -508,8 +508,8 @@ const spell=n=>n<=20?WORDS[n]
     // Loudest-first is gone: it was the same axis read backwards, and as an icon it was
     // the same speaker with one more wave on it. A browser that stored it falls back.
     say("  there is one intensity order, not two",
-      await s.evaluate(()=>document.querySelectorAll("[data-msort]").length===3
-        && !document.querySelector('[data-msort="loud"]')));
+      await s.evaluate(()=>{const sel=document.querySelector(".msortsel");
+        return sel.options.length===3 && ![...sel.options].some(o=>o.value==="loud");}));
     say("  A–Z really is alphabetical", seen.az===seen.az.split("|").slice()
       .sort((x,y)=>x.localeCompare(y)).join("|"));
     // nothing has been opened in this browser, so "most used" has no tally to go on and
@@ -524,7 +524,7 @@ const spell=n=>n<=20?WORDS[n]
     await s2.goto(URL+"#modes"); await ready(s2); await landed(s2,"modes");
     const r=await s2.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
-      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>(x.getAttribute("aria-label")||"").split(".")[0])[0],
+      return {on:(u.querySelector(".sortx")||{}).textContent,
         first:(u.querySelector(".modegrid .mclbl")||{}).textContent};});
     say("a remembered sort is honoured next time the page opens",
       r.on==="A–Z" && r.first==="Burn it off");
@@ -536,7 +536,7 @@ const spell=n=>n<=20?WORDS[n]
     await s3.goto(URL+"#modes"); await ready(s3); await landed(s3,"modes");
     const r=await s3.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
-      return {on:[...u.querySelectorAll("[data-msort]")].filter(x=>x.getAttribute("aria-selected")==="true").map(x=>(x.getAttribute("aria-label")||"").split(".")[0])[0],
+      return {on:(u.querySelector(".sortx")||{}).textContent,
         rows:u.querySelectorAll(".modegrid .mcirc").length};});
     say("a nonsense stored sort falls back to quietest, with every mode still there",
       r.on==="Quietest" && r.rows===(await s3.evaluate(()=>MODES.length)));
@@ -545,22 +545,22 @@ const spell=n=>n<=20?WORDS[n]
   // the control has to survive the narrowest phone without clipping a label
   { const s4=await b.newPage({viewport:{width:320,height:700,isMobile:true,hasTouch:true}});
     await s4.goto(URL+"#modes"); await ready(s4); await landed(s4,"modes");
-    const nSorts=await s4.evaluate(()=>document.querySelectorAll("[data-msort]").length);
+    const nSorts=await s4.evaluate(()=>document.querySelector(".msortsel").options.length);
     // It used to be four words in a track that filled the panel and then scrolled, so the
     // last option sat off the edge. Icons fit outright at 320, beside the heading, which
     // is the whole reason for the change: reachable now means on screen, not scrollable to.
     const fit=await s4.evaluate(()=>{
-      const seg=document.querySelector(".segctl.segicon");
+      const seg=document.querySelector(".sortpick");
       const head=document.querySelector(".secthead.picksort .secttl");
       const page=seg&&seg.closest(".ppage");
-      const btns=seg?[...seg.querySelectorAll("[data-msort]")]:[];
       const r=x=>x.getBoundingClientRect();
-      return {n:btns.length,
-        tall:btns.every(b=>r(b).height>=28),
+      return {n:seg?seg.querySelector("select").options.length:0,
+        tall:!!seg && r(seg).height>=28,
         onScreen:!!seg && r(seg).right<=r(page).right+1 && r(seg).left>=r(page).left-1,
         noScroll:!!seg && seg.scrollWidth<=seg.clientWidth+1,
+        // the picker sits inside the heading now, so "beside" is the same line
         besideHead:!!head && !!seg && Math.abs(r(head).top-r(seg).top)<r(head).height,
-        headOneLine:!!head && r(head).height<parseFloat(getComputedStyle(head).lineHeight)*1.5,
+        headOneLine:!!head && r(head).height<parseFloat(getComputedStyle(head).lineHeight)*2.2,
         nopush:document.documentElement.scrollWidth<=320+1};});
     // the count comes off the control, not off a number typed here: dropping an order
     // should not read as this check breaking, which is exactly what it did

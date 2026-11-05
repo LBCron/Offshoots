@@ -1458,7 +1458,31 @@ function panel(n,anc,desc){
   wrapStack(panelCard());
   paintPlay();
 }
-$("panel").addEventListener("change",e=>{ if(e.target&&e.target.classList.contains("svcsel")) setSvc(e.target.value); });
+$("panel").addEventListener("change",e=>{
+  const t=e.target; if(!t) return;
+  if(t.classList.contains("svcsel")){ setSvc(t.value); return; }
+  // both sorts swap what is on screen rather than rebuilding the page, which would throw
+  // the scroll away: re-sorting is for looking at the same set again. The heading is
+  // rebuilt too, because the picker's own label is the thing that says where you are.
+  if(t.classList.contains("msortsel")){
+    setModeSort(t.value);
+    const page=t.closest(".ppage");
+    const list=page&&page.querySelector(".modelist");
+    const head=page&&page.querySelector(".secthead.picksort");
+    if(list) list.outerHTML=modeListHtml();
+    if(head) head.outerHTML=modeSortHtml();
+    return; }
+  if(t.classList.contains("psortsel")){
+    setPickSort(t.value);
+    const page=t.closest(".ppage");
+    const list=page&&page.querySelector(".picks");
+    const head=page&&page.querySelector(".secthead.picksort");
+    const m=page && typeof MODES!=="undefined"
+      && MODES.find(x=>"mode:"+x[0]===page.dataset.p);
+    if(list&&m){ list.innerHTML=modePicks(m); amUpgrade(); }
+    if(head) head.outerHTML=pickSortHead();
+    return; }
+});
 function clearNav(m){
   if(m._home){ m._home.appendChild(m); m._home=null; }
   m.style.cssText="";
@@ -1555,19 +1579,6 @@ $("panel").addEventListener("click",e=>{
       const pool=m ? m[4].map(([id])=>id).filter(id=>byId[id] && id!==state.sel) : [];
       const pick=pool[Math.floor(Math.random()*pool.length)];
       if(pick){ closeNav(); select(pick); panelTop(); } return; } }
-  // swapped where they stand, like the sort on the collections list: rebuilding the page
-  // would throw away the scroll, and re-sorting is for looking at the same set again
-  { const ps=e.target.closest("[data-psort]");
-    if(ps){ e.preventDefault();
-      setPickSort(ps.dataset.psort);
-      const seg=ps.closest(".segctl");
-      if(seg) seg.querySelectorAll("[data-psort]").forEach(b=>
-        b.setAttribute("aria-selected", String(b===ps)));
-      const page=ps.closest(".ppage"), list=page&&page.querySelector(".picks");
-      const m=page && typeof MODES!=="undefined"
-        && MODES.find(x=>"mode:"+x[0]===page.dataset.p);
-      if(list&&m){ list.innerHTML=modePicks(m); amUpgrade(); }
-      return; } }
   { const rr=e.target.closest("[data-random]");
     if(rr){ const pool=nodes.filter(n=>n.id!==state.sel);
       const pick=pool[Math.floor(Math.random()*pool.length)];
@@ -1575,15 +1586,6 @@ $("panel").addEventListener("click",e=>{
   // the sort swaps the rows where they stand rather than rebuilding the page: a rebuild
   // would throw away the scroll position, and the whole point of re-sorting is to look
   // at the same set from somewhere else
-  { const sb=e.target.closest("[data-msort]");
-    if(sb){ e.preventDefault();
-      setModeSort(sb.dataset.msort);
-      const seg=sb.closest(".segctl");
-      if(seg) seg.querySelectorAll("[data-msort]").forEach(b=>
-        b.setAttribute("aria-selected", String(b===sb)));
-      const page=sb.closest(".ppage"), list=page&&page.querySelector(".modelist");
-      if(list) list.outerHTML=modeListHtml();
-      return; } }
   { const md=e.target.closest("[data-mode]");
     if(md){ e.preventDefault(); pushPage("mode:"+md.dataset.mode); return; } }
   const fm=e.target.closest("[data-fam]");
@@ -1967,7 +1969,9 @@ function onMapSect(){
     + goRow("random","Surprise me","Jump somewhere unexpected",null,
         ` data-random`,"Open any style, chosen at random")
     + `</div>`,
-    "", "", "Choose a style to hear its essential playlist.");
+    // no lede: the two rows under it say what they do, and a line telling you to choose a
+    // style sat above a list of two things that are not styles
+    "", "", "");
 }
 function goRow(key,label,sub,count,attr,title){
   return `<button type="button" class="listrow lrtwo"${attr||""}`
@@ -2045,9 +2049,9 @@ function modeOrder(adaptive){
 // 18px. One intensity order is enough, and a stored "loud" falls back to it below.
 const MODESORT_KEY="musicatlas.modesort";
 const MODESORTS=[
-  ["quiet","Quietest","Quietest first",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M163.51,24.81a8,8,0,0,0-8.42.88L85.25,80H40A16,16,0,0,0,24,96v64a16,16,0,0,0,16,16H85.25l69.84,54.31A8,8,0,0,0,168,224V32A8,8,0,0,0,163.51,24.81ZM152,207.64,92.91,161.69A7.94,7.94,0,0,0,88,160H40V96H88a7.94,7.94,0,0,0,4.91-1.69L152,48.36ZM208,104v48a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z\"/></svg>`],
-  ["used","Most used","What this browser opens most",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z\"/></svg>`],
-  ["az","A–Z","By name, A to Z",`<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M87.24,52.59a8,8,0,0,0-14.48,0l-64,136a8,8,0,1,0,14.48,6.81L39.9,160h80.2l16.66,35.4a8,8,0,1,0,14.48-6.81ZM47.43,144,80,74.79,112.57,144ZM200,96c-12.76,0-22.73,3.47-29.63,10.32a8,8,0,0,0,11.26,11.36c3.8-3.77,10-5.68,18.37-5.68,13.23,0,24,9,24,20v3.22A42.76,42.76,0,0,0,200,128c-22.06,0-40,16.15-40,36s17.94,36,40,36a42.73,42.73,0,0,0,24-7.25,8,8,0,0,0,16-.75V132C240,112.15,222.06,96,200,96Zm0,88c-13.23,0-24-9-24-20s10.77-20,24-20,24,9,24,20S213.23,184,200,184Z\"/></svg>`]];
+  ["quiet","Quietest","Quietest first"],
+  ["used","Most used","What this browser opens most"],
+  ["az","A–Z","By name, A to Z"]];
 function modeSort(){
   try{ const v=localStorage.getItem(MODESORT_KEY);
     return MODESORTS.some(s=>s[0]===v) ? v : "quiet";
@@ -2066,20 +2070,29 @@ function modeOrderBy(how){
   }
   return quiet;
 }
-// Icon-only read as four unlabelled buttons with no way to tell which axis you were on
-// without pressing one. The chosen one carries its name now, which costs the width of one
-// short word and says both what the control does and where it currently stands; the rest
-// stay glyphs, so the whole thing still sits on the heading's line.
+// ---------- an inline picker ----------
+// The sorts were a segmented track of unlabelled glyphs. Four little drawings, one of
+// them a speaker with one more wave on it than its neighbour, standing for ideas no
+// drawing really carries: "most used" is not a shape. This is the control the Listen on
+// row already uses, a word and a chevron with a native select over the top of them. One
+// element instead of four, the order said in words rather than inferred from which glyph
+// is lit, and the open list is the platform's own, which reads correctly to a screen
+// reader and lands where a thumb expects it on a phone.
+// Its own text class, not .svctx: paintPlay rewrites every .svctx on the panel to the
+// service name, and a sort that renamed itself "Apple Music" is a funny bug to find.
+function inlinePick(attr,label,opts,now){
+  const cur=(opts.find(o=>o[0]===now)||opts[0])[1];
+  return `<span class="svc svcinline sortpick" title="${esc(label)}">`
+    + `<span class="sortx">${esc(cur)}</span>${SVCCHEV}`
+    + `<select ${attr} aria-label="${esc(label)} Currently ${esc(cur)}.">`
+    + opts.map(([k,l])=>`<option value="${esc(k)}"${k===now?" selected":""}>`
+        + `${esc(l)}</option>`).join("")
+    + `</select></span>`;
+}
 function modeSortHtml(){
-  const now=modeSort();
-  return `<div class="secthead picksort"><h3 class="secttl">Sort by</h3>`
-    + `<div class="segctl segicon" role="tablist" aria-label="Sort the collections">`
-    + MODESORTS.map(([k,lbl,hint,ico])=>
-        `<button type="button" role="tab" class="segopt segi"`
-        + ` data-msort="${k}" aria-selected="${k===now}"`
-        + ` aria-label="${esc(lbl)}. ${esc(hint)}" title="${esc(lbl)}: ${esc(hint)}">`
-        + ico + `<span class="seglbl">${esc(lbl)}</span></button>`).join("")
-    + `</div></div>`;
+  return `<div class="secthead picksort"><h3 class="secttl">Sorted by `
+    + inlinePick('class="msortsel"',"Sort the collections.",MODESORTS,modeSort())
+    + `</h3></div>`;
 }
 // How far a case leans, derived from its own name rather than drawn fresh.
 //
@@ -2103,9 +2116,12 @@ function modeSect(){
     + `<i class="mco mi hasimg">${moodArt(m[0])}`
     + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
     + `<span class="mclbl">${esc(m[1])}</span></button>`).join("");
-  return sect("modes","Listening collections",
+  // "Collections" and nothing under it: the page this opens is called Collections, the
+  // pictures say what they are, and "By mood, place or task" was a caption for a row that
+  // had already shown you a cat asleep, a nightcap and a coffee shop.
+  return sect("modes","Collections",
     `<div class="mrow" role="list">${circles}</div>`,
-    "", "modes", "By mood, place or task.", true);
+    "", "modes", "", true);
 }
 // the same set as a page, which is what the row's heading opens. The same tiles too:
 // this was a two-column list of 28px thumbnails in a shaded card, so the one picture per
@@ -2145,9 +2161,9 @@ function resetPages(){ PSTACK=[]; }
 // is the collection's own argument about what fits it best, and stays the default.
 const PICKSORT_KEY="musicatlas.picksort";
 const PICKSORTS=[
-  ["fit","Relevance","Best fit for this collection first","<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M32,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H40A8,8,0,0,1,32,64Zm8,72H96a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16Zm72,48H40a8,8,0,0,0,0,16h72a8,8,0,0,0,0-16Zm125.09-40.22-22.52,18.59,6.86,27.71a8,8,0,0,1-11.82,8.81L184,183.82l-25.61,15.07a8,8,0,0,1-11.82-8.81l6.85-27.71-22.51-18.59a8,8,0,0,1,4.47-14.14l29.84-2.31,11.43-26.5a8,8,0,0,1,14.7,0l11.43,26.5,29.84,2.31a8,8,0,0,1,4.47,14.14Zm-25.47.28-14.89-1.15a8,8,0,0,1-6.73-4.8l-6-13.92-6,13.92a8,8,0,0,1-6.73,4.8l-14.89,1.15,11.11,9.18a8,8,0,0,1,2.68,8.09l-3.5,14.12,13.27-7.81a8,8,0,0,1,8.12,0l13.27,7.81-3.5-14.12a8,8,0,0,1,2.68-8.09Z\"/></svg>"],
-  ["az","A\u2013Z","By name, A to Z","<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M87.24,52.59a8,8,0,0,0-14.48,0l-64,136a8,8,0,1,0,14.48,6.81L39.9,160h80.2l16.66,35.4a8,8,0,1,0,14.48-6.81ZM47.43,144,80,74.79,112.57,144ZM200,96c-12.76,0-22.73,3.47-29.63,10.32a8,8,0,0,0,11.26,11.36c3.8-3.77,10-5.68,18.37-5.68,13.23,0,24,9,24,20v3.22A42.76,42.76,0,0,0,200,128c-22.06,0-40,16.15-40,36s17.94,36,40,36a42.73,42.73,0,0,0,24-7.25,8,8,0,0,0,16-.75V132C240,112.15,222.06,96,200,96Zm0,88c-13.23,0-24-9-24-20s10.77-20,24-20,24,9,24,20S213.23,184,200,184Z\"/></svg>"],
-  ["used","Most used","What this browser opens most","<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,200h-8V40a8,8,0,0,0-8-8H152a8,8,0,0,0-8,8V80H96a8,8,0,0,0-8,8v40H48a8,8,0,0,0-8,8v64H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM160,48h40V200H160ZM104,96h40V200H104ZM56,144H88v56H56Z\"/></svg>"]];
+  ["fit","Relevance","Best fit for this collection first"],
+  ["az","A\u2013Z","By name, A to Z"],
+  ["used","Most used","What this browser opens most"]];
 function pickSort(){
   try{ const v=localStorage.getItem(PICKSORT_KEY);
     return PICKSORTS.some(p=>p[0]===v) ? v : "fit";
@@ -2168,14 +2184,10 @@ function pickOrder(m,how){
   return list;
 }
 function pickSortHtml(){
-  const now=pickSort();
-  return `<div class="segctl segicon" role="tablist" aria-label="Sort this collection">`
-    + PICKSORTS.map(([k,lbl,hint,ico])=>
-        `<button type="button" role="tab" class="segopt segi"`
-        + ` data-psort="${k}" aria-selected="${k===now}"`
-        + ` aria-label="${esc(lbl)}. ${esc(hint)}" title="${esc(lbl)}: ${esc(hint)}">`
-        + ico + `</button>`).join("")
-    + `</div>`;
+  return inlinePick('class="psortsel"',"Sort this collection.",PICKSORTS,pickSort());
+}
+function pickSortHead(){
+  return pickSortHead();
 }
 // A collection is a shelf of forty now, and picking off a shelf is work. This does the
 // picking: one of these, opened, which is the whole transaction most of the time. It takes

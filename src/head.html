@@ -982,27 +982,14 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 .modetop{margin:2px 0 16px}
 .secthead.picksort{margin:0 0 10px}
 /* Three words did not fit the panel, so the control scrolled and the third order sat off
-   the edge. Glyphs with only the chosen one named, it is narrow enough to sit beside the
-   heading instead of taking a line of its own. */
-.secthead.picksort .secttl{white-space:nowrap;min-width:0;overflow:hidden;
-  text-overflow:ellipsis}
-/* min-width:100% is for the scrolling word version, which has to fill the panel before it
-   scrolls. This one is as wide as its targets and no wider, so it can sit on the heading's
-   line. The height stays a tap target: narrow is about width. */
-.segctl.segicon{flex:none;gap:0;padding:2px;min-width:0}
-.segopt.segi{flex:none;width:42px;padding:0;
-  display:flex;align-items:center;justify-content:center;gap:6px}
-.segopt.segi svg{width:18px;height:18px;flex:none}
-/* Unlabelled glyphs left you guessing which axis the list was on. The chosen one says its
-   name; the others stay glyphs, which is what keeps the control on the heading's line. */
-.segopt.segi .seglbl{display:none}
-.segopt.segi[aria-selected="true"]{width:auto;padding:0 11px 0 9px}
-.segopt.segi[aria-selected="true"] .seglbl{display:block}
-@media (max-width:420px){ .segopt.segi{width:40px} }
-/* a 320px phone is the tightest this gets, and the heading beside them has to keep its
-   one line */
-@media (max-width:360px){ .segopt.segi{width:36px}
-  .segopt.segi[aria-selected="true"]{padding:0 9px 0 7px;gap:5px} }
+   the edge; then it was four glyphs you had to press to identify. It is one inline picker
+   now, so the heading is a phrase with a control in it, the way Listen on is. */
+.secthead.picksort .secttl{display:flex;align-items:center;gap:8px;
+  white-space:nowrap;min-width:0}
+.secthead.picksort .sortpick{font-weight:600}
+/* an inline control in a heading, but still something a thumb has to land on: the Listen
+   on row's 30px is fine mid-sentence, this one is the only control on its line */
+.svc.sortpick{min-height:36px}
 /* The page of collections wears the same circles as the row on the root, so the two read
    as one thing seen two ways rather than as a row of pictures and a list of thumbnails.
    The tiles size themselves off the same 84px disc; only the layout differs, a grid that
@@ -2028,7 +2015,8 @@ a.wk.pl:hover,a.wk.sp:hover{background:color-mix(in srgb,var(--ink,var(--fg)) 84
   transition:border-color .15s,background-color .15s}
 .svcinline:hover{border-color:color-mix(in srgb,var(--ink,var(--fg)) 38%,transparent);
   background-color:color-mix(in srgb,var(--ink,var(--fg)) 7%,transparent)}
-.svcinline:hover .svctx{color:color-mix(in srgb,var(--ink,var(--link)) 80%,var(--fg))}
+.svcinline:hover .svctx,.svcinline:hover .sortx{
+  color:color-mix(in srgb,var(--ink,var(--link)) 80%,var(--fg))}
 .svcinline .svcchev{width:14px;height:14px;opacity:.8}
 /* the section is framed: a rule above the heading, another below the options */
 .sect-listen{margin-top:20px;padding:0}
