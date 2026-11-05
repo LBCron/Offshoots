@@ -166,7 +166,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // counted here the way the app counts it, rather than read back off the app, so the
   // check would still catch the row and the page drifting apart
   await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
-  const topN=await p.$$eval('.ppage[data-p="top"] .listrow',e=>e.length);
+  const topN=await p.$$eval('.ppage[data-p="top"] .topgrid .tcirc',e=>e.length);
   await p.click("#panelBack"); await settle(p);
   say("  and the count is the number of styles on the page it opens ("
     + noRoots.rows[0].ct+" said, "+topN+" there)",

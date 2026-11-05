@@ -88,10 +88,14 @@ const state=p=>p.evaluate(()=>{
     await p.evaluate(()=>{const l=document.querySelector("#panelBack .bklbl");
       return getComputedStyle(l).display!=="none" && l.getBoundingClientRect().width>20;}));
   say("  it starts at the top", st.scroll===0);
-  const n=await p.$$eval('.ppage[data-p="top"] .listrow',e=>e.length);
+  // the page wears the collections grid now: art tiles with the name under them, not a
+  // boxed list of coloured dots. The dot said which family and nothing else, on a page
+  // whose whole subject is styles you may not know yet.
+  const n=await p.$$eval('.ppage[data-p="top"] .topgrid .tcirc',e=>e.length);
   say("  listing "+n+" styles", n===24);
-  say("  each row points the way it goes",
-    await p.$$eval('.ppage[data-p="top"] .listrow .lrcv',e=>e.length>0 && e.every(x=>x.classList.contains("lrgov"))));
+  say("  each one carrying its art",
+    await p.$$eval('.ppage[data-p="top"] .tcirc .tco',
+      e=>e.length===24 && e.every(x=>!!x.querySelector("img, .pcovph"))));
 
   // pushing the same page twice would stack it on itself
   await p.evaluate(()=>{const r=document.querySelector('.sect-onmap [data-page="top"]'); if(r) r.click();});
@@ -107,8 +111,45 @@ const state=p=>p.evaluate(()=>{
 
   // Escape unwinds before it closes the panel
   await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
-  say("  with a count on every row",
-    await p.$$eval('.ppage[data-p="top"] .lrct',e=>e.length===24 && e.every(x=>/^\d+$/.test(x.textContent))));
+  say("  with a count under every one",
+    await p.$$eval('.ppage[data-p="top"] .tcct',e=>e.length===24 && e.every(x=>/^\d+$/.test(x.textContent))));
+
+  // Most influential and Collections are the same kind of page and are built the same
+  // way: a lede, a Sorted by picker, a grid of art, and a link to the page itself. This
+  // reads the skeleton off both rather than asserting a shape twice, so the two cannot
+  // drift apart without saying so.
+  const skel=async(hash)=>{
+    const q=await fresh(b,M,hash);
+    const v=await q.evaluate(()=>{
+      const u=document.querySelector(".ppage:not([hidden])");
+      const grid=u.querySelector(".modegrid, .topgrid");
+      return {lede:!!u.querySelector(".pglede"),
+        sortedBy:((u.querySelector(".secthead.picksort .secttl")||{}).textContent||"").trim().slice(0,9),
+        picker:!!u.querySelector(".sortpick select"),
+        grid:!!grid && getComputedStyle(grid).display==="grid",
+        boxed:!!grid && grid.classList.contains("listgrp"),
+        copy:!!u.querySelector(".pagecopy")};});
+    await q.close(); return v; };
+  const a=await skel("#top"), c=await skel("#modes");
+  note("top", JSON.stringify(a)); note("modes", JSON.stringify(c));
+  say("Most influential is built like Collections", JSON.stringify(a)===JSON.stringify(c)
+    ? true : JSON.stringify(a)+" vs "+JSON.stringify(c));
+  say("  both: a lede, a Sorted by picker, an unboxed grid and a link to the page",
+    a.lede && a.sortedBy==="Sorted by" && a.picker && a.grid && !a.boxed && a.copy);
+
+  // and the sort on it actually sorts
+  { const q=await fresh(b,M,"#top");
+    const names=()=>q.$$eval(".topgrid .mclbl",e=>e.map(x=>x.textContent));
+    const byInfl=await names();
+    await q.selectOption(".tsortsel","az");
+    await q.waitForFunction(()=>document.querySelector(".tsortsel").value==="az");
+    await settle(q);
+    const az=await names();
+    say("  and its sort reorders without dropping anything ("+az[0]+" first)",
+      az.length===byInfl.length
+      && az.every((n,i)=>i===0||az[i-1].localeCompare(n)<=0)
+      && JSON.stringify([...az].sort())===JSON.stringify([...byInfl].sort()));
+    await q.close(); }
   await p.keyboard.press("Escape"); await onPage(p,"root");
   st=await state(p);
   say("Escape pops the page rather than closing the panel",
@@ -169,8 +210,8 @@ const state=p=>p.evaluate(()=>{
     // the collections page is a grid of circles rather than a list of rows, so count
     // whichever of the two that page is made of
     if(rows) say("  carrying all "+rows,
-      (await dl.$$eval('.ppage:not([hidden]) .listrow, .ppage:not([hidden]) .modegrid .mcirc',
-        e=>e.length))===rows);
+      (await dl.$$eval('.ppage:not([hidden]) .listrow, .ppage:not([hidden]) .modegrid .mcirc,'
+        +' .ppage:not([hidden]) .topgrid .tcirc', e=>e.length))===rows);
     await dl.close();
   }
 

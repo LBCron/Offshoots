@@ -1472,6 +1472,14 @@ $("panel").addEventListener("change",e=>{
     if(list) list.outerHTML=modeListHtml();
     if(head) head.outerHTML=modeSortHtml();
     return; }
+  if(t.classList.contains("tsortsel")){
+    setTopSort(t.value);
+    const page=t.closest(".ppage");
+    const list=page&&page.querySelector(".toplist");
+    const head=page&&page.querySelector(".secthead.picksort");
+    if(list) list.outerHTML=topGridHtml();
+    if(head) head.outerHTML=topSortHtml();
+    return; }
   if(t.classList.contains("psortsel")){
     setPickSort(t.value);
     const page=t.closest(".ppage");
@@ -2314,6 +2322,53 @@ function popPage(){
 // A panel is a stack. Tapping a row pushes a page in from the right and the back button
 // pops it, rather than unfolding a block under your thumb or throwing a menu over the
 // top: a list of seventeen styles is a place you go, not a thing that drops down.
+// ---------- the order the most influential come in ----------
+// The page is an argument about influence, so influence is the default and stays first.
+// The other two are the same pair the collections page offers, for the same reasons: a
+// name you already know, or the ones this browser keeps opening.
+const TOPSORT_KEY="musicatlas.topsort";
+const TOPSORTS=[
+  ["infl","Influence","Most came out of it first"],
+  ["az","A\u2013Z","By name, A to Z"],
+  ["used","Most used","What this browser opens most"]];
+function topSort(){
+  try{ const v=localStorage.getItem(TOPSORT_KEY);
+    return TOPSORTS.some(t=>t[0]===v) ? v : "infl";
+  }catch(e){ return "infl"; }
+}
+function setTopSort(v){ try{ localStorage.setItem(TOPSORT_KEY,v); }catch(e){} }
+function topOrderBy(how){
+  const ids=topIds();
+  if(how==="az") return ids.slice().sort((a,b)=>byId[a].name.localeCompare(byId[b].name));
+  if(how==="used"){
+    // ties keep the influence order, so an untouched browser reads as the page's own
+    // argument rather than scrambling into whatever order the ids happen to sit in
+    const use=styleUse();
+    return ids.map((id,i)=>[id,i]).sort((a,b)=>
+      ((+use[b[0]]||0)-(+use[a[0]]||0)) || a[1]-b[1]).map(x=>x[0]);
+  }
+  return ids;
+}
+function topSortHtml(){
+  return `<div class="secthead picksort"><h3 class="secttl">Sorted by `
+    + inlinePick('class="tsortsel"',"Sort the most influential.",TOPSORTS,topSort())
+    + `</h3></div>`;
+}
+// The same shape the collections page is: a grid of art with the name under it, on the
+// panel rather than in a card. It was a boxed list of coloured dots, which told you the
+// family and nothing else, on a page whose whole subject is styles you might not know
+// yet. The art is what says what a style sounds like before the name does.
+function topGridHtml(){
+  return `<div class="toplist topgrid" role="list">` + topOrderBy(topSort()).map(id=>{
+    const x=byId[id];
+    return `<button type="button" class="mcirc tcirc" data-go="${esc(id)}"`
+      + ` title="Show ${esc(x.name)} on the map"`
+      + ` aria-label="${esc(x.name)}. ${x.children.length} styles came out of it.">`
+      + `<i class="mco tco">${cover(id,x,true)}</i>`
+      + `<span class="mclbl">${esc(x.name)}</span>`
+      + `<span class="tcct">${x.children.length}</span></button>`;
+  }).join("") + `</div>`;
+}
 function styleRows(ids,detail){
   return `<div class="listgrp plist">` + ids.map(id=>{ const x=byId[id];
     return `<button type="button" class="listrow" data-go="${x.id}">`
@@ -2355,7 +2410,8 @@ const PAGES_DEF={
     html:styleRows(firstLevel(),x=>x.year<1950?x.disp:x.year)}),
   top:()=>({title:"Most influential",
     lede:"The styles that led to the most, counted by what came directly out of them.",
-    html:styleRows(topIds(), x=>x.children.length)}),
+    top:topSortHtml(),
+    html:topGridHtml()+copyRow("top")}),
   about:()=>{ const np=playable().length,
       withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
     return {title:"About this map of what grew out of what", html:`
