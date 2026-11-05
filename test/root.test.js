@@ -78,12 +78,20 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       label:h?h.textContent.trim():"",
       shown:d.getBoundingClientRect().height>0,
       underTitle:!!ttl && !!(ttl.compareDocumentPosition(d)&4),
-      body:(d.querySelector(".note")||{}).textContent||"",
-      more:(d.querySelector("[data-page=\"about\"] .lrlbl")||{}).textContent||""}; });
+      // the description IS the row now, so both read off the one label
+      body:(d.querySelector(".ablbl")||{}).textContent||"",
+      lead:(d.querySelector(".ablead")||{}).textContent||"",
+      paras:d.querySelectorAll("p.note").length,
+      more:(d.querySelector("[data-page=\"about\"]")||{}).dataset||{}}; });
   say("About the map is a section, not a fold", !!fold && fold.isFold===false
     && fold.label==="About this map");
   say("  with its text on the page rather than behind a triangle",
     !!fold && fold.shown && fold.body.length>80);
+  // It was a paragraph with a row under it that offered to tell you the same thing: the
+  // section said it twice and only the second half could be pressed. One row now, whose
+  // label is the description, so the thing you read is the thing you tap.
+  say("  said once, as the row itself rather than beside it",
+    !!fold && fold.paras===0 && fold.lead==="Read more about this atlas:");
   // the three things it has to cover, in the brief's own order
   say("  saying what the map is, how styles connect, and what a playlist is",
     !!fold && /\bstyles\b/.test(fold.body) && /grew out of/.test(fold.body)
@@ -94,8 +102,8 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // the point of the thing. It came off once and came back with the restructure.
   say("  without narrowing it to one continent",
     !!fold && !/North America/i.test(fold.body));
-  say("  with the full page one tap on ("+(fold&&fold.more)+")",
-    !!fold && fold.more==="Read more about this atlas");
+  say("  with the full page one tap on ("+(fold&&fold.more&&fold.more.page)+")",
+    !!fold && fold.more.page==="about");
   // and it is a row, like every other way out of this panel: a card, a glyph, a chevron.
   // It was a line of text with a chevron after it, which is not a shape this panel uses
   // anywhere else.
@@ -109,7 +117,9 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
           && !/rgba\(0, 0, 0, 0\)/.test(getComputedStyle(g).backgroundColor),
         icon:!!r.querySelector(".lrico svg"), chev:!!r.querySelector(".lrcv"),
         tap:Math.round(r.getBoundingClientRect().height),
-        likePete:!pete || (same(r,pete,"fontSize") && same(r,pete,"minHeight"))};});
+        // Pete's Picks is a one-line row and this one is a paragraph, so the shared
+        // shape is the card, the glyph and the chevron, not the height
+        likePete:!pete || same(r,pete,"paddingLeft")};});
     say("  drawn as a row in a card, the way Pete's Picks is",
       !!row && row.boxed && row.icon && row.chev && row.likePete);
     say("  clearing the tap floor ("+(row&&row.tap)+"px)", !!row && row.tap>=44); }
@@ -181,9 +191,13 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     axis:[...document.querySelectorAll("#axis text")].map(x=>x.textContent).join(" ")}));
   say("nothing on the panel says start ("+starts.heads.join(" / ")+")",
     starts.heads.every(h=>!/start/i.test(h)));
+  // row LABELS, which is what this is about. The About row's label is a paragraph of
+  // prose now and it says "each one starts just outside its own style", which is the word
+  // used as English rather than as the name of a thing to press.
   say("  nor does the big title or the rows", await p.evaluate(()=>{
     const t=[document.querySelector(".bigttl").textContent,
-      ...[...document.querySelectorAll(".listgrp .lrlbl")].map(x=>x.textContent)].join(" ");
+      ...[...document.querySelectorAll(".listgrp .lrlbl")]
+        .filter(x=>!x.classList.contains("ablbl")).map(x=>x.textContent)].join(" ");
     return !/start/i.test(t); }));
   say("  and the axis still has the word for that region", /Roots/.test(starts.axis));
 
@@ -410,10 +424,10 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   say("  and its text is not in the panel until you ask", abRow.anyOpenText===false);
   const abMore=await p.evaluate(()=>{
     const r=document.querySelector('.sect-about [data-page="about"]');
-    return {exists:!!r, label:r?r.querySelector(".lrlbl").textContent:"",
+    return {exists:!!r, label:r?(r.querySelector(".ablead")||{}).textContent:"",
       tap:r?Math.round(r.getBoundingClientRect().height):0}; });
   say("opening it offers the rest ("+abMore.label+")",
-    abMore.exists && abMore.label==="Read more about this atlas");
+    abMore.exists && abMore.label==="Read more about this atlas:");
   say("  tap target "+abMore.tap+"px", abMore.tap>=44);
   await p.click('.sect-about [data-page="about"]'); await onPage(p,"about");
   const ab=await p.evaluate(()=>{

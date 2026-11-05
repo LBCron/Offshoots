@@ -542,6 +542,17 @@ body.open .pcnt{display:none}
 .listrow .lrsub{display:block;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);
   color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .listrow.lrtwo .lrct{align-self:center}
+/* About the map is one row whose label is the whole description. The paragraph used to
+   sit above a row that offered to tell you the same thing, so the section said it twice
+   and the row was the only part of it you could press. The text is the link now, which
+   means it has to wrap: every other label on this panel is one line with an ellipsis. */
+.listrow.abrow{min-height:0;padding:14px;align-items:center}
+.listrow .ablbl{white-space:normal;overflow:visible;text-overflow:clip;
+  font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+.listrow .ablbl .ablead{font-weight:400;color:var(--fg)}
+/* the glyph and the chevron keep their place beside a block of text rather than drifting
+   to the middle of it */
+.listrow.abrow .lrico,.listrow.abrow .lrcv{align-self:center}
 @media (min-width:900px) and (hover:hover) and (pointer:fine){
   .listgrp{--lrlead:51px}
   .listrow{min-height:46px;padding:0 12px;gap:11px}
