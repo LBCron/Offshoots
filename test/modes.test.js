@@ -159,7 +159,7 @@ const spell=n=>n<=20?WORDS[n]
   // not a failure. It is still a gap, so the ones waiting for art are named here rather
   // than tolerated quietly: adding a collection with no picture shows up in this diff.
   // The list is checked both ways, so it cannot outlive the gap it describes.
-  const AWAITING=[];   // every collection has its painting
+  const AWAITING=["phone"];   // Phone speaker is new and waiting for its painting
   const fs=require("fs"), path=require("path");
   const dir=path.join(__dirname,"..","moods");
   const onDisk=m=>fs.existsSync(path.join(dir,m+".jpg"));
