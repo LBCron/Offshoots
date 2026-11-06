@@ -580,7 +580,7 @@ const rdMono = p => {
   if(w.length>=2) return w.slice(0,3).map(x=>x[0]).join("").toUpperCase();
   return (w[0]||t).slice(0,2).replace(/^./,c=>c.toUpperCase());
 };
-// one source, as a row. Lifted out of readSect so the guest-picks page can draw the very
+// one source, as a row. Lifted out of Go Deeper so the guest-picks page can draw the very
 // same row rather than a second rendering of the same facts that drifts from this one.
 function readRow(r){
   const kind = esc(r[4]);
@@ -621,12 +621,6 @@ function readRow(r){
     + (p ? `<span class="rdpb">${pickerAvatar(p,"")}`
          + `<span>${esc(p.name)}\u2019s pick</span></span>` : "")
     + `</span></a>`;
-}
-function readSect(n){
-  const rows = (typeof READ!=="undefined" && READ[n.id]) || [];
-  if(!rows.length) return "";
-  return sect("read","Go Deeper",`<div class="reads">${rows.map(readRow).join("")}</div>`,
-    `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 
 function sect(key,label,html,aside,page,lede,seeall,fold){
@@ -1425,26 +1419,38 @@ const DEEPGRP=[
   ["watch","Watch","Videos",["watch","look"]],
   ["listen","Listen","Podcasts",["listen"]]
 ];
+// Every medium a group claims. A row whose type is in none of them used to be dropped
+// without a word, and if that was every row on a style the whole section went with it.
+const DEEPTYPES=new Set(DEEPGRP.reduce((a,g)=>a.concat(g[3]),[]));
 function deepSect(n){
   const rows=(typeof READ!=="undefined" && READ[n.id]) || [];
-  if(!rows.length) return "";
+  const fold=(label,sub,mine)=>
+    `<details class="xfold deepfold" open><summary><span class="dgl">${esc(label)}</span>`
+    + `<span class="dgs">${esc(sub)}</span><span class="dgn">${mine.length}</span>${FOLDTRI}</summary>`
+    + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
   const folds=DEEPGRP.map(([k,label,sub,types])=>{
     const mine=rows.filter(r=>types.indexOf(r[7])>=0);
     if(!mine.length) return "";
     // open, where the connections above are shut: nine sources at most, and a title you
     // can read is the thing itself rather than a way to somewhere else
-    return `<details class="xfold deepfold" open><summary><span class="dgl">${esc(label)}</span>`
-      + `<span class="dgs">${esc(sub)}</span><span class="dgn">${mine.length}</span>${FOLDTRI}</summary>`
-      + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
+    return fold(label,sub,mine);
   }).join("");
-  if(!folds) return "";
+  // anything no group claims still gets shown. test/read.test.js keeps this empty, so
+  // seeing it means a new medium arrived without a group to live in.
+  const spare=rows.filter(r=>!DEEPTYPES.has(r[7]));
   // the way more of these arrive: a link out to the suggestion form, with this style
   // already filled in. It opens on its own so the map keeps its place underneath.
   const sug = `<a class="deepsug" href="suggest.html?s=${encodeURIComponent(n.id)}" target="_blank" rel="noopener">`
     + `<i class="dsi"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg></i>`
     + `<span>Suggest something</span></a>`;
-  return sect("read","Go Deeper", folds + sug,
-    `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
+  // Always a section, on all of them. It appeared on 125 styles and was missing from the
+  // other 336, which are precisely the ones with nothing yet and so the ones where the
+  // way to add the first thing matters most.
+  const body = rows.length
+    ? folds + (spare.length?fold("More","Not filed under a medium yet",spare):"") + sug
+    : `<p class="note deepnone">Nothing here yet.</p>` + sug;
+  return sect("read","Go Deeper", body,
+    rows.length?`<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`:"");
 }
 function panel(n,anc,desc){
   const who=n.whoList||[];
@@ -1648,7 +1654,12 @@ function clearSel(){
 // install steps from Chrome, or from the browser inside Instagram or Slack, cannot follow
 // them. A web page cannot choose a browser on a desktop, but both phone platforms have a
 // scheme that can, so offer it to the people the steps do not work for.
-function hereURL(){ return location.origin + location.pathname + location.search; }
+// Every shared link names the site, not the address the page happens to be open at. A
+// link built from location travels as whatever host made it: offshoots.netlify.app, a
+// deploy preview, a file:// path, which is a link nobody else can follow. The hash is
+// the only part that varies.
+const SITE="https://musicatlas.us/";
+function hereURL(){ return SITE; }
 const UA = navigator.userAgent;
 function isiOS(){ return /iPad|iPhone|iPod/.test(UA) ||
   (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1); }   // iPadOS claims to be a Mac
@@ -1700,7 +1711,7 @@ function openShareSheet(btn){
 
 // ---------- sharing ----------
 // every style has a URL: the page plus #id, which boot() already reads back
-function styleURL(id){ return location.origin + location.pathname + location.search + "#" + hashOf(id); }
+function styleURL(id){ return SITE + "#" + hashOf(id); }
 // "about" is the one hash that is not a style id
 const ABOUT_HASH="about", INSTALL_HASH="install", MODES_HASH="modes", PICKS_HASH="picks";
 // The hashes that open a page rather than select a style. Roots and Most influential are
@@ -1709,7 +1720,7 @@ const ABOUT_HASH="about", INSTALL_HASH="install", MODES_HASH="modes", PICKS_HASH
 // selectors these were back when they were folds, and nothing reads them any more.
 const FOLDS={[ABOUT_HASH]:".aboutwrap", [INSTALL_HASH]:".installwrap", [MODES_HASH]:".modelist",
   [PICKS_HASH]:".picklist", roots:".plist", top:".plist"};
-function foldURL(hash){ return location.origin + location.pathname + location.search + "#" + hash; }
+function foldURL(hash){ return SITE + "#" + hash; }
 function openAbout(scroll,hash){
   // these two used to be folds on the root panel; they are pages now, so the hash that
   // deep-links them pushes one
@@ -1733,15 +1744,19 @@ function setHash(id){
 // the same link glyph the About copy control wears, so the two read as one action
 const COPYGLYPH="<svg viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8.4 11.6a3.2 3.2 0 0 0 4.6 0l2.6-2.6a3.2 3.2 0 0 0-4.6-4.6l-1 1\"/><path d=\"M11.6 8.4a3.2 3.2 0 0 0-4.6 0L4.4 11a3.2 3.2 0 0 0 4.6 4.6l1-1\"/></svg>";
 const DATAICON="<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M43.18,128a29.78,29.78,0,0,1,8,10.26c4.8,9.9,4.8,22,4.8,33.74,0,24.31,1,36,24,36a8,8,0,0,1,0,16c-17.48,0-29.32-6.14-35.2-18.26-4.8-9.9-4.8-22-4.8-33.74,0-24.31-1-36-24-36a8,8,0,0,1,0-16c23,0,24-11.69,24-36,0-11.72,0-23.84,4.8-33.74C50.68,38.14,62.52,32,80,32a8,8,0,0,1,0,16C57,48,56,59.69,56,84c0,11.72,0,23.84-4.8,33.74A29.78,29.78,0,0,1,43.18,128ZM240,120c-23,0-24-11.69-24-36,0-11.72,0-23.84-4.8-33.74C205.32,38.14,193.48,32,176,32a8,8,0,0,0,0,16c23,0,24,11.69,24,36,0,11.72,0,23.84,4.8,33.74a29.78,29.78,0,0,0,8,10.26,29.78,29.78,0,0,0-8,10.26c-4.8,9.9-4.8,22-4.8,33.74,0,24.31-1,36-24,36a8,8,0,0,0,0,16c17.48,0,29.32-6.14,35.2-18.26,4.8-9.9,4.8-22,4.8-33.74,0-24.31,1-36,24-36a8,8,0,0,0,0-16Z\"/></svg>";
+// The data address is handed to other people and to models, so it names the site too
+// rather than resolving against whatever host is open.
 function catalogURL(file){
-  try{ return new URL(file, location.href).href; }
+  try{ return new URL(file, SITE).href; }
   catch(e){ return file; }
 }
 function dataRow(){
   return CATALOG.map(c=>{
     const u=catalogURL(c.file), shown=u.replace(/^https?:\/\//,"");
-    // file:// has no address worth handing to anyone, so the row only copies
-    const openable=/^https?:/.test(u) && !installed();
+    // file:// has no address worth handing to anyone, so the row only copies. The test
+    // is on where the page is open, not on the address shown: that names the site now,
+    // so it is https even when the page itself is a local file.
+    const openable=/^https?:/.test(location.href) && !installed();
     return `<button type="button" class="dataline" data-datacopy="${esc(c.file)}"`
       + ` aria-label="Copy the link to ${esc(c.name)}">`
       + DATAICON
@@ -1788,7 +1803,7 @@ function shareSel(btn0){
   // a page says what it is; otherwise the selected style, and failing that the map itself
   const url = page ? foldURL(hashOf(page))
     : n ? styleURL(id)
-    : location.origin+location.pathname+location.search;
+    : hereURL();
   const nm = page ? (btn0.dataset.sharename||"") : n ? n.name : "";
   const title = nm ? "Music Atlas · "+nm : "Music Atlas";
   const text  = nm ? nm+" on Music Atlas" : "Music Atlas — what grew out of what in popular music";
@@ -2290,11 +2305,19 @@ function pushPage(key){
   const page=document.createElement("div");
   page.className="ppage pgin"; page.dataset.p=key;
   if(d.lv) page.classList.add("lv"+d.lv);
-  page.innerHTML=`<h1 class="bigttl${d.icon?" withi":""}">${d.icon?`<i class="pgi mi${d.iconCls?" "+d.iconCls:""}">${d.icon}</i>`:""}<span class="mn">${esc(d.title)}</span></h1>`
-    // the deck says when you would reach for this page; the lede says what it sounds
-    // like. Only the collections carry both.
-    + (d.deck?`<p class="pgdeck">${esc(d.deck)}</p>`:"")
-    + (d.lede?`<p class="note pglede">${esc(d.lede)}</p>`:"")
+  // the deck says when you would reach for this page; the lede says what it sounds
+  // like. Only the collections carry a deck.
+  const ttl=`<h1 class="bigttl"><span class="mn">${esc(d.title)}</span></h1>`;
+  const say=(d.deck?`<p class="pgdeck">${esc(d.deck)}</p>`:"")
+    + (d.lede?`<p class="note pglede">${esc(d.lede)}</p>`:"");
+  // With a picture, the title and what it says sit in a column beside it, so the
+  // description starts where the title does instead of wrapping full width under the
+  // circle and leaving a hole next to it. The h1 still holds nothing but the title, which
+  // is what the compact header bar and measure() read.
+  page.innerHTML=(d.icon
+      ? `<div class="pghead"><i class="pgi mi${d.iconCls?" "+d.iconCls:""}">${d.icon}</i>`
+        + `<div class="pghtx">${ttl}${say}</div></div>`
+      : ttl+say)
     // a slot between the lede and the body, for a control that acts on the whole page
     + (d.top||"")
     + `<div class="more pgbody">${d.html}</div>`;

@@ -189,9 +189,10 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   say("installed, they are text rather than a way out of the app ("+app.anchors+")",
     app.anchors===0);
   say("  and the row itself never navigates", web.navs===0 && app.navs===0);
-  say("either way it copies the absolute URL (\""+app.clip+"\")",
-    /^http:\/\/127\.0\.0\.1:8753\/musicatlas\.json$/.test(app.clip)
-    && app.clip===web.clip);
+  // Issue #17: the data address is handed to other people and other models, so it is the
+  // site's own address now, not wherever this copy happens to be served from.
+  say("either way it copies the site's address (\""+app.clip+"\")",
+    app.clip==="https://musicatlas.us/musicatlas.json" && app.clip===web.clip);
   say("  and says so (\""+app.said+"\")", app.said==="Link copied" && web.said===app.said);
   say("  without leaving the page", /index\.html#about$/.test(app.here));
   srv.close();

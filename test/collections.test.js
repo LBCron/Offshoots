@@ -186,10 +186,10 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
           || document.querySelector('.moderow[data-mode="'+key+'"] img');
         return c?c.getAttribute("src"):null; },k);
       await p.click('[data-mode="'+k+'"]');
-      await until(p,()=>!!document.querySelector(".ppage:not([hidden]) .bigttl .pgi"));
+      await until(p,()=>!!document.querySelector(".ppage:not([hidden]) .pghead .pgi"));
       await settle(p); await new Promise(r=>setTimeout(r,350));
       const got=await p.evaluate(()=>{
-        const i=document.querySelector(".ppage:not([hidden]) .bigttl .pgi");
+        const i=document.querySelector(".ppage:not([hidden]) .pghead .pgi");
         const im=i&&i.querySelector("img");
         return {src:im?im.getAttribute("src"):null,
           loaded:im?(im.complete&&im.naturalWidth>0):false,

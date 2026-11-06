@@ -159,7 +159,7 @@ const spell=n=>n<=20?WORDS[n]
   // not a failure. It is still a gap, so the ones waiting for art are named here rather
   // than tolerated quietly: adding a collection with no picture shows up in this diff.
   // The list is checked both ways, so it cannot outlive the gap it describes.
-  const AWAITING=["phone"];   // Phone speaker is new and waiting for its painting
+  const AWAITING=[];   // every collection has its painting
   const fs=require("fs"), path=require("path");
   const dir=path.join(__dirname,"..","moods");
   const onDisk=m=>fs.existsSync(path.join(dir,m+".jpg"));
@@ -299,7 +299,7 @@ const spell=n=>n<=20?WORDS[n]
     return {pages:document.querySelectorAll(".ppage").length, shown:up.length,
       key:up.length?up[0].dataset.p:null,
       title:up.length?up[0].querySelector(".bigttl .mn").textContent:null,
-      icon:up.length?!!up[0].querySelector(".bigttl .pgi svg"):false,
+      icon:up.length?!!up[0].querySelector(".pghead .pgi"):false,
       // the one line under the name. The longer paragraph on how it sounds is no
       // longer rendered: the name and that line are what you read before choosing.
       lede:up.length?(up[0].querySelector(".pgdeck")||{}).textContent:null,
@@ -394,7 +394,10 @@ const spell=n=>n<=20?WORDS[n]
     const r=document.querySelector(".ppage:not([hidden]) .picks [data-go]").getBoundingClientRect();
     const body=document.getElementById("panelBody").getBoundingClientRect();
     const art=document.querySelector(".ppage:not([hidden]) .pick img.pcov,.ppage:not([hidden]) .pick .pcovph").getBoundingClientRect();
-    const ttl=document.querySelector(".ppage:not([hidden]) .bigttl").getBoundingClientRect();
+    // the page's left content edge. The circle used to sit inside the h1, so .bigttl was
+    // that edge; it is beside the h1 now, in .pghead, and the h1 starts past it.
+    const u=document.querySelector(".ppage:not([hidden])");
+    const ttl=(u.querySelector(".pghead")||u.querySelector(".bigttl")).getBoundingClientRect();
     return {h:Math.round(r.height), bleed:Math.round(r.width)-Math.round(body.width),
       off:Math.round(art.left-ttl.left)};});
   say("a pick row is "+box.h+"px and spans the panel", box.h>=44 && Math.abs(box.bleed)<=1);

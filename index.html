@@ -2,6 +2,18 @@
 <meta name="color-scheme" content="light dark">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Music Atlas</title>
+<!-- So a link pasted into Messages or Slack unfurls as musicatlas.us whatever host it was
+     copied from, and so search engines treat that as the address of record. Both are
+     absolute for the same reason the share links are: a relative canonical would name
+     whichever preview or netlify.app address served the page. -->
+<link rel="canonical" href="https://musicatlas.us/">
+<meta name="description" content="A map of 461 music styles and the music each one grew out of. Follow any sound back to where it started.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Music Atlas">
+<meta property="og:title" content="Music Atlas">
+<meta property="og:url" content="https://musicatlas.us/">
+<meta property="og:description" content="A map of 461 music styles and the music each one grew out of. Follow any sound back to where it started.">
+<meta name="twitter:card" content="summary">
 <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
 <link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,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">
 <meta name="apple-mobile-web-app-title" content="Music Atlas">
@@ -772,7 +784,9 @@ p.subcap{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 10p
 .reads{--rdlead:69px}
 /* the last line of Go deeper: an invitation, quieter than the rows above it, with the
    same tile so it lines up with their icons */
-a.deepsug{display:flex;align-items:center;gap:13px;min-height:var(--tap);margin-top:10px;padding:6px 14px;
+a/* the empty state: a style nobody has added a source to yet */
+.deepnone{margin:0 0 10px}
+.deepsug{display:flex;align-items:center;gap:13px;min-height:var(--tap);margin-top:10px;padding:6px 14px;
   border-radius:14px;color:var(--muted);text-decoration:none;font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body);
   transition:background .15s,color .15s}
 a.deepsug .dsi{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:11px;
@@ -1055,23 +1069,32 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 /* and the page it opens carries the same colour on the title */
 /* The title mark is the circle you tapped, arrived at: same fill, same colour, the size
    of the cover art in the list below it, so the page opens on the thing you pressed. */
-.ppage .bigttl.withi{display:flex;align-items:center;gap:14px}
-.ppage .bigttl.withi .mn{display:block;min-width:0}
-.ppage .bigttl .pgi{flex:none;display:grid;place-items:center;width:76px;height:76px;
+/* picture, then a column holding the title and the line under it. The picture used to sit
+   inside the h1 beside the title alone, so the description wrapped the full width of the
+   panel underneath both and left a hole next to the circle. Top-aligned rather than
+   centred: a description can run to three lines and a circle floating in the middle of
+   them reads as a mistake. */
+.ppage .pghead{display:flex;align-items:flex-start;gap:14px;
+  margin-top:calc(var(--tap) + 10px)}
+.ppage .pghead .bigttl{margin-top:0}
+.ppage .pghtx{flex:1 1 auto;min-width:0}
+.ppage .pghtx .pgdeck:last-child,.ppage .pghtx .pglede:last-child{margin-bottom:0}
+.ppage .bigttl .mn{display:block;min-width:0}
+.ppage .pghead .pgi{flex:none;display:grid;place-items:center;width:76px;height:76px;
   border-radius:50%;color:#fff;
   background:linear-gradient(160deg,color-mix(in srgb,var(--lvf) 80%,#fff) 0%,var(--lvf) 55%,
     color-mix(in srgb,var(--lvf) 74%,#000) 100%);
   box-shadow:0 1px 3px rgb(0 0 0 / .26)}
-.ppage .bigttl .pgi svg{width:36px;height:36px}
+.ppage .pghead .pgi svg{width:36px;height:36px}
 /* the collection's own painting, the same file the circles and the list rows wear, with
    the glyph left underneath for the moment before it loads */
-.ppage .bigttl .pgi.hasimg{position:relative;overflow:hidden;background:var(--lvf)}
-.ppage .bigttl .pgi.hasimg img{position:absolute;inset:0;width:100%;height:100%;
+.ppage .pghead .pgi.hasimg{position:relative;overflow:hidden;background:var(--lvf)}
+.ppage .pghead .pgi.hasimg img{position:absolute;inset:0;width:100%;height:100%;
   object-fit:cover;z-index:1}
-.ppage .bigttl .pgi.hasimg .facefb{position:absolute;inset:0;display:grid;place-items:center;
+.ppage .pghead .pgi.hasimg .facefb{position:absolute;inset:0;display:grid;place-items:center;
   z-index:0;color:#fff}
-.ppage .bigttl .pgi.hasimg .facefb svg{width:36px;height:36px}
-@media (max-width:420px){ .ppage .bigttl.withi{gap:12px} }
+.ppage .pghead .pgi.hasimg .facefb svg{width:36px;height:36px}
+@media (max-width:420px){ .ppage .pghead{gap:12px} }
 /* --lvc tints a small tile; --lvf fills a circle under a white glyph, the darker pair the
    browse circles already use */
 .ppage{--lvc:#9aa0a6;--lvf:#6b6b73}
@@ -6263,7 +6286,7 @@ const rdMono = p => {
   if(w.length>=2) return w.slice(0,3).map(x=>x[0]).join("").toUpperCase();
   return (w[0]||t).slice(0,2).replace(/^./,c=>c.toUpperCase());
 };
-// one source, as a row. Lifted out of readSect so the guest-picks page can draw the very
+// one source, as a row. Lifted out of Go Deeper so the guest-picks page can draw the very
 // same row rather than a second rendering of the same facts that drifts from this one.
 function readRow(r){
   const kind = esc(r[4]);
@@ -6304,12 +6327,6 @@ function readRow(r){
     + (p ? `<span class="rdpb">${pickerAvatar(p,"")}`
          + `<span>${esc(p.name)}\u2019s pick</span></span>` : "")
     + `</span></a>`;
-}
-function readSect(n){
-  const rows = (typeof READ!=="undefined" && READ[n.id]) || [];
-  if(!rows.length) return "";
-  return sect("read","Go Deeper",`<div class="reads">${rows.map(readRow).join("")}</div>`,
-    `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
 }
 
 function sect(key,label,html,aside,page,lede,seeall,fold){
@@ -7108,26 +7125,38 @@ const DEEPGRP=[
   ["watch","Watch","Videos",["watch","look"]],
   ["listen","Listen","Podcasts",["listen"]]
 ];
+// Every medium a group claims. A row whose type is in none of them used to be dropped
+// without a word, and if that was every row on a style the whole section went with it.
+const DEEPTYPES=new Set(DEEPGRP.reduce((a,g)=>a.concat(g[3]),[]));
 function deepSect(n){
   const rows=(typeof READ!=="undefined" && READ[n.id]) || [];
-  if(!rows.length) return "";
+  const fold=(label,sub,mine)=>
+    `<details class="xfold deepfold" open><summary><span class="dgl">${esc(label)}</span>`
+    + `<span class="dgs">${esc(sub)}</span><span class="dgn">${mine.length}</span>${FOLDTRI}</summary>`
+    + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
   const folds=DEEPGRP.map(([k,label,sub,types])=>{
     const mine=rows.filter(r=>types.indexOf(r[7])>=0);
     if(!mine.length) return "";
     // open, where the connections above are shut: nine sources at most, and a title you
     // can read is the thing itself rather than a way to somewhere else
-    return `<details class="xfold deepfold" open><summary><span class="dgl">${esc(label)}</span>`
-      + `<span class="dgs">${esc(sub)}</span><span class="dgn">${mine.length}</span>${FOLDTRI}</summary>`
-      + `<div class="xfoldb"><div class="reads">${mine.map(readRow).join("")}</div></div></details>`;
+    return fold(label,sub,mine);
   }).join("");
-  if(!folds) return "";
+  // anything no group claims still gets shown. test/read.test.js keeps this empty, so
+  // seeing it means a new medium arrived without a group to live in.
+  const spare=rows.filter(r=>!DEEPTYPES.has(r[7]));
   // the way more of these arrive: a link out to the suggestion form, with this style
   // already filled in. It opens on its own so the map keeps its place underneath.
   const sug = `<a class="deepsug" href="suggest.html?s=${encodeURIComponent(n.id)}" target="_blank" rel="noopener">`
     + `<i class="dsi"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg></i>`
     + `<span>Suggest something</span></a>`;
-  return sect("read","Go Deeper", folds + sug,
-    `<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`);
+  // Always a section, on all of them. It appeared on 125 styles and was missing from the
+  // other 336, which are precisely the ones with nothing yet and so the ones where the
+  // way to add the first thing matters most.
+  const body = rows.length
+    ? folds + (spare.length?fold("More","Not filed under a medium yet",spare):"") + sug
+    : `<p class="note deepnone">Nothing here yet.</p>` + sug;
+  return sect("read","Go Deeper", body,
+    rows.length?`<span class="sectaside">${rows.length} ${rows.length===1?"source":"sources"}</span>`:"");
 }
 function panel(n,anc,desc){
   const who=n.whoList||[];
@@ -7331,7 +7360,12 @@ function clearSel(){
 // install steps from Chrome, or from the browser inside Instagram or Slack, cannot follow
 // them. A web page cannot choose a browser on a desktop, but both phone platforms have a
 // scheme that can, so offer it to the people the steps do not work for.
-function hereURL(){ return location.origin + location.pathname + location.search; }
+// Every shared link names the site, not the address the page happens to be open at. A
+// link built from location travels as whatever host made it: offshoots.netlify.app, a
+// deploy preview, a file:// path, which is a link nobody else can follow. The hash is
+// the only part that varies.
+const SITE="https://musicatlas.us/";
+function hereURL(){ return SITE; }
 const UA = navigator.userAgent;
 function isiOS(){ return /iPad|iPhone|iPod/.test(UA) ||
   (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1); }   // iPadOS claims to be a Mac
@@ -7383,7 +7417,7 @@ function openShareSheet(btn){
 
 // ---------- sharing ----------
 // every style has a URL: the page plus #id, which boot() already reads back
-function styleURL(id){ return location.origin + location.pathname + location.search + "#" + hashOf(id); }
+function styleURL(id){ return SITE + "#" + hashOf(id); }
 // "about" is the one hash that is not a style id
 const ABOUT_HASH="about", INSTALL_HASH="install", MODES_HASH="modes", PICKS_HASH="picks";
 // The hashes that open a page rather than select a style. Roots and Most influential are
@@ -7392,7 +7426,7 @@ const ABOUT_HASH="about", INSTALL_HASH="install", MODES_HASH="modes", PICKS_HASH
 // selectors these were back when they were folds, and nothing reads them any more.
 const FOLDS={[ABOUT_HASH]:".aboutwrap", [INSTALL_HASH]:".installwrap", [MODES_HASH]:".modelist",
   [PICKS_HASH]:".picklist", roots:".plist", top:".plist"};
-function foldURL(hash){ return location.origin + location.pathname + location.search + "#" + hash; }
+function foldURL(hash){ return SITE + "#" + hash; }
 function openAbout(scroll,hash){
   // these two used to be folds on the root panel; they are pages now, so the hash that
   // deep-links them pushes one
@@ -7416,15 +7450,19 @@ function setHash(id){
 // the same link glyph the About copy control wears, so the two read as one action
 const COPYGLYPH="<svg viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8.4 11.6a3.2 3.2 0 0 0 4.6 0l2.6-2.6a3.2 3.2 0 0 0-4.6-4.6l-1 1\"/><path d=\"M11.6 8.4a3.2 3.2 0 0 0-4.6 0L4.4 11a3.2 3.2 0 0 0 4.6 4.6l1-1\"/></svg>";
 const DATAICON="<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M43.18,128a29.78,29.78,0,0,1,8,10.26c4.8,9.9,4.8,22,4.8,33.74,0,24.31,1,36,24,36a8,8,0,0,1,0,16c-17.48,0-29.32-6.14-35.2-18.26-4.8-9.9-4.8-22-4.8-33.74,0-24.31-1-36-24-36a8,8,0,0,1,0-16c23,0,24-11.69,24-36,0-11.72,0-23.84,4.8-33.74C50.68,38.14,62.52,32,80,32a8,8,0,0,1,0,16C57,48,56,59.69,56,84c0,11.72,0,23.84-4.8,33.74A29.78,29.78,0,0,1,43.18,128ZM240,120c-23,0-24-11.69-24-36,0-11.72,0-23.84-4.8-33.74C205.32,38.14,193.48,32,176,32a8,8,0,0,0,0,16c23,0,24,11.69,24,36,0,11.72,0,23.84,4.8,33.74a29.78,29.78,0,0,0,8,10.26,29.78,29.78,0,0,0-8,10.26c-4.8,9.9-4.8,22-4.8,33.74,0,24.31-1,36-24,36a8,8,0,0,0,0,16c17.48,0,29.32-6.14,35.2-18.26,4.8-9.9,4.8-22,4.8-33.74,0-24.31,1-36,24-36a8,8,0,0,0,0-16Z\"/></svg>";
+// The data address is handed to other people and to models, so it names the site too
+// rather than resolving against whatever host is open.
 function catalogURL(file){
-  try{ return new URL(file, location.href).href; }
+  try{ return new URL(file, SITE).href; }
   catch(e){ return file; }
 }
 function dataRow(){
   return CATALOG.map(c=>{
     const u=catalogURL(c.file), shown=u.replace(/^https?:\/\//,"");
-    // file:// has no address worth handing to anyone, so the row only copies
-    const openable=/^https?:/.test(u) && !installed();
+    // file:// has no address worth handing to anyone, so the row only copies. The test
+    // is on where the page is open, not on the address shown: that names the site now,
+    // so it is https even when the page itself is a local file.
+    const openable=/^https?:/.test(location.href) && !installed();
     return `<button type="button" class="dataline" data-datacopy="${esc(c.file)}"`
       + ` aria-label="Copy the link to ${esc(c.name)}">`
       + DATAICON
@@ -7471,7 +7509,7 @@ function shareSel(btn0){
   // a page says what it is; otherwise the selected style, and failing that the map itself
   const url = page ? foldURL(hashOf(page))
     : n ? styleURL(id)
-    : location.origin+location.pathname+location.search;
+    : hereURL();
   const nm = page ? (btn0.dataset.sharename||"") : n ? n.name : "";
   const title = nm ? "Music Atlas · "+nm : "Music Atlas";
   const text  = nm ? nm+" on Music Atlas" : "Music Atlas — what grew out of what in popular music";
@@ -7973,11 +8011,19 @@ function pushPage(key){
   const page=document.createElement("div");
   page.className="ppage pgin"; page.dataset.p=key;
   if(d.lv) page.classList.add("lv"+d.lv);
-  page.innerHTML=`<h1 class="bigttl${d.icon?" withi":""}">${d.icon?`<i class="pgi mi${d.iconCls?" "+d.iconCls:""}">${d.icon}</i>`:""}<span class="mn">${esc(d.title)}</span></h1>`
-    // the deck says when you would reach for this page; the lede says what it sounds
-    // like. Only the collections carry both.
-    + (d.deck?`<p class="pgdeck">${esc(d.deck)}</p>`:"")
-    + (d.lede?`<p class="note pglede">${esc(d.lede)}</p>`:"")
+  // the deck says when you would reach for this page; the lede says what it sounds
+  // like. Only the collections carry a deck.
+  const ttl=`<h1 class="bigttl"><span class="mn">${esc(d.title)}</span></h1>`;
+  const say=(d.deck?`<p class="pgdeck">${esc(d.deck)}</p>`:"")
+    + (d.lede?`<p class="note pglede">${esc(d.lede)}</p>`:"");
+  // With a picture, the title and what it says sit in a column beside it, so the
+  // description starts where the title does instead of wrapping full width under the
+  // circle and leaving a hole next to it. The h1 still holds nothing but the title, which
+  // is what the compact header bar and measure() read.
+  page.innerHTML=(d.icon
+      ? `<div class="pghead"><i class="pgi mi${d.iconCls?" "+d.iconCls:""}">${d.icon}</i>`
+        + `<div class="pghtx">${ttl}${say}</div></div>`
+      : ttl+say)
     // a slot between the lede and the body, for a control that acts on the whole page
     + (d.top||"")
     + `<div class="more pgbody">${d.html}</div>`;

@@ -137,7 +137,20 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
       for(const s in READ) for(const r of READ[s]) k.add(r[7]); return [...k];});
     const missing=media.filter(m=>tbl.indexOf(JSON.stringify(m)+":")<0);
     say("all "+media.length+" media have a shape of their own"
-      +(missing.length?" (missing "+missing.join(", ")+")":""), missing.length===0); }
+      +(missing.length?" (missing "+missing.join(", ")+")":""), missing.length===0);
+    // and a group on the style panel to be listed under. A medium no group claimed used
+    // to be dropped silently, and a style whose rows were all of that medium lost its
+    // whole Go Deeper section with them. Nothing is dropped now, but a row landing in
+    // the catch-all "More" fold means a medium arrived without a home, so say so here
+    // rather than letting it show up as an odd fold on a panel somebody happens to open.
+    // DEEPGRP is module-scoped like MEDICON, so it is read off the built file too
+    const grp=built.slice(built.indexOf("const DEEPGRP=["));
+    // every all-lowercase token in the block: the group keys and the media they claim.
+    // The labels are capitalised or spaced, so they do not match.
+    const grouped=[...grp.slice(0,grp.indexOf("];")).matchAll(/"([a-z]+)"/g)].map(m=>m[1]);
+    const homeless=media.filter(m=>grouped.indexOf(m)<0);
+    say("every medium has a group on the panel to be listed under"
+      +(homeless.length?" (homeless: "+homeless.join(", ")+")":""), homeless.length===0); }
   // and no row repeats itself: an audio piece must not read "Audio Listen"
   // a 33 1/3 is one book about one record and gets the series badge
   // the badge is drawn once, on the tile. It used to be drawn again as the first word of
@@ -165,11 +178,25 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
   say("and above the share button", r.beforeShare);
   await p.close();
 
-  // and a style with nothing says nothing, rather than showing an empty heading
+  // A style with nothing still gets the section, because that is where the way to add
+  // the first thing lives. It showed on the 125 styles that had sources and was missing
+  // from the other 336, which are exactly the ones that need a suggestion.
   p=await b.newPage({viewport:M}); p.on("pageerror",e=>errs.push(String(e)));
   await p.goto(URL+"#spirituals"); await selected(p);
   await raise(p); await opened(p);
-  say("a style with no reads shows no section", (await p.$$(".sect-read")).length===0);
+  const bare=await p.evaluate(()=>{const sec=document.querySelector(".sect-read");
+    if(!sec) return null;
+    const a=sec.querySelector("a.deepsug");
+    return {head:(sec.querySelector(".secttl")||{}).textContent,
+      empty:((sec.querySelector(".deepnone")||{}).textContent||"").trim(),
+      count:!!sec.querySelector(".sectaside"),
+      folds:sec.querySelectorAll("details").length,
+      sug:a?a.getAttribute("href"):null};});
+  say("a style with no sources still shows Go Deeper",
+    !!bare && bare.head==="Go Deeper" && bare.folds===0);
+  say("  saying so plainly, with no count beside it (\""+(bare&&bare.empty)+"\")",
+    !!bare && bare.empty.length>0 && bare.count===false);
+  say("  and the way to add the first one", !!bare && bare.sug==="suggest.html?s=spirituals");
   say("but still describes the style", (await p.$$(".aboutfold")).length===1);
   await p.close();
 
