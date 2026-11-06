@@ -213,7 +213,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         hrefs:rows.every(x=>/^https?:/.test(x.href)),
         tap:Math.min(...rows.map(x=>Math.round(x.getBoundingClientRect().height)))};});
     say("tapping it lists all "+pg.n+" on a page called "+pg.title,
-      pg.title==="Key artists" && pg.n===(row&&row.count));
+      pg.title==="Key Artists" && pg.n===(row&&row.count));
     // the panel's three or four lead the page, and each row carries the years that
     // artist was making music, which is the one fact a bare name withholds
     say("  the panel's own first", pg.names.slice(0,row.chips).join("/")

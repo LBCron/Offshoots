@@ -133,7 +133,7 @@ const onPage=async(q,k)=>{ await until(q,k=>{
         ct:(x.querySelector(".lrct")||{}).textContent, ico:!!x.querySelector(".lrico svg")})),
       inBrowse:!!br.querySelector('[data-page="picks"]'),
       lede:(d.querySelector(".sectlede")||{}).textContent||""};});
-  say("its own section, headed "+JSON.stringify(sect&&sect.head), !!sect && sect.head==="Go deeper");
+  say("its own section, headed "+JSON.stringify(sect&&sect.head), !!sect && sect.head==="Go Deeper");
   say("  below the collections rather than inside them",
     !!sect && sect.below && sect.inBrowse===false);
   say("  with a line saying what is in it ("+(sect&&sect.lede)+")",

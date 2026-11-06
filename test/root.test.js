@@ -37,17 +37,17 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // ---- order on the page ----
   // Collections lead. They are the thing most people want and the only section whose
   // contents are pictures, so they are also what the minimised sheet peeks at. Then what
-  // the map itself will do for you, then what the map is, then the reading, then the
-  // app's own settings. About used to be a fold under the title, which spent the top of
-  // the panel on a closed row and hid the one paragraph explaining the whole thing.
+  // the map itself will do for you, then the reading, then what the map is, then the
+  // app's own settings. About sits under Go Deeper: it is the thing you read once, so it
+  // goes after the things you come back to rather than between them.
   const order=await p.$eval("#panelBody",e=>[...e.querySelectorAll(
     ".ovcard,.sect-modes,.sect-onmap,.sect-about,.sect-deeper,.sect-appset,.more > .shbtn,.ovhint")]
     .map(x=>x.className.split(" ").find(c=>/ovcard|sect-onmap|sect-modes|sect-about|sect-deeper|sect-appset|shbtn|ovhint/.test(c))));
   note("reading order", order.join(" \u2192 "));
-  say("Collections first, then the map shortcuts, then About, then the reading",
+  say("Collections first, then the map shortcuts, then the reading, then About",
     order.indexOf("sect-modes")<order.indexOf("sect-onmap")
-    && order.indexOf("sect-onmap")<order.indexOf("sect-about")
-    && order.indexOf("sect-about")<order.indexOf("sect-deeper"));
+    && order.indexOf("sect-onmap")<order.indexOf("sect-deeper")
+    && order.indexOf("sect-deeper")<order.indexOf("sect-about"));
   say("  the app's own settings last, with Share under them",
     order.indexOf("sect-appset")>order.indexOf("sect-deeper")
     && order.indexOf("shbtn")===order.length-1);
@@ -55,7 +55,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
   // on the grounds that the title covered it, which worked while there was one list.
   const groups=await p.$$eval("#panelBody .sect .secttl",e=>e.map(x=>x.textContent));
   say("four section headings: "+groups.join(" / "),
-    groups.join("/")==="Collections/Exploring the Atlas/About this map/Go deeper");
+    groups.join("/")==="Collections/Exploring the Atlas/Go Deeper/About This Map");
   say("  not Find: these are for when you do not know what you want", !/find/i.test(groups.join(" ")));
   say("  and Collections is called that here too, the way its own page is",
     groups[0]==="Collections");
@@ -86,7 +86,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       clipped:[...d.querySelectorAll(".lrlbl,.lrsub")].some(x=>x.scrollWidth>x.clientWidth+1),
       more:(d.querySelector("[data-page=\"about\"]")||{}).dataset||{}}; });
   say("About the map is a section, not a fold", !!fold && fold.isFold===false
-    && fold.label==="About this map");
+    && fold.label==="About This Map");
   // The job of this section is to raise two questions, not answer them: what am I looking
   // at, and where did this come from. It briefly answered them in place, carrying the
   // whole methodology paragraph as the row's own label, which came to eleven lines and
@@ -110,17 +110,21 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     const row=await p.evaluate(()=>{
       const r=document.querySelector('.sect-about [data-page="about"]');
       if(!r) return null;
-      const g=r.closest(".listgrp"), pete=document.querySelector('[data-page="picks"]');
+      const g=r.closest(".listgrp");
+      // Most influential, which is a plain full-width row. Pete's Picks used to be the
+      // comparator and is now inside the two-column grid, where the inset is tighter on
+      // purpose, so it is no longer a fair example of an ordinary row.
+      const plain=document.querySelector('.sect-onmap .listrow');
       const same=(a,b,k)=>getComputedStyle(a)[k]===getComputedStyle(b)[k];
       return {boxed:!!g && parseFloat(getComputedStyle(g).borderRadius)>=10
           && !/rgba\(0, 0, 0, 0\)/.test(getComputedStyle(g).backgroundColor),
         icon:!!r.querySelector(".lrico svg"), chev:!!r.querySelector(".lrcv"),
         tap:Math.round(r.getBoundingClientRect().height),
-        // Pete's Picks is a one-line row and this one is a paragraph, so the shared
-        // shape is the card, the glyph and the chevron, not the height
-        likePete:!pete || same(r,pete,"paddingLeft")};});
-    say("  drawn as a row in a card, the way Pete's Picks is",
-      !!row && row.boxed && row.icon && row.chev && row.likePete);
+        // one is a paragraph and one is a line, so the shared shape is the card, the
+        // glyph, the chevron and the inset, not the height
+        likePlain:!plain || same(r,plain,"paddingLeft")};});
+    say("  drawn as a row in a card, like the rest of the panel",
+      !!row && row.boxed && row.icon && row.chev && row.likePlain);
     say("  clearing the tap floor ("+(row&&row.tap)+"px)", !!row && row.tap>=44); }
 
   // ---- the footer: the app's own two settings ----
@@ -436,7 +440,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
       scroll:b.scrollTop, stats:(pg.querySelector(".stats")||{}).textContent||""}; });
   // the page is "About this map", the same words the section that opens it uses: the old
   // title repeated the app's own tagline back at you and wrapped to two lines doing it
-  say("tapping it pushes the page", ab.up && ab.title==="About this map");
+  say("tapping it pushes the page", ab.up && ab.title==="About This Map");
   // the claims the section used to make in place are the page's job now: what the map is,
   // how styles connect, what a playlist is, and under its own heading, where it came from.
   // Not fenced to one continent either: Reggae, Dub, Ska, Jungle, Grime, Krautrock, Bossa

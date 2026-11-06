@@ -106,7 +106,7 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
       // "What it is" became the About this style fold directly under the name, so the
       // thing Go deeper has to come after is the heading block, not a section
       afterAbout:!!(document.querySelector(".sthead").compareDocumentPosition(s)&4)};});
-  say("shown when the panel opens, as \""+r.head+"\"", r.shown && r.head==="Go deeper");
+  say("shown when the panel opens, as \""+r.head+"\"", r.shown && r.head==="Go Deeper");
   say("counted in the aside ("+r.aside+")", r.aside===r.n+" sources");
   say("each row carries title, source and note", r.full);
   // the kind is drawn as well as said, which is what makes a long list scannable

@@ -81,7 +81,7 @@ const state=p=>p.evaluate(()=>{
   await p.click('.sect-onmap [data-page="top"]'); await onPage(p,"top");
   let st=await state(p);
   say("Most influential pushes a page ("+st.title+")",
-    st.key==="top" && st.title==="Most influential");
+    st.key==="top" && st.title==="Most Influential");
   say("  two pages exist but only one is shown", st.pages===2 && st.shown===1);
   say("  back appears, naming where it goes ("+st.backLbl+")", st.back && st.backLbl==="Music Atlas");
   say("  and the name is actually painted",

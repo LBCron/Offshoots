@@ -1655,7 +1655,10 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
 }
 @media (prefers-reduced-motion:reduce){ aside#panel{transition:none} }
 
-.secttl{font:700 var(--t-title3)/var(--t-title3-lh) var(--f-body);letter-spacing:-.02em;text-transform:none;color:var(--fg);margin:0 0 12px}
+/* One heading size across the app. The root panel's section headings were 20px/700 and
+   every heading inside a pushed page was 17px/600, so going one level in made the type
+   get smaller rather than the page get deeper. These match .subh now. */
+.secttl{font:600 var(--t-head)/var(--t-head-lh) var(--f-body);letter-spacing:-.01em;text-transform:none;color:var(--fg);margin:0 0 12px}
 .sect{margin-top:32px;padding:0}
 .sect:first-child{margin-top:20px}
 
@@ -1841,11 +1844,32 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
    draws one hairline across every child after the first. Down a column that is a row
    divider; across a grid it is a line over the top of the right-hand cell. */
 .medgrp{margin-top:10px}
+/* Half a panel is not much room for a label. At 390px a two-column row had 88px of it,
+   which "Pictures" nearly filled and "Pete's Picks" did not fit at all, and at 320px even
+   "Articles" was clipped. The chrome gives some back: a tighter inset and a smaller gap
+   either side of the glyph. What still does not fit wraps rather than losing its end,
+   since these are names and a name with its tail cut off is a different name. */
+.medgrp .listrow{padding:0 10px;gap:8px;min-height:52px}
+.medgrp .lrlbl{white-space:normal;overflow:visible;text-overflow:clip;
+  line-height:1.25;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;
+  overflow:hidden}
+.medgrp .lrico{width:30px;height:30px}
+.medgrp .lrico svg{width:26px;height:26px}
 .medgrp > *{position:relative}
 .medgrp > :nth-child(n+3)::before{content:"";position:absolute;left:12px;right:12px;top:0;
   height:.5px;background:var(--sep)}
 .medgrp > :nth-child(2n)::after{content:"";position:absolute;left:0;top:9px;bottom:9px;
   width:.5px;background:var(--sep)}
+/* On the narrowest phone two columns leave 57px for a label, which clipped Articles and
+   Pictures long before Pete's Picks joined them. One column there: six rows is a short
+   list, and a name you can read beats a grid you cannot. The rules follow the layout,
+   so the vertical one goes and the horizontal one runs from the second row down. */
+@media (max-width:359px){
+  .listgrp.two.medgrp{grid-template-columns:minmax(0,1fr)}
+  .medgrp > :nth-child(2n)::after{display:none}
+  .medgrp > :nth-child(n+2)::before{content:"";position:absolute;left:12px;right:12px;
+    top:0;height:.5px;background:var(--sep)}
+}
 /* the hairline starts where the text does, clear of the glyph, the way every other
    grouped list in the panel draws it */
 /* Explore has four sections where a style panel has six, and they are all lists rather
