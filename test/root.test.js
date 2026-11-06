@@ -144,7 +144,10 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
         const b=document.getElementById("panelBody"), cs=getComputedStyle(b);
         const inner=b.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
         return sh.getBoundingClientRect().width>=inner-1; })(),
-      shBlue:!!sh && getComputedStyle(sh).color.indexOf(hex(blue))>=0,
+      // filled in the deeper blue now, with white on it, rather than blue type on a tint
+      shBlue:!!sh && getComputedStyle(sh).backgroundColor.indexOf(hex(
+        getComputedStyle(document.documentElement).getPropertyValue("--bluebtn").trim()))>=0
+        && /^rgb\(255, 255, 255\)/.test(getComputedStyle(sh).color),
       shOut:!!sh && !sec.contains(sh) && !!(sec.compareDocumentPosition(sh)&4),
       onlyBlue:[...document.querySelectorAll("#panelBody *")].filter(e=>{
         const c=getComputedStyle(e).color; return c.indexOf(hex(blue))>=0;})
@@ -155,7 +158,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp}); const e
     !!foot && /^Install Music Atlas/.test(foot.inst) && foot.instTap>=44);
   say("  and Share full width under both ("+(foot&&foot.shLbl)+")",
     !!foot && foot.shLbl==="Share this app" && foot.shOut && foot.shWide && foot.shTap>=44);
-  say("  in blue, and the only blue on the panel", !!foot && foot.shBlue && foot.onlyBlue===0);
+  say("  filled in blue, and nothing else on the panel blue", !!foot && foot.shBlue && foot.onlyBlue===0);
 
   // ---- Roots came off the panel ----
   // The map is the browser. A third list of style names under it, competing with the map
