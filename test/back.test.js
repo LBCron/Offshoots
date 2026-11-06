@@ -335,7 +335,8 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
   // one step, and that step is the mood just left rather than anything from the walk that
   // home cleared. It used to read "Back to the map", which said the trail was empty but
   // also that the mood had been forgotten on the way into one of its styles.
-  say("not the walk from before", (await label(p))==="Back to Winding down");
+  // the collection's name, which is what its circle and its page both say now
+  say("not the walk from before", (await label(p))==="Back to Wind down");
   say("no page errors", p._errs.length===0 ? true : p._errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);
 
   // the three pieces of map chrome sit on one line, and the search surfaces are light

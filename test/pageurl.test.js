@@ -56,7 +56,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
         title:(document.querySelector(".ppage:not([hidden]) .bigttl .mn")||{}).textContent};});
     const m=D.MODES.find(x=>x[0]===key);
     say("#mode:"+key+" opens it from cold (\""+got.title+"\")",
-      got.p==="mode:"+key && got.open===true && got.title===m[2]);
+      got.p==="mode:"+key && got.open===true && got.title===m[1]);
     await q.close();
   }
   // a hash naming nothing must land on the map rather than on a blank page
@@ -91,7 +91,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   note("the button", JSON.stringify({label:v.label, key:v.key, name:v.name}));
   say("a collection carries one share button", v.n===1);
   say("  naming the collection, not the app (\""+v.name+"\")",
-    v.name==="System test" && v.key==="mode:system" && v.label==="Share this collection");
+    v.name==="Test the speakers" && v.key==="mode:system" && v.label==="Share this collection");
   say("  at the foot, under the list", v.underList);
   say("  clearing the tap floor ("+v.tap+"px)", v.tap>=44);
   // what it shares is the thing you are standing in

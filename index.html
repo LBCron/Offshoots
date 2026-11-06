@@ -792,6 +792,12 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 .ppage.pgout{transform:translateX(-22px);opacity:0}
 @media (prefers-reduced-motion:reduce){ .ppage{transition:none} }
 .ppage:not([data-p="root"]) .bigttl{margin-top:calc(var(--tap) + 10px)}
+/* A collection page says its own name, then when you would reach for it, then what it
+   sounds like. The deck is the line that used to be the page's title, which meant Focus
+   opened a page headed "Working or studying" with the word Focus nowhere on it. */
+.pgdeck{margin:2px 0 6px;max-width:40em;
+  font:500 var(--t-body)/var(--t-body-lh) var(--f-body);color:var(--fg)}
+.pgdeck + .pglede{margin-top:0}
 .pglede{margin:2px 0 14px;max-width:40em}
 /* a pushed list is the page's whole content, so it does not need a section's top margin */
 .pgbody > .listgrp:first-child{margin-top:2px}
@@ -3369,7 +3375,7 @@ const FAMMAP = {"exp":"#bac5d5","latin":"#2fa984","gospel":"#879c5d","folk":"#cf
 // happy, romantic, driving) plus the three dimensions listening research keeps finding —
 // regulating how you feel, listening to think about yourself, and listening to be with people.
 const MODES = [
-  ["focus","Focus","Working or studying",
+  ["focus","Focus","Working or studying, when words get in the way.",
    "Words compete with the words in your own head, so what survives is instrumental, steady and a little uneventful — music that puts a floor under the work instead of asking for attention.",
    [
     ["ambient","Written to be as ignorable as it is interesting"],
@@ -3404,7 +3410,7 @@ const MODES = [
     ["amapiano","Log drums and space, patient for seven minutes"],
     ["threestep","A soft shuffle that stays below the work"]
    ],2],
-  ["coding","Coding","Hours in a text editor",
+  ["coding","Coding","Long hours in a text editor, repetition welcome.",
    "Not the same as Focus, which is for taking something in. This is for building, so it wants momentum rather than calm, and it has to survive being ignored for forty minutes and then noticed again. Words are the problem: anything with a lyric competes with the part of you reading the screen.",
    [
     ["idm","Rhythm as a problem someone else already solved"],
@@ -3443,7 +3449,7 @@ const MODES = [
     ["abstract","Sample loops doing the work of a drummer"],
     ["newgrass","Acoustic runs at speed, wordless for whole stretches"]
    ],3],
-  ["restless","Can't settle","When nothing will go in",
+  ["restless","Can't settle","When nothing will go in and nothing will sit still.",
    "The usual advice is something quieter. It often works the other way round: dense and relentless gives the restless part something to hold, and heavy repetition keeps novelty low so nothing new can hijack you. Studies adding steady noise find it lifts people who are easily distracted and does nothing for people who are not.",
    [
     ["funk","One chord, one groove, as long as it takes"],
@@ -3488,7 +3494,7 @@ const MODES = [
     ["postpunk","Angular and wound tight, which matches the mood"],
     ["egg_punk","Tinny, fast and deliberately the wrong shape"]
    ],3],
-  ["workout","Workout","Lifting and intervals",
+  ["workout","Workout","Lifting and intervals, loud enough to push through.",
    "Effort that comes in bursts rather than a steady hour. Loud, repetitive and front-loaded, so the hardest ten seconds of a set always has something behind it. Distance running and riding want the opposite of this: see Miles.",
    [
     ["house","Four-on-the-floor at 120–128 — the original treadmill tempo"],
@@ -3533,7 +3539,7 @@ const MODES = [
     ["raprock","Dumb, loud and timed to the lift"],
     ["bloghouse","Compressed to the ceiling, which is the point here"]
    ],5],
-  ["miles","Miles","Running or riding",
+  ["miles","Run or ride","Going the distance at a pace you can hold.",
    "An hour at one effort, not ten sets. Cadence is the thing: runners land near 160–180 steps a minute, so 130–140 BPM meets every other footfall and 170ish meets each one. Long forms, few drops and little dynamic range, so nothing yanks you off your pace or asks to be listened to while you are also breathing.",
    [
     ["progressive_house","Gradual, with nothing that breaks stride"],
@@ -3576,7 +3582,7 @@ const MODES = [
     ["threestep","Skipping garage drums that fall between your steps"],
     ["stompclap","Stomps and claps setting a stride for you"]
    ],4],
-  ["winddown","Wind down","Winding down",
+  ["winddown","Wind down","For the hour between finishing and sleeping.",
    "Slow tempos, soft attacks and space between the notes. Getting under your own resting pulse is most of the trick.",
    [
     ["slowcore","Quiet, unhurried, barely there"],
@@ -3619,7 +3625,7 @@ const MODES = [
     ["swamp_blues","A humid groove hanging behind the beat all night"],
     ["nashville","Strings and a choir behind a voice set close"]
    ],1],
-  ["sleep","Sleep","Falling asleep",
+  ["sleep","Sleep","To fall asleep to, and stay asleep through.",
    "Not the same as Wind down, which is for the hour before. This is for the music still playing after you stop hearing it, so nothing can arrive: no words, no chorus, no change in volume big enough to pull you back up. Sleep studies that find an effect tend to use slow, soft, predictable music at around sixty beats a minute, which is most of what is going on here.",
    [
     ["ambient","Long enough to still be playing when you are gone"],
@@ -3643,7 +3649,7 @@ const MODES = [
     ["westcoast_jazz","Airy counterpoint played without ever raising the volume"],
     ["smoothjazz","Soft, predictable and never changing dynamic level"]
    ],1],
-  ["party","Party","A room full of people",
+  ["party","Dance floor","Keeping a room moving once it already is.",
    "A floor beat people can find without counting, choruses that arrive early, and enough familiarity that nobody has to work at it.",
    [
     ["disco","The style that invented the modern dance floor"],
@@ -3692,7 +3698,7 @@ const MODES = [
     ["crunknb","A sung hook over a beat that shouts"],
     ["snap","Space left in the beat for the room"]
    ],5],
-  ["houseparty","House party","Shouting along, drink in hand",
+  ["houseparty","House party","Shouting along with a drink in your hand.",
    "Party is a dance floor and a DJ. This is the other kind: a living room with the furniture pushed back, where recognition beats taste and the measure of a song is whether thirty people can yell the words at it. Ordered oldest to newest, so the back half is what currently gets played, and it carries two styles built around a drop for the point in the night when the room wants one.",
    [
     ["frat","The ancestor, and it still works"],
@@ -3743,7 +3749,7 @@ const MODES = [
     ["cowpunk","Country at punk speed, which clears furniture"],
     ["snap","Dance instructions, which solves the standing-around problem"]
    ],5],
-  ["road","Road trip","Hours of open highway",
+  ["road","Road trip","Hours of open highway with the next town far off.",
    "The long drive, not the daily one: nothing here has to survive stopping. A mid-tempo groove that keeps going without needing you to follow it, and a chorus big enough to beat a windshield at seventy.",
    [
     ["krautrock","Motorik: a beat built out of the highway itself"],
@@ -3790,7 +3796,7 @@ const MODES = [
     ["psych_soul","Wah and echo with the window down"],
     ["countryrap","Rural stories over Southern drums, for the interstate"]
    ],3],
-  ["commute","Commuting","The same drive, twice a day",
+  ["commute","Commuting","The same drive twice a day, made bearable.",
    "Traffic is the opposite problem to a road trip: the car keeps stopping, so nothing here can depend on momentum. Even tempo, warm tone and grooves that never build toward a release you are not going to get, plus a few long or familiar enough to fill a backup without asking much of you.",
    [
     ["softrock","Drive-time radio, made for the trip home"],
@@ -3839,40 +3845,26 @@ const MODES = [
     ["alt_hh","Looser sampling that never depends on getting anywhere"],
     ["underground","Dusty loops and dense rhyming, built for headphones"]
    ],2],
-  ["dinner","Dinner","Cooking or eating",
+  ["dinner","Dinner","At the table, under the conversation.",
    "Present without demanding. Groove-forward, warm in timbre and even in volume, so it holds the room between conversations.",
    [
     ["souljazz","Hammond organ at a slow simmer"],
-    ["boogaloo","Latin soul with its sleeves rolled up"],
     ["philly","Strings, sweetness, immaculate manners"],
     ["easy","The style literally engineered for this"],
     ["exotica","Dinner-party music that thinks it is on an island"],
     ["bossa","A whisper with a rhythm section behind it"],
-    ["mento","Jamaican porch music, acoustic and light"],
     ["smoothjazz","Unembarrassed background"],
     ["son","Guitar, voice and a clave, nothing louder"],
     ["citypop","Expensive-sounding Tokyo evening music"],
-    ["jazz_early","Cheerful, busy, never in the way"],
-    ["western_swing","A dance band that fits in a kitchen"],
-    ["acidjazz","Groove with the volume knob at four"],
-    ["hardbop","Melodies you can hum over a chopping board"],
-    ["jazzfunk","A locked groove with the solos tucked inside"],
     ["bolero","Nylon guitar taking its time with the second course"],
     ["cool","Restraint, which is exactly the right manners here"],
     ["westcoast_jazz","Chamber textures that hold a room at low volume"],
     ["modal","Vamps that hold steady while the talking continues"],
-    ["retro_soul","A live band in one room, warm on tape"],
     ["danzon","Strings and flute with perfect table manners"],
-    ["chachacha","Light percussion that keeps the kitchen moving"],
-    ["mambo","Brass stabs that lift a room without filling it"],
-    ["salsa","Percussion warm enough to cook over"],
-    ["cumbia","A two-step that suits standing at the stove"],
-    ["conjunto","Accordion polkas, cheerful and entirely unbothered"],
     ["ragtime","Parlor piano that handles the gaps in conversation"],
     ["swing","Horn sections at a conversational volume"],
     ["tropicalia","Sunny and strange, warm across the table"],
     ["chicago_soul","Weight carried without raising the volume"],
-    ["highlife","Guitar lines that circle the table politely"],
     ["nujazz","Rhodes and double bass over a soft programmed pulse"],
     ["ukjazz","Live horns at a simmer, modern and unhurried"],
     ["jazz_new","Improvisers who stay inside the groove all evening"],
@@ -3880,14 +3872,69 @@ const MODES = [
     ["spaceage","Vibraphone bouncing gently between the speakers"],
     ["tradpop","Standards sung close to the mic, for grown-ups"],
     ["baroquepop","Harpsichord and strings, three minutes at a time"],
-    ["sunshine","Stacked harmony as bright as the kitchen light"],
     ["calypsocraze","Island rhythm smoothed for a dinner table"],
     ["rocksteady","Close harmony and a bass that stays seated"],
-    ["nudisco","A four-four kick with the lights still up"],
     ["deephouse","Warm chords for when plates are being cleared"],
-    ["worldbeat","Warm and rhythmic without asking for the table"]
+    ["worldbeat","Warm and rhythmic without asking for the table"],
+    ["quiet_storm","Late, smooth, and pitched under the talking"],
+    ["neosoul","Live-sounding and in no hurry at all"],
+    ["nashville","Strings and smooth edges, country with its tie on"],
+    ["countrypolitan","Countrypolitan is dinner music that happens to be country"],
+    ["thirdstream","Chamber writing with a rhythm section, quiet by design"],
+    ["ac","Soft, familiar, and asks nothing of the table"],
+    ["balada","Spanish-language ballads, warm and slow"],
+    ["blueeyed","Soul sung gently, for a table of mixed tastes"],
+    ["altrnb","Low-lit and spacious, modern without being cold"],
+    ["postbop","Complicated enough to notice, polite enough to ignore"],
+    ["tinpan","The songs everything else is a version of"],
+    ["broadway","Standards with the orchestra still in the pit"]
    ],2],
-  ["cocktails","Cocktails","People standing and talking",
+  ["cooking","Cooking","Standing at the stove, chopping, stirring, waiting.",
+   "Rhythm you can work to without listening to it. Upbeat and even, nothing that stops you mid-task, and long enough that you are not choosing again every three minutes.",
+   [
+    ["boogaloo","Latin soul with its sleeves rolled up"],
+    ["western_swing","A dance band that fits in a kitchen"],
+    ["hardbop","Melodies you can hum over a chopping board"],
+    ["chachacha","Light percussion that keeps the kitchen moving"],
+    ["salsa","Percussion warm enough to cook over"],
+    ["cumbia","A two-step that suits standing at the stove"],
+    ["mambo","Brass stabs that lift a room without filling it"],
+    ["conjunto","Accordion polkas, cheerful and entirely unbothered"],
+    ["sunshine","Stacked harmony as bright as the kitchen light"],
+    ["jazz_early","Cheerful, busy, never in the way"],
+    ["acidjazz","Groove with the volume knob at four"],
+    ["jazzfunk","A locked groove with the solos tucked inside"],
+    ["nudisco","A four-four kick with the lights still up"],
+    ["mento","Jamaican porch music, acoustic and light"],
+    ["retro_soul","A live band in one room, warm on tape"],
+    ["highlife","Guitar lines that circle the table politely"],
+    ["motown","Three minutes a side, and everybody knows the words"],
+    ["soul","Warm enough to keep a kitchen moving"],
+    ["southern_soul","Horns and sweat, for the part that needs stirring"],
+    ["funk","A groove to chop in time with"],
+    ["nola_rnb","Piano that rolls along at the speed of a kitchen"],
+    ["beach_music","Shag rhythm, made for moving around a room"],
+    ["doowop","Harmony to sing badly over a pan"],
+    ["ska","An upstroke on every offbeat, which is the pace of prep"],
+    ["reggae","Unhurried, and it never needs watching"],
+    ["soca","Carnival tempo for a long cook"],
+    ["afrobeat","Twelve-minute grooves, so you set it once"],
+    ["afrobeats","Bright and springy, the modern kitchen default"],
+    ["bachata","Guitar and a hip-swing you do without noticing"],
+    ["ranchera","Mariachi brass, for cooking that deserves an audience"],
+    ["chicano_soul","Slow and sweet between the chopping"],
+    ["latin_rock","Congas under a guitar, busy but not loud"],
+    ["postdisco","Boogie basslines at domestic volume"],
+    ["disco","Four on the floor while the oven comes up"],
+    ["gogo","Percussion that does not stop, like the prep"],
+    ["modern_funk","Synth-funk, warm, and happy to loop"],
+    ["neoswing","Horns with a bounce, for a kitchen with people in it"],
+    ["psych_soul","Wah guitar and strings, for taking your time"],
+    ["bluegrass","Fast picking for fast hands"],
+    ["honkytonk","A shuffle and a steel guitar, cheerful about everything"]
+   ],3],
+
+  ["cocktails","Cocktails","A room of people standing up, holding drinks, talking.",
    "Dinner holds a seated table together. This is the other job: everyone is upright, moving between conversations, and talking over it. Brighter and more rhythmic than Dinner, well short of Party, and written to be half-heard.",
    [
     ["afrocuban_jazz","Horns and congas at conversation volume"],
@@ -3937,7 +3984,7 @@ const MODES = [
     ["artpop","Clever enough to notice, poised enough to ignore"],
     ["worldbeat","Bright, percussive and unbothered by being talked over"]
    ],2],
-  ["coffee","Coffee shop","A room full of strangers",
+  ["coffee","Coffee shop","Working near strangers, half listening to the room.",
    "Playing to people who did not choose it, at a volume nobody asked about. It has to work for the person reading, the person on a laptop and the person in the queue, so nothing that demands attention and nothing anyone could object to. Agreeable, but not wallpaper, since the staff hear it all day.",
    [
     ["indiefolk","Acoustic and unobjectionable, and it still has a voice"],
@@ -3985,7 +4032,7 @@ const MODES = [
     ["alte","Unfamiliar enough to notice, soft enough to ignore"],
     ["alt_hh","Unexpected subjects at a volume nobody asks about"]
    ],2],
-  ["gaming","Gaming","Playing something",
+  ["gaming","Gaming","Playing for hours with the game's own sound turned down.",
    "A mood held for hours without competing for the hand-eye part of your brain: loops, sequences and a tempo that stays put. A good share of it descends from the sound chips that scored games in the first place.",
    [
     ["chiptune","Written on the chips that scored your childhood"],
@@ -4032,7 +4079,7 @@ const MODES = [
     ["hyperpop","Maximal and pitched up, somehow easy to tune out"],
     ["dariacore","Chopped fragments colliding at the speed of play"]
    ],3],
-  ["chores","Getting it done","Chores and admin",
+  ["chores","Getting it done","Chores, admin, and the things you have been avoiding.",
    "Nothing here has to be followed. It wants to be familiar, mid-tempo and forgiving of being half-ignored, so losing a minute to the washing machine costs nothing. A workout locks to a cadence and a party needs the room; this needs neither.",
    [
     ["njs","Swing beat and a chorus you already know"],
@@ -4083,7 +4130,7 @@ const MODES = [
     ["countryrap","Beats that push while the banjo keeps it light"],
     ["worldbeat","Percussion that keeps going when you leave the room"]
    ],3],
-  ["lift","Lift the mood","Changing how you feel",
+  ["lift","Lift the mood","For deliberately changing how you feel.",
    "Major keys, chords that change often, and more than one voice singing at once. Steering mood is the most common reason people reach for music at all.",
    [
     ["motown","Three minutes engineered for joy"],
@@ -4133,7 +4180,7 @@ const MODES = [
     ["christianhh","Rap built to end somewhere better than it started"],
     ["rnb","A dance band behind a voice that is sure"]
    ],3],
-  ["hype","Walk in tall","Before you walk in",
+  ["hype","Walk in tall","The ten minutes before you walk in.",
    "Swagger rather than speed. Front-loaded, brash and certain of itself, for the three minutes before the thing rather than during it. Workout is led by tempo and Burn it off is anger; this is neither.",
    [
     ["golden","The voice arrives already convinced"],
@@ -4181,7 +4228,7 @@ const MODES = [
     ["garage","Amateurs certain they are the best band alive"],
     ["crunknb","Smooth on top, aggressive underneath, certain throughout"]
    ],4],
-  ["burn","Burn it off","Anger with nowhere to go",
+  ["burn","Burn it off","Anger with nowhere else to go.",
    "Anger wants volume, distortion and a tempo above your pulse. Playing it through tends to work better than reaching for something calming first.",
    [
     ["hardcore","Two minutes, no chorus, full volume"],
@@ -4220,7 +4267,7 @@ const MODES = [
     ["egg_punk","Too fast and too cheap to sit still through"],
     ["cowpunk","Honky-tonk played at a speed nobody can sit through"]
    ],5],
-  ["nightcap","Nightcap","Alone, late, nothing to do",
+  ["nightcap","Nightcap","A late hour on your own, with nowhere to be.",
    "Not sad, which is Sit with it, and not on the way to sleep, which is Wind down. Slow, worn-in and adult, with room between the notes and nobody to talk to. Anything that would make you check the time is out.",
    [
     ["delta","One voice, one guitar, at two in the morning"],
@@ -4265,7 +4312,7 @@ const MODES = [
     ["citypop","Polished nightlife music for staying in"],
     ["psych_soul","Echo and wah at the end of a long evening"]
    ],1],
-  ["sit","Sit with it","Something heavy",
+  ["sit","Sit with it","For bad news, and for not wanting to be cheered up.",
    "Sad music is reliably one of the most pleasurable kinds there is: slow, minor, a single voice close to the microphone, the feeling rehearsed at a safe distance.",
    [
     ["delta","One voice, one guitar, nothing hidden"],
@@ -4309,7 +4356,7 @@ const MODES = [
     ["antifolk","Unpolished on purpose, which is easier to believe"],
     ["neopsych","Melodies bent slightly out of true"]
    ],1],
-  ["onmind","On your mind","Someone's on your mind",
+  ["onmind","On your mind","Someone you keep thinking about, present or gone.",
    "Not being with someone: thinking about them. High major keys, a voice close and a little nervous, and words in the second person about something that has not been said yet. A great deal of pop exists to sell this one feeling.",
    [
     ["synthpop","Longing routed through a synthesiser"],
@@ -4354,7 +4401,7 @@ const MODES = [
     ["postpunk","Bass where the solo was, and nobody relaxing"],
     ["protorap","Spoken plainly, which is how it actually sounds"]
    ],2],
-  ["together","With someone","Being with people",
+  ["together","With someone","One other person, close enough not to need talking.",
    "The third thing the research keeps finding, after mood and self-reflection: music as a way of being with someone. Slow enough to talk over, or shared enough that everyone already knows it.",
    [
     ["doowop","Four people on a corner, no instruments required"],
@@ -4401,7 +4448,7 @@ const MODES = [
     ["frat","Three chords, a shouted chorus, a saxophone"],
     ["rnb","Where most of this started, and still works"]
    ],2],
-  ["showkid","Show a kid","Ages four to fifteen",
+  ["showkid","Show a kid","Ages four to fifteen, usually played in the car.",
    "Not children's music, which is a genre a kid grows out of. The rule here is that the first question a kid asks, how is that sound being made, has an answer they can see: a washboard worn as a shirt, a games console with three channels, two turntables, hands moving faster than looks possible. That lands at four, where it is a body response, and at fifteen, where what gets through is that a person did this on purpose. Chosen so none of it needs skipping with someone small in the room.",
    [
     ["chiptune","A games console with three voices, and that is the whole band"],
@@ -4445,7 +4492,7 @@ const MODES = [
     ["powermetal","Galloping riffs and dragons, played completely straight"],
     ["progmetal","Odd meters counted out with visible effort"]
    ],3],
-  ["family","Family's over","Three generations in one room",
+  ["family","Family's over","Three generations in one room and one stereo.",
    "Weighted toward whoever is oldest, since they are the one least likely to meet the others halfway, and chosen so nobody younger has to sit through it politely. Songs with a shape people can sing along to even when they do not know the record.",
    [
     ["tradpop","Sinatra, Crosby, and a room that goes quiet"],
@@ -4494,7 +4541,7 @@ const MODES = [
     ["british_blues","The records the oldest person in the room bought"],
     ["rnb","Postwar records that nobody present objects to"]
    ],3],
-  ["deep","Listen properly","Nothing else running",
+  ["deep","Listen properly","Sitting down with the record and nothing else running.",
    "Wide dynamic range and long forms that only pay off if you give them the whole stretch. This is the one that rewards headphones and an hour.",
    [
     ["freejazz","No net and no map"],
@@ -4548,7 +4595,7 @@ const MODES = [
     ["protorap","Poetry against bass, decades before the template"],
     ["artpop","Hooks delivered with avant-garde production, for close listening"]
    ],1],
-  ["morning","Morning","The first hour of the day",
+  ["morning","Morning","The first hour, before the day has decided anything.",
    "Bright without being loud, and already moving. Nothing that asks you to decide anything, since you have not had the coffee yet.",
    [
     ["sunshine","Written to sound like a clear morning"],
@@ -4594,7 +4641,7 @@ const MODES = [
     ["ragtime","Syncopation with a snap, short and bright"],
     ["jazz_early","Horns weaving cheerfully with nowhere to be"]
    ],2],
-  ["system","System test","What the speakers can do",
+  ["system","Test the speakers","What a system can do, when you want to hear it.",
    "Not Listen properly, which is about the music. This is about the equipment, and the five ways it gives itself away: how low it reaches and whether it stops cleanly, whether a voice arrives in the room or behind glass, whether a cymbal rings out or sizzles, how far it falls between the quietest moment and the loudest, and whether you can point at where each player is standing. Roughly in that order.",
    [
     ["dub","Bass with echo behind it, which finds the room's corners"],
@@ -6333,8 +6380,11 @@ function backLabel(){
 // the title without building the page: modePage() and mediaPage() render their whole body
 function pageTitleOf(key){
   if(key.indexOf("mode:")===0){
+    // the collection's name, which is what its page is titled and what the circle you
+    // pressed said. This returned the descriptor, so leaving a style put "Going the
+    // distance at a pace you can hold." in a back pill built for two or three words.
     const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===key.slice(5));
-    return m ? m[2] : "";
+    return m ? m[1] : "";
   }
   const d=PAGES_DEF[key];
   if(!d) return "";
@@ -7562,7 +7612,8 @@ function goRow(key,label,sub,count,attr,title){
 // offline file. Chosen per mode for what the mode means rather than the nearest word:
 // Sleep is a zzz and not a hotel bed, Getting it done is a double check, and the three
 // drinks are three different glasses so no two modes wear the same one.
-const MODEICON={"system":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M192,24H64A16,16,0,0,0,48,40V216a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V40A16,16,0,0,0,192,24Zm0,192H64V40H192ZM116,76a12,12,0,1,1,12,12A12,12,0,0,1,116,76Zm12,116a40,40,0,1,0-40-40A40,40,0,0,0,128,192Zm0-64a24,24,0,1,1-24,24A24,24,0,0,1,128,128Z\"/></svg>","winddown":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,96a8,8,0,0,1-8,8H216v16a8,8,0,0,1-16,0V104H184a8,8,0,0,1,0-16h16V72a8,8,0,0,1,16,0V88h16A8,8,0,0,1,240,96ZM144,56h8v8a8,8,0,0,0,16,0V56h8a8,8,0,0,0,0-16h-8V32a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16Zm72.77,97a8,8,0,0,1,1.43,8A96,96,0,1,1,95.07,37.8a8,8,0,0,1,10.6,9.06A88.07,88.07,0,0,0,209.14,150.33,8,8,0,0,1,216.77,153Zm-19.39,14.88c-1.79.09-3.59.14-5.38.14A104.11,104.11,0,0,1,88,64c0-1.79,0-3.59.14-5.38A80,80,0,1,0,197.38,167.86Z\"/></svg>","sleep":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M216,72H32V48a8,8,0,0,0-16,0V208a8,8,0,0,0,16,0V176H240v32a8,8,0,0,0,16,0V112A40,40,0,0,0,216,72ZM32,88h72v72H32Zm88,72V88h96a24,24,0,0,1,24,24v48Z\"/></svg>","nightcap":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,88h0a95.63,95.63,0,0,0-15.53-52.37,8,8,0,0,0-6.7-3.63H54.23a8,8,0,0,0-6.7,3.63A95.63,95.63,0,0,0,32,88h0a96.12,96.12,0,0,0,88,95.66V216H88a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16H136V183.66A96.12,96.12,0,0,0,224,88ZM58.7,48H197.3a79.52,79.52,0,0,1,10.3,32H48.4A79.52,79.52,0,0,1,58.7,48ZM128,168A80.11,80.11,0,0,1,48.4,96H207.6A80.11,80.11,0,0,1,128,168Z\"/></svg>","sit":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M158.66,196.44l-32,48a8,8,0,1,1-13.32-8.88l32-48a8,8,0,0,1,13.32,8.88ZM232,92a76.08,76.08,0,0,1-76,76H132.28l-29.62,44.44a8,8,0,1,1-13.32-8.88L113.05,168H76A52,52,0,0,1,76,64a53.26,53.26,0,0,1,8.92.76A76.08,76.08,0,0,1,232,92Zm-16,0A60.06,60.06,0,0,0,96,88.46a8,8,0,0,1-16-.92q.21-3.66.77-7.23A38.11,38.11,0,0,0,76,80a36,36,0,0,0,0,72h80A60.07,60.07,0,0,0,216,92Z\"/></svg>","deep":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M201.89,54.66A103.43,103.43,0,0,0,128.79,24H128A104,104,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V144a24,24,0,0,0-24-24H40.36A88,88,0,0,1,128,40h.67a87.71,87.71,0,0,1,87,80H192a24,24,0,0,0-24,24v40a24,24,0,0,0,24,24h16a24,24,0,0,0,24-24V128A103.41,103.41,0,0,0,201.89,54.66ZM64,136a8,8,0,0,1,8,8v40a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V136Zm152,48a8,8,0,0,1-8,8H192a8,8,0,0,1-8-8V144a8,8,0,0,1,8-8h24Z\"/></svg>","focus":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M221.87,83.16A104.1,104.1,0,1,1,195.67,49l22.67-22.68a8,8,0,0,1,11.32,11.32l-96,96a8,8,0,0,1-11.32-11.32l27.72-27.72a40,40,0,1,0,17.87,31.09,8,8,0,1,1,16-.9,56,56,0,1,1-22.38-41.65L184.3,60.39a87.88,87.88,0,1,0,23.13,29.67,8,8,0,0,1,14.44-6.9Z\"/></svg>","dinner":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M72,88V40a8,8,0,0,1,16,0V88a8,8,0,0,1-16,0ZM216,40V224a8,8,0,0,1-16,0V176H152a8,8,0,0,1-8-8,268.75,268.75,0,0,1,7.22-56.88c9.78-40.49,28.32-67.63,53.63-78.47A8,8,0,0,1,216,40ZM200,53.9c-32.17,24.57-38.47,84.42-39.7,106.1H200ZM119.89,38.69a8,8,0,1,0-15.78,2.63L112,88.63a32,32,0,0,1-64,0l7.88-47.31a8,8,0,1,0-15.78-2.63l-8,48A8.17,8.17,0,0,0,32,88a48.07,48.07,0,0,0,40,47.32V224a8,8,0,0,0,16,0V135.32A48.07,48.07,0,0,0,128,88a8.17,8.17,0,0,0-.11-1.31Z\"/></svg>","cocktails":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M237.66,45.66A8,8,0,0,0,232,32H24a8,8,0,0,0-5.66,13.66L120,147.31V208H88a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16H136V147.31ZM43.31,48H212.69l-16,16H59.31ZM128,132.69,75.31,80H180.69Z\"/></svg>","coffee":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M80,56V24a8,8,0,0,1,16,0V56a8,8,0,0,1-16,0Zm40,8a8,8,0,0,0,8-8V24a8,8,0,0,0-16,0V56A8,8,0,0,0,120,64Zm32,0a8,8,0,0,0,8-8V24a8,8,0,0,0-16,0V56A8,8,0,0,0,152,64Zm96,56v8a40,40,0,0,1-37.51,39.91,96.59,96.59,0,0,1-27,40.09H208a8,8,0,0,1,0,16H32a8,8,0,0,1,0-16H56.54A96.3,96.3,0,0,1,24,136V88a8,8,0,0,1,8-8H208A40,40,0,0,1,248,120ZM200,96H40v40a80.27,80.27,0,0,0,45.12,72h69.76A80.27,80.27,0,0,0,200,136Zm32,24a24,24,0,0,0-16-22.62V136a95.78,95.78,0,0,1-1.2,15A24,24,0,0,0,232,128Z\"/></svg>","onmind":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z\"/></svg>","together":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,8,8,0,0,1,0-6.22A8,8,0,0,1,192,112a24,24,0,1,0-23.24-30,8,8,0,1,1-15.5-4A40,40,0,1,1,219,117.51a67.94,67.94,0,0,1,27.43,21.68A8,8,0,0,1,244.8,150.4ZM190.92,212a8,8,0,1,1-13.84,8,57,57,0,0,0-98.16,0,8,8,0,1,1-13.84-8,72.06,72.06,0,0,1,33.74-29.92,48,48,0,1,1,58.36,0A72.06,72.06,0,0,1,190.92,212ZM128,176a32,32,0,1,0-32-32A32,32,0,0,0,128,176ZM72,120a8,8,0,0,0-8-8A24,24,0,1,1,87.24,82a8,8,0,1,0,15.5-4A40,40,0,1,0,37,117.51,67.94,67.94,0,0,0,9.6,139.19a8,8,0,1,0,12.8,9.61A51.6,51.6,0,0,1,64,128,8,8,0,0,0,72,120Z\"/></svg>","morning":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,152H199.55a73.54,73.54,0,0,0,.45-8,72,72,0,0,0-144,0,73.54,73.54,0,0,0,.45,8H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM72,144a56,56,0,1,1,111.41,8H72.59A56.13,56.13,0,0,1,72,144Zm144,56a8,8,0,0,1-8,8H48a8,8,0,0,1,0-16H208A8,8,0,0,1,216,200ZM72.84,43.58a8,8,0,0,1,14.32-7.16l8,16a8,8,0,0,1-14.32,7.16Zm-56,48.84a8,8,0,0,1,10.74-3.57l16,8a8,8,0,0,1-7.16,14.31l-16-8A8,8,0,0,1,16.84,92.42Zm192,15.16a8,8,0,0,1,3.58-10.73l16-8a8,8,0,1,1,7.16,14.31l-16,8a8,8,0,0,1-10.74-3.58Zm-48-55.16,8-16a8,8,0,0,1,14.32,7.16l-8,16a8,8,0,1,1-14.32-7.16Z\"/></svg>","coding":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.3Zm176,27.7-48-40a8,8,0,1,0-10.24,12.3L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z\"/></svg>","restless":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M56,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0ZM88,24a8,8,0,0,0-8,8V224a8,8,0,0,0,16,0V32A8,8,0,0,0,88,24Zm40,32a8,8,0,0,0-8,8V192a8,8,0,0,0,16,0V64A8,8,0,0,0,128,56Zm40,32a8,8,0,0,0-8,8v64a8,8,0,0,0,16,0V96A8,8,0,0,0,168,88Zm40-16a8,8,0,0,0-8,8v96a8,8,0,0,0,16,0V80A8,8,0,0,0,208,72Z\"/></svg>","road":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M235.92,199A8,8,0,0,1,225,195.92L155.32,72H136v8a8,8,0,0,1-16,0V72H100.68L31,195.92A8,8,0,0,1,17,188.08L82.32,72H24a8,8,0,0,1,0-16H232a8,8,0,0,1,0,16H173.68L239,188.08A8,8,0,0,1,235.92,199ZM128,112a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V120A8,8,0,0,0,128,112Zm0,56a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V176A8,8,0,0,0,128,168Z\"/></svg>","gaming":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M176,112H152a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16ZM104,96H96V88a8,8,0,0,0-16,0v8H72a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0v-8h8a8,8,0,0,0,0-16ZM241.48,200.65a36,36,0,0,1-54.94,4.81c-.12-.12-.24-.24-.35-.37L146.48,160h-37L69.81,205.09l-.35.37A36.08,36.08,0,0,1,44,216,36,36,0,0,1,8.56,173.75a.68.68,0,0,1,0-.14L24.93,89.52A59.88,59.88,0,0,1,83.89,40H172a60.08,60.08,0,0,1,59,49.25c0,.06,0,.12,0,.18l16.37,84.17a.68.68,0,0,1,0,.14A35.74,35.74,0,0,1,241.48,200.65ZM172,144a44,44,0,0,0,0-88H83.89A43.9,43.9,0,0,0,40.68,92.37l0,.13L24.3,176.59A20,20,0,0,0,58,194.3l41.92-47.59a8,8,0,0,1,6-2.71Zm59.7,32.59-8.74-45A60,60,0,0,1,172,160h-4.2L198,194.31a20.09,20.09,0,0,0,17.46,5.39,20,20,0,0,0,16.23-23.11Z\"/></svg>","chores":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM208,208V48H48V208H208Z\"/></svg>","lift":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM80,108a12,12,0,1,1,12,12A12,12,0,0,1,80,108Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,176,108Zm-1.07,48c-10.29,17.79-27.4,28-46.93,28s-36.63-10.2-46.92-28a8,8,0,1,1,13.84-8c7.47,12.91,19.21,20,33.08,20s25.61-7.1,33.07-20a8,8,0,0,1,13.86,8Z\"/></svg>","showkid":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M92,140a12,12,0,1,1,12-12A12,12,0,0,1,92,140Zm72-24a12,12,0,1,0,12,12A12,12,0,0,0,164,116Zm-12.27,45.23a45,45,0,0,1-47.46,0,8,8,0,0,0-8.54,13.54,61,61,0,0,0,64.54,0,8,8,0,0,0-8.54-13.54ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88.11,88.11,0,0,0-84.09-87.91C120.32,56.38,120,71.88,120,72a8,8,0,0,0,16,0,8,8,0,0,1,16,0,24,24,0,0,1-48,0c0-.73.13-14.3,8.46-30.63A88,88,0,1,0,216,128Z\"/></svg>","family":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,208H224V136l2.34,2.34A8,8,0,0,0,237.66,127L139.31,28.68a16,16,0,0,0-22.62,0L18.34,127a8,8,0,0,0,11.32,11.31L32,136v72H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM48,120l80-80,80,80v88H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48Zm96,88H112V160h32Z\"/></svg>","miles":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M152,88a32,32,0,1,0-32-32A32,32,0,0,0,152,88Zm0-48a16,16,0,1,1-16,16A16,16,0,0,1,152,40Zm67.31,100.68c-.61.28-7.49,3.28-19.67,3.28-13.85,0-34.55-3.88-60.69-20a169.31,169.31,0,0,1-15.41,32.34,104.29,104.29,0,0,1,31.31,15.81C173.92,186.65,184,207.35,184,232a8,8,0,0,1-16,0c0-41.7-34.69-56.71-54.14-61.85-.55.7-1.12,1.41-1.69,2.1-19.64,23.8-44.25,36.18-71.63,36.18A92.29,92.29,0,0,1,31.2,208,8,8,0,0,1,32.8,192c25.92,2.58,48.47-7.49,67-30,12.49-15.14,21-33.61,25.25-47C86.13,92.35,61.27,111.63,61,111.84A8,8,0,1,1,51,99.36c1.5-1.2,37.22-29,89.51,6.57,45.47,30.91,71.93,20.31,72.18,20.19a8,8,0,1,1,6.63,14.56Z\"/></svg>","workout":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z\"/></svg>","party":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M111.49,52.63a15.8,15.8,0,0,0-26,5.77L33,202.78A15.83,15.83,0,0,0,47.76,224a16,16,0,0,0,5.46-1l144.37-52.5a15.8,15.8,0,0,0,5.78-26Zm-8.33,135.21-35-35,13.16-36.21,58.05,58.05Zm-55,20,14-38.41,24.45,24.45ZM156,168.64,87.36,100l13-35.87,91.43,91.43ZM160,72a37.8,37.8,0,0,1,3.84-15.58C169.14,45.83,179.14,40,192,40c6.7,0,11-2.29,13.65-7.21A22,22,0,0,0,208,23.94,8,8,0,0,1,224,24c0,12.86-8.52,32-32,32-6.7,0-11,2.29-13.65,7.21A22,22,0,0,0,176,72.06,8,8,0,0,1,160,72ZM136,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm101.66,82.34a8,8,0,1,1-11.32,11.31l-16-16a8,8,0,0,1,11.32-11.32Zm4.87-42.75-24,8a8,8,0,0,1-5.06-15.18l24-8a8,8,0,0,1,5.06,15.18Z\"/></svg>","houseparty":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M120,64.37V16a8,8,0,0,0-16,0V64.37a88,88,0,1,0,16,0ZM183.54,144H151.77c-1.51-28.36-10.79-48.36-19.44-61.06A72.16,72.16,0,0,1,183.54,144Zm-95.3,16h47.52c-2,33.52-16.13,52.95-23.76,61.08C104.36,212.93,90.23,193.51,88.24,160Zm0-16c2-33.52,16.13-52.95,23.76-61.08,7.64,8.15,21.77,27.57,23.76,61.08Zm3.43-61.06C83,95.64,73.74,115.64,72.23,144H40.46A72.16,72.16,0,0,1,91.67,82.94ZM40.46,160H72.23c1.51,28.36,10.79,48.36,19.44,61.06A72.16,72.16,0,0,1,40.46,160Zm91.87,61.06c8.65-12.7,17.93-32.7,19.44-61.06h31.77A72.16,72.16,0,0,1,132.33,221.06ZM256,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,256,88ZM152,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H192V64a8,8,0,0,1-16,0V48H160A8,8,0,0,1,152,40Z\"/></svg>","burn":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M183.89,153.34a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68ZM216,144a88,88,0,0,1-176,0c0-27.92,11-56.47,32.66-84.85a8,8,0,0,1,11.93-.89l24.12,23.41,22-60.41a8,8,0,0,1,12.63-3.41C165.21,36,216,84.55,216,144Zm-16,0c0-46.09-35.79-85.92-58.21-106.33L119.52,98.74a8,8,0,0,1-13.09,3L80.06,76.16C64.09,99.21,56,122,56,144a72,72,0,0,0,144,0Z\"/></svg>","hype":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M248,80a28,28,0,1,0-51.12,15.77l-26.79,33L146,73.4a28,28,0,1,0-36.06,0L85.91,128.74l-26.79-33a28,28,0,1,0-26.6,12L47,194.63A16,16,0,0,0,62.78,208H193.22A16,16,0,0,0,209,194.63l14.47-86.85A28,28,0,0,0,248,80ZM128,40a12,12,0,1,1-12,12A12,12,0,0,1,128,40ZM24,80A12,12,0,1,1,36,92,12,12,0,0,1,24,80ZM193.22,192H62.78L48.86,108.52,81.79,149A8,8,0,0,0,88,152a7.83,7.83,0,0,0,1.08-.07,8,8,0,0,0,6.26-4.74l29.3-67.4a27,27,0,0,0,6.72,0l29.3,67.4a8,8,0,0,0,6.26,4.74A7.83,7.83,0,0,0,168,152a8,8,0,0,0,6.21-3l32.93-40.52ZM220,92a12,12,0,1,1,12-12A12,12,0,0,1,220,92Z\"/></svg>","commute":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,104H229.2L201.42,41.5A16,16,0,0,0,186.8,32H69.2a16,16,0,0,0-14.62,9.5L26.8,104H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V184h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V120h8a8,8,0,0,0,0-16ZM69.2,48H186.8l24.89,56H44.31ZM64,200H40V184H64Zm128,0V184h24v16Zm24-32H40V120H216ZM56,144a8,8,0,0,1,8-8H80a8,8,0,0,1,0,16H64A8,8,0,0,1,56,144Zm112,0a8,8,0,0,1,8-8h16a8,8,0,0,1,0,16H176A8,8,0,0,1,168,144Z\"/></svg>"};
+const MODEICON={"system":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M192,24H64A16,16,0,0,0,48,40V216a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V40A16,16,0,0,0,192,24Zm0,192H64V40H192ZM116,76a12,12,0,1,1,12,12A12,12,0,0,1,116,76Zm12,116a40,40,0,1,0-40-40A40,40,0,0,0,128,192Zm0-64a24,24,0,1,1-24,24A24,24,0,0,1,128,128Z\"/></svg>","winddown":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,96a8,8,0,0,1-8,8H216v16a8,8,0,0,1-16,0V104H184a8,8,0,0,1,0-16h16V72a8,8,0,0,1,16,0V88h16A8,8,0,0,1,240,96ZM144,56h8v8a8,8,0,0,0,16,0V56h8a8,8,0,0,0,0-16h-8V32a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16Zm72.77,97a8,8,0,0,1,1.43,8A96,96,0,1,1,95.07,37.8a8,8,0,0,1,10.6,9.06A88.07,88.07,0,0,0,209.14,150.33,8,8,0,0,1,216.77,153Zm-19.39,14.88c-1.79.09-3.59.14-5.38.14A104.11,104.11,0,0,1,88,64c0-1.79,0-3.59.14-5.38A80,80,0,1,0,197.38,167.86Z\"/></svg>","sleep":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M216,72H32V48a8,8,0,0,0-16,0V208a8,8,0,0,0,16,0V176H240v32a8,8,0,0,0,16,0V112A40,40,0,0,0,216,72ZM32,88h72v72H32Zm88,72V88h96a24,24,0,0,1,24,24v48Z\"/></svg>","nightcap":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M224,88h0a95.63,95.63,0,0,0-15.53-52.37,8,8,0,0,0-6.7-3.63H54.23a8,8,0,0,0-6.7,3.63A95.63,95.63,0,0,0,32,88h0a96.12,96.12,0,0,0,88,95.66V216H88a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16H136V183.66A96.12,96.12,0,0,0,224,88ZM58.7,48H197.3a79.52,79.52,0,0,1,10.3,32H48.4A79.52,79.52,0,0,1,58.7,48ZM128,168A80.11,80.11,0,0,1,48.4,96H207.6A80.11,80.11,0,0,1,128,168Z\"/></svg>","sit":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M158.66,196.44l-32,48a8,8,0,1,1-13.32-8.88l32-48a8,8,0,0,1,13.32,8.88ZM232,92a76.08,76.08,0,0,1-76,76H132.28l-29.62,44.44a8,8,0,1,1-13.32-8.88L113.05,168H76A52,52,0,0,1,76,64a53.26,53.26,0,0,1,8.92.76A76.08,76.08,0,0,1,232,92Zm-16,0A60.06,60.06,0,0,0,96,88.46a8,8,0,0,1-16-.92q.21-3.66.77-7.23A38.11,38.11,0,0,0,76,80a36,36,0,0,0,0,72h80A60.07,60.07,0,0,0,216,92Z\"/></svg>","deep":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M201.89,54.66A103.43,103.43,0,0,0,128.79,24H128A104,104,0,0,0,24,128v56a24,24,0,0,0,24,24H64a24,24,0,0,0,24-24V144a24,24,0,0,0-24-24H40.36A88,88,0,0,1,128,40h.67a87.71,87.71,0,0,1,87,80H192a24,24,0,0,0-24,24v40a24,24,0,0,0,24,24h16a24,24,0,0,0,24-24V128A103.41,103.41,0,0,0,201.89,54.66ZM64,136a8,8,0,0,1,8,8v40a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V136Zm152,48a8,8,0,0,1-8,8H192a8,8,0,0,1-8-8V144a8,8,0,0,1,8-8h24Z\"/></svg>","focus":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M221.87,83.16A104.1,104.1,0,1,1,195.67,49l22.67-22.68a8,8,0,0,1,11.32,11.32l-96,96a8,8,0,0,1-11.32-11.32l27.72-27.72a40,40,0,1,0,17.87,31.09,8,8,0,1,1,16-.9,56,56,0,1,1-22.38-41.65L184.3,60.39a87.88,87.88,0,1,0,23.13,29.67,8,8,0,0,1,14.44-6.9Z\"/></svg>","cooking":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M88,48V16a8,8,0,0,1,16,0V48a8,8,0,0,1-16,0Zm40,8a8,8,0,0,0,8-8V16a8,8,0,0,0-16,0V48A8,8,0,0,0,128,56Zm32,0a8,8,0,0,0,8-8V16a8,8,0,0,0-16,0V48A8,8,0,0,0,160,56Zm92.8,46.4L224,124v60a32,32,0,0,1-32,32H64a32,32,0,0,1-32-32V124L3.2,102.4a8,8,0,0,1,9.6-12.8L32,104V80a8,8,0,0,1,8-8H216a8,8,0,0,1,8,8v24l19.2-14.4a8,8,0,0,1,9.6,12.8ZM208,88H48v96a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16Z\"/></svg>",
+  "dinner":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M72,88V40a8,8,0,0,1,16,0V88a8,8,0,0,1-16,0ZM216,40V224a8,8,0,0,1-16,0V176H152a8,8,0,0,1-8-8,268.75,268.75,0,0,1,7.22-56.88c9.78-40.49,28.32-67.63,53.63-78.47A8,8,0,0,1,216,40ZM200,53.9c-32.17,24.57-38.47,84.42-39.7,106.1H200ZM119.89,38.69a8,8,0,1,0-15.78,2.63L112,88.63a32,32,0,0,1-64,0l7.88-47.31a8,8,0,1,0-15.78-2.63l-8,48A8.17,8.17,0,0,0,32,88a48.07,48.07,0,0,0,40,47.32V224a8,8,0,0,0,16,0V135.32A48.07,48.07,0,0,0,128,88a8.17,8.17,0,0,0-.11-1.31Z\"/></svg>","cocktails":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M237.66,45.66A8,8,0,0,0,232,32H24a8,8,0,0,0-5.66,13.66L120,147.31V208H88a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16H136V147.31ZM43.31,48H212.69l-16,16H59.31ZM128,132.69,75.31,80H180.69Z\"/></svg>","coffee":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M80,56V24a8,8,0,0,1,16,0V56a8,8,0,0,1-16,0Zm40,8a8,8,0,0,0,8-8V24a8,8,0,0,0-16,0V56A8,8,0,0,0,120,64Zm32,0a8,8,0,0,0,8-8V24a8,8,0,0,0-16,0V56A8,8,0,0,0,152,64Zm96,56v8a40,40,0,0,1-37.51,39.91,96.59,96.59,0,0,1-27,40.09H208a8,8,0,0,1,0,16H32a8,8,0,0,1,0-16H56.54A96.3,96.3,0,0,1,24,136V88a8,8,0,0,1,8-8H208A40,40,0,0,1,248,120ZM200,96H40v40a80.27,80.27,0,0,0,45.12,72h69.76A80.27,80.27,0,0,0,200,136Zm32,24a24,24,0,0,0-16-22.62V136a95.78,95.78,0,0,1-1.2,15A24,24,0,0,0,232,128Z\"/></svg>","onmind":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z\"/></svg>","together":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,8,8,0,0,1,0-6.22A8,8,0,0,1,192,112a24,24,0,1,0-23.24-30,8,8,0,1,1-15.5-4A40,40,0,1,1,219,117.51a67.94,67.94,0,0,1,27.43,21.68A8,8,0,0,1,244.8,150.4ZM190.92,212a8,8,0,1,1-13.84,8,57,57,0,0,0-98.16,0,8,8,0,1,1-13.84-8,72.06,72.06,0,0,1,33.74-29.92,48,48,0,1,1,58.36,0A72.06,72.06,0,0,1,190.92,212ZM128,176a32,32,0,1,0-32-32A32,32,0,0,0,128,176ZM72,120a8,8,0,0,0-8-8A24,24,0,1,1,87.24,82a8,8,0,1,0,15.5-4A40,40,0,1,0,37,117.51,67.94,67.94,0,0,0,9.6,139.19a8,8,0,1,0,12.8,9.61A51.6,51.6,0,0,1,64,128,8,8,0,0,0,72,120Z\"/></svg>","morning":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,152H199.55a73.54,73.54,0,0,0,.45-8,72,72,0,0,0-144,0,73.54,73.54,0,0,0,.45,8H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM72,144a56,56,0,1,1,111.41,8H72.59A56.13,56.13,0,0,1,72,144Zm144,56a8,8,0,0,1-8,8H48a8,8,0,0,1,0-16H208A8,8,0,0,1,216,200ZM72.84,43.58a8,8,0,0,1,14.32-7.16l8,16a8,8,0,0,1-14.32,7.16Zm-56,48.84a8,8,0,0,1,10.74-3.57l16,8a8,8,0,0,1-7.16,14.31l-16-8A8,8,0,0,1,16.84,92.42Zm192,15.16a8,8,0,0,1,3.58-10.73l16-8a8,8,0,1,1,7.16,14.31l-16,8a8,8,0,0,1-10.74-3.58Zm-48-55.16,8-16a8,8,0,0,1,14.32,7.16l-8,16a8,8,0,1,1-14.32-7.16Z\"/></svg>","coding":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.3Zm176,27.7-48-40a8,8,0,1,0-10.24,12.3L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z\"/></svg>","restless":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M56,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0ZM88,24a8,8,0,0,0-8,8V224a8,8,0,0,0,16,0V32A8,8,0,0,0,88,24Zm40,32a8,8,0,0,0-8,8V192a8,8,0,0,0,16,0V64A8,8,0,0,0,128,56Zm40,32a8,8,0,0,0-8,8v64a8,8,0,0,0,16,0V96A8,8,0,0,0,168,88Zm40-16a8,8,0,0,0-8,8v96a8,8,0,0,0,16,0V80A8,8,0,0,0,208,72Z\"/></svg>","road":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M235.92,199A8,8,0,0,1,225,195.92L155.32,72H136v8a8,8,0,0,1-16,0V72H100.68L31,195.92A8,8,0,0,1,17,188.08L82.32,72H24a8,8,0,0,1,0-16H232a8,8,0,0,1,0,16H173.68L239,188.08A8,8,0,0,1,235.92,199ZM128,112a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V120A8,8,0,0,0,128,112Zm0,56a8,8,0,0,0-8,8v16a8,8,0,0,0,16,0V176A8,8,0,0,0,128,168Z\"/></svg>","gaming":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M176,112H152a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16ZM104,96H96V88a8,8,0,0,0-16,0v8H72a8,8,0,0,0,0,16h8v8a8,8,0,0,0,16,0v-8h8a8,8,0,0,0,0-16ZM241.48,200.65a36,36,0,0,1-54.94,4.81c-.12-.12-.24-.24-.35-.37L146.48,160h-37L69.81,205.09l-.35.37A36.08,36.08,0,0,1,44,216,36,36,0,0,1,8.56,173.75a.68.68,0,0,1,0-.14L24.93,89.52A59.88,59.88,0,0,1,83.89,40H172a60.08,60.08,0,0,1,59,49.25c0,.06,0,.12,0,.18l16.37,84.17a.68.68,0,0,1,0,.14A35.74,35.74,0,0,1,241.48,200.65ZM172,144a44,44,0,0,0,0-88H83.89A43.9,43.9,0,0,0,40.68,92.37l0,.13L24.3,176.59A20,20,0,0,0,58,194.3l41.92-47.59a8,8,0,0,1,6-2.71Zm59.7,32.59-8.74-45A60,60,0,0,1,172,160h-4.2L198,194.31a20.09,20.09,0,0,0,17.46,5.39,20,20,0,0,0,16.23-23.11Z\"/></svg>","chores":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM208,208V48H48V208H208Z\"/></svg>","lift":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216ZM80,108a12,12,0,1,1,12,12A12,12,0,0,1,80,108Zm96,0a12,12,0,1,1-12-12A12,12,0,0,1,176,108Zm-1.07,48c-10.29,17.79-27.4,28-46.93,28s-36.63-10.2-46.92-28a8,8,0,1,1,13.84-8c7.47,12.91,19.21,20,33.08,20s25.61-7.1,33.07-20a8,8,0,0,1,13.86,8Z\"/></svg>","showkid":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M92,140a12,12,0,1,1,12-12A12,12,0,0,1,92,140Zm72-24a12,12,0,1,0,12,12A12,12,0,0,0,164,116Zm-12.27,45.23a45,45,0,0,1-47.46,0,8,8,0,0,0-8.54,13.54,61,61,0,0,0,64.54,0,8,8,0,0,0-8.54-13.54ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88.11,88.11,0,0,0-84.09-87.91C120.32,56.38,120,71.88,120,72a8,8,0,0,0,16,0,8,8,0,0,1,16,0,24,24,0,0,1-48,0c0-.73.13-14.3,8.46-30.63A88,88,0,1,0,216,128Z\"/></svg>","family":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,208H224V136l2.34,2.34A8,8,0,0,0,237.66,127L139.31,28.68a16,16,0,0,0-22.62,0L18.34,127a8,8,0,0,0,11.32,11.31L32,136v72H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM48,120l80-80,80,80v88H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48Zm96,88H112V160h32Z\"/></svg>","miles":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M152,88a32,32,0,1,0-32-32A32,32,0,0,0,152,88Zm0-48a16,16,0,1,1-16,16A16,16,0,0,1,152,40Zm67.31,100.68c-.61.28-7.49,3.28-19.67,3.28-13.85,0-34.55-3.88-60.69-20a169.31,169.31,0,0,1-15.41,32.34,104.29,104.29,0,0,1,31.31,15.81C173.92,186.65,184,207.35,184,232a8,8,0,0,1-16,0c0-41.7-34.69-56.71-54.14-61.85-.55.7-1.12,1.41-1.69,2.1-19.64,23.8-44.25,36.18-71.63,36.18A92.29,92.29,0,0,1,31.2,208,8,8,0,0,1,32.8,192c25.92,2.58,48.47-7.49,67-30,12.49-15.14,21-33.61,25.25-47C86.13,92.35,61.27,111.63,61,111.84A8,8,0,1,1,51,99.36c1.5-1.2,37.22-29,89.51,6.57,45.47,30.91,71.93,20.31,72.18,20.19a8,8,0,1,1,6.63,14.56Z\"/></svg>","workout":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M248,120h-8V88a16,16,0,0,0-16-16H208V64a16,16,0,0,0-16-16H168a16,16,0,0,0-16,16v56H104V64A16,16,0,0,0,88,48H64A16,16,0,0,0,48,64v8H32A16,16,0,0,0,16,88v32H8a8,8,0,0,0,0,16h8v32a16,16,0,0,0,16,16H48v8a16,16,0,0,0,16,16H88a16,16,0,0,0,16-16V136h48v56a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,16-16V136h8a8,8,0,0,0,0-16ZM32,168V88H48v80Zm56,24H64V64H88V192Zm104,0H168V64h24V175.82c0,.06,0,.12,0,.18s0,.12,0,.18V192Zm32-24H208V88h16Z\"/></svg>","party":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M111.49,52.63a15.8,15.8,0,0,0-26,5.77L33,202.78A15.83,15.83,0,0,0,47.76,224a16,16,0,0,0,5.46-1l144.37-52.5a15.8,15.8,0,0,0,5.78-26Zm-8.33,135.21-35-35,13.16-36.21,58.05,58.05Zm-55,20,14-38.41,24.45,24.45ZM156,168.64,87.36,100l13-35.87,91.43,91.43ZM160,72a37.8,37.8,0,0,1,3.84-15.58C169.14,45.83,179.14,40,192,40c6.7,0,11-2.29,13.65-7.21A22,22,0,0,0,208,23.94,8,8,0,0,1,224,24c0,12.86-8.52,32-32,32-6.7,0-11,2.29-13.65,7.21A22,22,0,0,0,176,72.06,8,8,0,0,1,160,72ZM136,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm101.66,82.34a8,8,0,1,1-11.32,11.31l-16-16a8,8,0,0,1,11.32-11.32Zm4.87-42.75-24,8a8,8,0,0,1-5.06-15.18l24-8a8,8,0,0,1,5.06,15.18Z\"/></svg>","houseparty":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M120,64.37V16a8,8,0,0,0-16,0V64.37a88,88,0,1,0,16,0ZM183.54,144H151.77c-1.51-28.36-10.79-48.36-19.44-61.06A72.16,72.16,0,0,1,183.54,144Zm-95.3,16h47.52c-2,33.52-16.13,52.95-23.76,61.08C104.36,212.93,90.23,193.51,88.24,160Zm0-16c2-33.52,16.13-52.95,23.76-61.08,7.64,8.15,21.77,27.57,23.76,61.08Zm3.43-61.06C83,95.64,73.74,115.64,72.23,144H40.46A72.16,72.16,0,0,1,91.67,82.94ZM40.46,160H72.23c1.51,28.36,10.79,48.36,19.44,61.06A72.16,72.16,0,0,1,40.46,160Zm91.87,61.06c8.65-12.7,17.93-32.7,19.44-61.06h31.77A72.16,72.16,0,0,1,132.33,221.06ZM256,88a8,8,0,0,1-8,8h-8v8a8,8,0,0,1-16,0V96h-8a8,8,0,0,1,0-16h8V72a8,8,0,0,1,16,0v8h8A8,8,0,0,1,256,88ZM152,40a8,8,0,0,1,8-8h16V16a8,8,0,0,1,16,0V32h16a8,8,0,0,1,0,16H192V64a8,8,0,0,1-16,0V48H160A8,8,0,0,1,152,40Z\"/></svg>","burn":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M183.89,153.34a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68ZM216,144a88,88,0,0,1-176,0c0-27.92,11-56.47,32.66-84.85a8,8,0,0,1,11.93-.89l24.12,23.41,22-60.41a8,8,0,0,1,12.63-3.41C165.21,36,216,84.55,216,144Zm-16,0c0-46.09-35.79-85.92-58.21-106.33L119.52,98.74a8,8,0,0,1-13.09,3L80.06,76.16C64.09,99.21,56,122,56,144a72,72,0,0,0,144,0Z\"/></svg>","hype":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M248,80a28,28,0,1,0-51.12,15.77l-26.79,33L146,73.4a28,28,0,1,0-36.06,0L85.91,128.74l-26.79-33a28,28,0,1,0-26.6,12L47,194.63A16,16,0,0,0,62.78,208H193.22A16,16,0,0,0,209,194.63l14.47-86.85A28,28,0,0,0,248,80ZM128,40a12,12,0,1,1-12,12A12,12,0,0,1,128,40ZM24,80A12,12,0,1,1,36,92,12,12,0,0,1,24,80ZM193.22,192H62.78L48.86,108.52,81.79,149A8,8,0,0,0,88,152a7.83,7.83,0,0,0,1.08-.07,8,8,0,0,0,6.26-4.74l29.3-67.4a27,27,0,0,0,6.72,0l29.3,67.4a8,8,0,0,0,6.26,4.74A7.83,7.83,0,0,0,168,152a8,8,0,0,0,6.21-3l32.93-40.52ZM220,92a12,12,0,1,1,12-12A12,12,0,0,1,220,92Z\"/></svg>","commute":"<svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M240,104H229.2L201.42,41.5A16,16,0,0,0,186.8,32H69.2a16,16,0,0,0-14.62,9.5L26.8,104H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16V184h96v16a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V120h8a8,8,0,0,0,0-16ZM69.2,48H186.8l24.89,56H44.31ZM64,200H40V184H64Zm128,0V184h24v16Zm24-32H40V120H216ZM56,144a8,8,0,0,1,8-8H80a8,8,0,0,1,0,16H64A8,8,0,0,1,56,144Zm112,0a8,8,0,0,1,8-8h16a8,8,0,0,1,0,16H176A8,8,0,0,1,168,144Z\"/></svg>"};
 // ---------- what order the ways in come in ----------
 // The row runs quietest first, which is where most listening starts, and then learns:
 // the modes you open float to the front, most-opened leftmost, so the ones you actually
@@ -7819,8 +7870,11 @@ function pageShareBtn(key,name){
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);
   if(!m) return null;
-  return {title:m[2], icon:moodArt(m[0])+`<b class="facefb">${MODEICON[m[0]]||""}</b>`,
-    iconCls:"hasimg", lv:m[5]||3, lede:m[3], top:headTrack(k)+modeTop(m),
+  // The page is titled what the circle you pressed is called. It used to be titled with
+  // the short descriptor instead, so Focus opened a page headed "Working or studying" and
+  // nothing on it said Focus. The descriptor earns its keep as a line under the title.
+  return {title:m[1], icon:moodArt(m[0])+`<b class="facefb">${MODEICON[m[0]]||""}</b>`,
+    iconCls:"hasimg", lv:m[5]||3, deck:m[2], lede:m[3], top:headTrack(k)+modeTop(m),
     html:`<div class="picks">${modePicks(m)}</div>`
       + pageShareBtn("mode:"+m[0], m[1])};
 }
@@ -7846,6 +7900,9 @@ function pushPage(key){
   page.className="ppage pgin"; page.dataset.p=key;
   if(d.lv) page.classList.add("lv"+d.lv);
   page.innerHTML=`<h1 class="bigttl${d.icon?" withi":""}">${d.icon?`<i class="pgi mi${d.iconCls?" "+d.iconCls:""}">${d.icon}</i>`:""}<span class="mn">${esc(d.title)}</span></h1>`
+    // the deck says when you would reach for this page; the lede says what it sounds
+    // like. Only the collections carry both.
+    + (d.deck?`<p class="pgdeck">${esc(d.deck)}</p>`:"")
     + (d.lede?`<p class="note pglede">${esc(d.lede)}</p>`:"")
     // a slot between the lede and the body, for a control that acts on the whole page
     + (d.top||"")
@@ -7946,6 +8003,17 @@ function styleRows(ids,detail){
       + `<span class="lrlbl">${esc(x.name)}</span>`
       + `<em class="lrct">${detail(x)}</em>${GOCHEV}</button>`; }).join("") + `</div>`;
 }
+// The lede on the Collections page said "Twenty-eight" in prose, which was true until a
+// twenty-ninth was added and then quietly was not. Counted, not claimed.
+const SPELLED=["zero","one","two","three","four","five","six","seven","eight","nine","ten",
+  "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen",
+  "nineteen","twenty"];
+function spellCount(n){
+  const w = n<=20 ? SPELLED[n]
+    : n<30 ? "twenty-"+SPELLED[n-20]
+    : n<40 ? "thirty-"+SPELLED[n-30] : String(n);
+  return w.charAt(0).toUpperCase()+w.slice(1);
+}
 const PAGES_DEF={
   artists:()=>{
     const n=state.sel?byId[state.sel]:null; if(!n) return null;
@@ -7971,7 +8039,7 @@ const PAGES_DEF={
       html:`<div class="listgrp sep amlist">${all.map(row).join("")}</div>`};
   },
   modes:()=>({title:"Collections",
-    lede:"Twenty-eight moods, places and tasks, each opening the styles that suit it.",
+    lede:spellCount(MODES.length)+" moods, places and tasks, each opening the styles that suit it.",
     top:modeSortHtml(),
     html:modeListHtml()+copyRow("modes")}),
   picks:()=>picksPage("pete"),

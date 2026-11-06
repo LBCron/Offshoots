@@ -840,7 +840,7 @@ const FAMMAP = {"exp":"#bac5d5","latin":"#2fa984","gospel":"#879c5d","folk":"#cf
 // happy, romantic, driving) plus the three dimensions listening research keeps finding —
 // regulating how you feel, listening to think about yourself, and listening to be with people.
 const MODES = [
-  ["focus","Focus","Working or studying",
+  ["focus","Focus","Working or studying, when words get in the way.",
    "Words compete with the words in your own head, so what survives is instrumental, steady and a little uneventful — music that puts a floor under the work instead of asking for attention.",
    [
     ["ambient","Written to be as ignorable as it is interesting"],
@@ -875,7 +875,7 @@ const MODES = [
     ["amapiano","Log drums and space, patient for seven minutes"],
     ["threestep","A soft shuffle that stays below the work"]
    ],2],
-  ["coding","Coding","Hours in a text editor",
+  ["coding","Coding","Long hours in a text editor, repetition welcome.",
    "Not the same as Focus, which is for taking something in. This is for building, so it wants momentum rather than calm, and it has to survive being ignored for forty minutes and then noticed again. Words are the problem: anything with a lyric competes with the part of you reading the screen.",
    [
     ["idm","Rhythm as a problem someone else already solved"],
@@ -914,7 +914,7 @@ const MODES = [
     ["abstract","Sample loops doing the work of a drummer"],
     ["newgrass","Acoustic runs at speed, wordless for whole stretches"]
    ],3],
-  ["restless","Can't settle","When nothing will go in",
+  ["restless","Can't settle","When nothing will go in and nothing will sit still.",
    "The usual advice is something quieter. It often works the other way round: dense and relentless gives the restless part something to hold, and heavy repetition keeps novelty low so nothing new can hijack you. Studies adding steady noise find it lifts people who are easily distracted and does nothing for people who are not.",
    [
     ["funk","One chord, one groove, as long as it takes"],
@@ -959,7 +959,7 @@ const MODES = [
     ["postpunk","Angular and wound tight, which matches the mood"],
     ["egg_punk","Tinny, fast and deliberately the wrong shape"]
    ],3],
-  ["workout","Workout","Lifting and intervals",
+  ["workout","Workout","Lifting and intervals, loud enough to push through.",
    "Effort that comes in bursts rather than a steady hour. Loud, repetitive and front-loaded, so the hardest ten seconds of a set always has something behind it. Distance running and riding want the opposite of this: see Miles.",
    [
     ["house","Four-on-the-floor at 120–128 — the original treadmill tempo"],
@@ -1004,7 +1004,7 @@ const MODES = [
     ["raprock","Dumb, loud and timed to the lift"],
     ["bloghouse","Compressed to the ceiling, which is the point here"]
    ],5],
-  ["miles","Miles","Running or riding",
+  ["miles","Run or ride","Going the distance at a pace you can hold.",
    "An hour at one effort, not ten sets. Cadence is the thing: runners land near 160–180 steps a minute, so 130–140 BPM meets every other footfall and 170ish meets each one. Long forms, few drops and little dynamic range, so nothing yanks you off your pace or asks to be listened to while you are also breathing.",
    [
     ["progressive_house","Gradual, with nothing that breaks stride"],
@@ -1047,7 +1047,7 @@ const MODES = [
     ["threestep","Skipping garage drums that fall between your steps"],
     ["stompclap","Stomps and claps setting a stride for you"]
    ],4],
-  ["winddown","Wind down","Winding down",
+  ["winddown","Wind down","For the hour between finishing and sleeping.",
    "Slow tempos, soft attacks and space between the notes. Getting under your own resting pulse is most of the trick.",
    [
     ["slowcore","Quiet, unhurried, barely there"],
@@ -1090,7 +1090,7 @@ const MODES = [
     ["swamp_blues","A humid groove hanging behind the beat all night"],
     ["nashville","Strings and a choir behind a voice set close"]
    ],1],
-  ["sleep","Sleep","Falling asleep",
+  ["sleep","Sleep","To fall asleep to, and stay asleep through.",
    "Not the same as Wind down, which is for the hour before. This is for the music still playing after you stop hearing it, so nothing can arrive: no words, no chorus, no change in volume big enough to pull you back up. Sleep studies that find an effect tend to use slow, soft, predictable music at around sixty beats a minute, which is most of what is going on here.",
    [
     ["ambient","Long enough to still be playing when you are gone"],
@@ -1114,7 +1114,7 @@ const MODES = [
     ["westcoast_jazz","Airy counterpoint played without ever raising the volume"],
     ["smoothjazz","Soft, predictable and never changing dynamic level"]
    ],1],
-  ["party","Party","A room full of people",
+  ["party","Dance floor","Keeping a room moving once it already is.",
    "A floor beat people can find without counting, choruses that arrive early, and enough familiarity that nobody has to work at it.",
    [
     ["disco","The style that invented the modern dance floor"],
@@ -1163,7 +1163,7 @@ const MODES = [
     ["crunknb","A sung hook over a beat that shouts"],
     ["snap","Space left in the beat for the room"]
    ],5],
-  ["houseparty","House party","Shouting along, drink in hand",
+  ["houseparty","House party","Shouting along with a drink in your hand.",
    "Party is a dance floor and a DJ. This is the other kind: a living room with the furniture pushed back, where recognition beats taste and the measure of a song is whether thirty people can yell the words at it. Ordered oldest to newest, so the back half is what currently gets played, and it carries two styles built around a drop for the point in the night when the room wants one.",
    [
     ["frat","The ancestor, and it still works"],
@@ -1214,7 +1214,7 @@ const MODES = [
     ["cowpunk","Country at punk speed, which clears furniture"],
     ["snap","Dance instructions, which solves the standing-around problem"]
    ],5],
-  ["road","Road trip","Hours of open highway",
+  ["road","Road trip","Hours of open highway with the next town far off.",
    "The long drive, not the daily one: nothing here has to survive stopping. A mid-tempo groove that keeps going without needing you to follow it, and a chorus big enough to beat a windshield at seventy.",
    [
     ["krautrock","Motorik: a beat built out of the highway itself"],
@@ -1261,7 +1261,7 @@ const MODES = [
     ["psych_soul","Wah and echo with the window down"],
     ["countryrap","Rural stories over Southern drums, for the interstate"]
    ],3],
-  ["commute","Commuting","The same drive, twice a day",
+  ["commute","Commuting","The same drive twice a day, made bearable.",
    "Traffic is the opposite problem to a road trip: the car keeps stopping, so nothing here can depend on momentum. Even tempo, warm tone and grooves that never build toward a release you are not going to get, plus a few long or familiar enough to fill a backup without asking much of you.",
    [
     ["softrock","Drive-time radio, made for the trip home"],
@@ -1310,40 +1310,26 @@ const MODES = [
     ["alt_hh","Looser sampling that never depends on getting anywhere"],
     ["underground","Dusty loops and dense rhyming, built for headphones"]
    ],2],
-  ["dinner","Dinner","Cooking or eating",
+  ["dinner","Dinner","At the table, under the conversation.",
    "Present without demanding. Groove-forward, warm in timbre and even in volume, so it holds the room between conversations.",
    [
     ["souljazz","Hammond organ at a slow simmer"],
-    ["boogaloo","Latin soul with its sleeves rolled up"],
     ["philly","Strings, sweetness, immaculate manners"],
     ["easy","The style literally engineered for this"],
     ["exotica","Dinner-party music that thinks it is on an island"],
     ["bossa","A whisper with a rhythm section behind it"],
-    ["mento","Jamaican porch music, acoustic and light"],
     ["smoothjazz","Unembarrassed background"],
     ["son","Guitar, voice and a clave, nothing louder"],
     ["citypop","Expensive-sounding Tokyo evening music"],
-    ["jazz_early","Cheerful, busy, never in the way"],
-    ["western_swing","A dance band that fits in a kitchen"],
-    ["acidjazz","Groove with the volume knob at four"],
-    ["hardbop","Melodies you can hum over a chopping board"],
-    ["jazzfunk","A locked groove with the solos tucked inside"],
     ["bolero","Nylon guitar taking its time with the second course"],
     ["cool","Restraint, which is exactly the right manners here"],
     ["westcoast_jazz","Chamber textures that hold a room at low volume"],
     ["modal","Vamps that hold steady while the talking continues"],
-    ["retro_soul","A live band in one room, warm on tape"],
     ["danzon","Strings and flute with perfect table manners"],
-    ["chachacha","Light percussion that keeps the kitchen moving"],
-    ["mambo","Brass stabs that lift a room without filling it"],
-    ["salsa","Percussion warm enough to cook over"],
-    ["cumbia","A two-step that suits standing at the stove"],
-    ["conjunto","Accordion polkas, cheerful and entirely unbothered"],
     ["ragtime","Parlor piano that handles the gaps in conversation"],
     ["swing","Horn sections at a conversational volume"],
     ["tropicalia","Sunny and strange, warm across the table"],
     ["chicago_soul","Weight carried without raising the volume"],
-    ["highlife","Guitar lines that circle the table politely"],
     ["nujazz","Rhodes and double bass over a soft programmed pulse"],
     ["ukjazz","Live horns at a simmer, modern and unhurried"],
     ["jazz_new","Improvisers who stay inside the groove all evening"],
@@ -1351,14 +1337,69 @@ const MODES = [
     ["spaceage","Vibraphone bouncing gently between the speakers"],
     ["tradpop","Standards sung close to the mic, for grown-ups"],
     ["baroquepop","Harpsichord and strings, three minutes at a time"],
-    ["sunshine","Stacked harmony as bright as the kitchen light"],
     ["calypsocraze","Island rhythm smoothed for a dinner table"],
     ["rocksteady","Close harmony and a bass that stays seated"],
-    ["nudisco","A four-four kick with the lights still up"],
     ["deephouse","Warm chords for when plates are being cleared"],
-    ["worldbeat","Warm and rhythmic without asking for the table"]
+    ["worldbeat","Warm and rhythmic without asking for the table"],
+    ["quiet_storm","Late, smooth, and pitched under the talking"],
+    ["neosoul","Live-sounding and in no hurry at all"],
+    ["nashville","Strings and smooth edges, country with its tie on"],
+    ["countrypolitan","Countrypolitan is dinner music that happens to be country"],
+    ["thirdstream","Chamber writing with a rhythm section, quiet by design"],
+    ["ac","Soft, familiar, and asks nothing of the table"],
+    ["balada","Spanish-language ballads, warm and slow"],
+    ["blueeyed","Soul sung gently, for a table of mixed tastes"],
+    ["altrnb","Low-lit and spacious, modern without being cold"],
+    ["postbop","Complicated enough to notice, polite enough to ignore"],
+    ["tinpan","The songs everything else is a version of"],
+    ["broadway","Standards with the orchestra still in the pit"]
    ],2],
-  ["cocktails","Cocktails","People standing and talking",
+  ["cooking","Cooking","Standing at the stove, chopping, stirring, waiting.",
+   "Rhythm you can work to without listening to it. Upbeat and even, nothing that stops you mid-task, and long enough that you are not choosing again every three minutes.",
+   [
+    ["boogaloo","Latin soul with its sleeves rolled up"],
+    ["western_swing","A dance band that fits in a kitchen"],
+    ["hardbop","Melodies you can hum over a chopping board"],
+    ["chachacha","Light percussion that keeps the kitchen moving"],
+    ["salsa","Percussion warm enough to cook over"],
+    ["cumbia","A two-step that suits standing at the stove"],
+    ["mambo","Brass stabs that lift a room without filling it"],
+    ["conjunto","Accordion polkas, cheerful and entirely unbothered"],
+    ["sunshine","Stacked harmony as bright as the kitchen light"],
+    ["jazz_early","Cheerful, busy, never in the way"],
+    ["acidjazz","Groove with the volume knob at four"],
+    ["jazzfunk","A locked groove with the solos tucked inside"],
+    ["nudisco","A four-four kick with the lights still up"],
+    ["mento","Jamaican porch music, acoustic and light"],
+    ["retro_soul","A live band in one room, warm on tape"],
+    ["highlife","Guitar lines that circle the table politely"],
+    ["motown","Three minutes a side, and everybody knows the words"],
+    ["soul","Warm enough to keep a kitchen moving"],
+    ["southern_soul","Horns and sweat, for the part that needs stirring"],
+    ["funk","A groove to chop in time with"],
+    ["nola_rnb","Piano that rolls along at the speed of a kitchen"],
+    ["beach_music","Shag rhythm, made for moving around a room"],
+    ["doowop","Harmony to sing badly over a pan"],
+    ["ska","An upstroke on every offbeat, which is the pace of prep"],
+    ["reggae","Unhurried, and it never needs watching"],
+    ["soca","Carnival tempo for a long cook"],
+    ["afrobeat","Twelve-minute grooves, so you set it once"],
+    ["afrobeats","Bright and springy, the modern kitchen default"],
+    ["bachata","Guitar and a hip-swing you do without noticing"],
+    ["ranchera","Mariachi brass, for cooking that deserves an audience"],
+    ["chicano_soul","Slow and sweet between the chopping"],
+    ["latin_rock","Congas under a guitar, busy but not loud"],
+    ["postdisco","Boogie basslines at domestic volume"],
+    ["disco","Four on the floor while the oven comes up"],
+    ["gogo","Percussion that does not stop, like the prep"],
+    ["modern_funk","Synth-funk, warm, and happy to loop"],
+    ["neoswing","Horns with a bounce, for a kitchen with people in it"],
+    ["psych_soul","Wah guitar and strings, for taking your time"],
+    ["bluegrass","Fast picking for fast hands"],
+    ["honkytonk","A shuffle and a steel guitar, cheerful about everything"]
+   ],3],
+
+  ["cocktails","Cocktails","A room of people standing up, holding drinks, talking.",
    "Dinner holds a seated table together. This is the other job: everyone is upright, moving between conversations, and talking over it. Brighter and more rhythmic than Dinner, well short of Party, and written to be half-heard.",
    [
     ["afrocuban_jazz","Horns and congas at conversation volume"],
@@ -1408,7 +1449,7 @@ const MODES = [
     ["artpop","Clever enough to notice, poised enough to ignore"],
     ["worldbeat","Bright, percussive and unbothered by being talked over"]
    ],2],
-  ["coffee","Coffee shop","A room full of strangers",
+  ["coffee","Coffee shop","Working near strangers, half listening to the room.",
    "Playing to people who did not choose it, at a volume nobody asked about. It has to work for the person reading, the person on a laptop and the person in the queue, so nothing that demands attention and nothing anyone could object to. Agreeable, but not wallpaper, since the staff hear it all day.",
    [
     ["indiefolk","Acoustic and unobjectionable, and it still has a voice"],
@@ -1456,7 +1497,7 @@ const MODES = [
     ["alte","Unfamiliar enough to notice, soft enough to ignore"],
     ["alt_hh","Unexpected subjects at a volume nobody asks about"]
    ],2],
-  ["gaming","Gaming","Playing something",
+  ["gaming","Gaming","Playing for hours with the game's own sound turned down.",
    "A mood held for hours without competing for the hand-eye part of your brain: loops, sequences and a tempo that stays put. A good share of it descends from the sound chips that scored games in the first place.",
    [
     ["chiptune","Written on the chips that scored your childhood"],
@@ -1503,7 +1544,7 @@ const MODES = [
     ["hyperpop","Maximal and pitched up, somehow easy to tune out"],
     ["dariacore","Chopped fragments colliding at the speed of play"]
    ],3],
-  ["chores","Getting it done","Chores and admin",
+  ["chores","Getting it done","Chores, admin, and the things you have been avoiding.",
    "Nothing here has to be followed. It wants to be familiar, mid-tempo and forgiving of being half-ignored, so losing a minute to the washing machine costs nothing. A workout locks to a cadence and a party needs the room; this needs neither.",
    [
     ["njs","Swing beat and a chorus you already know"],
@@ -1554,7 +1595,7 @@ const MODES = [
     ["countryrap","Beats that push while the banjo keeps it light"],
     ["worldbeat","Percussion that keeps going when you leave the room"]
    ],3],
-  ["lift","Lift the mood","Changing how you feel",
+  ["lift","Lift the mood","For deliberately changing how you feel.",
    "Major keys, chords that change often, and more than one voice singing at once. Steering mood is the most common reason people reach for music at all.",
    [
     ["motown","Three minutes engineered for joy"],
@@ -1604,7 +1645,7 @@ const MODES = [
     ["christianhh","Rap built to end somewhere better than it started"],
     ["rnb","A dance band behind a voice that is sure"]
    ],3],
-  ["hype","Walk in tall","Before you walk in",
+  ["hype","Walk in tall","The ten minutes before you walk in.",
    "Swagger rather than speed. Front-loaded, brash and certain of itself, for the three minutes before the thing rather than during it. Workout is led by tempo and Burn it off is anger; this is neither.",
    [
     ["golden","The voice arrives already convinced"],
@@ -1652,7 +1693,7 @@ const MODES = [
     ["garage","Amateurs certain they are the best band alive"],
     ["crunknb","Smooth on top, aggressive underneath, certain throughout"]
    ],4],
-  ["burn","Burn it off","Anger with nowhere to go",
+  ["burn","Burn it off","Anger with nowhere else to go.",
    "Anger wants volume, distortion and a tempo above your pulse. Playing it through tends to work better than reaching for something calming first.",
    [
     ["hardcore","Two minutes, no chorus, full volume"],
@@ -1691,7 +1732,7 @@ const MODES = [
     ["egg_punk","Too fast and too cheap to sit still through"],
     ["cowpunk","Honky-tonk played at a speed nobody can sit through"]
    ],5],
-  ["nightcap","Nightcap","Alone, late, nothing to do",
+  ["nightcap","Nightcap","A late hour on your own, with nowhere to be.",
    "Not sad, which is Sit with it, and not on the way to sleep, which is Wind down. Slow, worn-in and adult, with room between the notes and nobody to talk to. Anything that would make you check the time is out.",
    [
     ["delta","One voice, one guitar, at two in the morning"],
@@ -1736,7 +1777,7 @@ const MODES = [
     ["citypop","Polished nightlife music for staying in"],
     ["psych_soul","Echo and wah at the end of a long evening"]
    ],1],
-  ["sit","Sit with it","Something heavy",
+  ["sit","Sit with it","For bad news, and for not wanting to be cheered up.",
    "Sad music is reliably one of the most pleasurable kinds there is: slow, minor, a single voice close to the microphone, the feeling rehearsed at a safe distance.",
    [
     ["delta","One voice, one guitar, nothing hidden"],
@@ -1780,7 +1821,7 @@ const MODES = [
     ["antifolk","Unpolished on purpose, which is easier to believe"],
     ["neopsych","Melodies bent slightly out of true"]
    ],1],
-  ["onmind","On your mind","Someone's on your mind",
+  ["onmind","On your mind","Someone you keep thinking about, present or gone.",
    "Not being with someone: thinking about them. High major keys, a voice close and a little nervous, and words in the second person about something that has not been said yet. A great deal of pop exists to sell this one feeling.",
    [
     ["synthpop","Longing routed through a synthesiser"],
@@ -1825,7 +1866,7 @@ const MODES = [
     ["postpunk","Bass where the solo was, and nobody relaxing"],
     ["protorap","Spoken plainly, which is how it actually sounds"]
    ],2],
-  ["together","With someone","Being with people",
+  ["together","With someone","One other person, close enough not to need talking.",
    "The third thing the research keeps finding, after mood and self-reflection: music as a way of being with someone. Slow enough to talk over, or shared enough that everyone already knows it.",
    [
     ["doowop","Four people on a corner, no instruments required"],
@@ -1872,7 +1913,7 @@ const MODES = [
     ["frat","Three chords, a shouted chorus, a saxophone"],
     ["rnb","Where most of this started, and still works"]
    ],2],
-  ["showkid","Show a kid","Ages four to fifteen",
+  ["showkid","Show a kid","Ages four to fifteen, usually played in the car.",
    "Not children's music, which is a genre a kid grows out of. The rule here is that the first question a kid asks, how is that sound being made, has an answer they can see: a washboard worn as a shirt, a games console with three channels, two turntables, hands moving faster than looks possible. That lands at four, where it is a body response, and at fifteen, where what gets through is that a person did this on purpose. Chosen so none of it needs skipping with someone small in the room.",
    [
     ["chiptune","A games console with three voices, and that is the whole band"],
@@ -1916,7 +1957,7 @@ const MODES = [
     ["powermetal","Galloping riffs and dragons, played completely straight"],
     ["progmetal","Odd meters counted out with visible effort"]
    ],3],
-  ["family","Family's over","Three generations in one room",
+  ["family","Family's over","Three generations in one room and one stereo.",
    "Weighted toward whoever is oldest, since they are the one least likely to meet the others halfway, and chosen so nobody younger has to sit through it politely. Songs with a shape people can sing along to even when they do not know the record.",
    [
     ["tradpop","Sinatra, Crosby, and a room that goes quiet"],
@@ -1965,7 +2006,7 @@ const MODES = [
     ["british_blues","The records the oldest person in the room bought"],
     ["rnb","Postwar records that nobody present objects to"]
    ],3],
-  ["deep","Listen properly","Nothing else running",
+  ["deep","Listen properly","Sitting down with the record and nothing else running.",
    "Wide dynamic range and long forms that only pay off if you give them the whole stretch. This is the one that rewards headphones and an hour.",
    [
     ["freejazz","No net and no map"],
@@ -2019,7 +2060,7 @@ const MODES = [
     ["protorap","Poetry against bass, decades before the template"],
     ["artpop","Hooks delivered with avant-garde production, for close listening"]
    ],1],
-  ["morning","Morning","The first hour of the day",
+  ["morning","Morning","The first hour, before the day has decided anything.",
    "Bright without being loud, and already moving. Nothing that asks you to decide anything, since you have not had the coffee yet.",
    [
     ["sunshine","Written to sound like a clear morning"],
@@ -2065,7 +2106,7 @@ const MODES = [
     ["ragtime","Syncopation with a snap, short and bright"],
     ["jazz_early","Horns weaving cheerfully with nowhere to be"]
    ],2],
-  ["system","System test","What the speakers can do",
+  ["system","Test the speakers","What a system can do, when you want to hear it.",
    "Not Listen properly, which is about the music. This is about the equipment, and the five ways it gives itself away: how low it reaches and whether it stops cleanly, whether a voice arrives in the room or behind glass, whether a cymbal rings out or sizzles, how far it falls between the quietest moment and the loudest, and whether you can point at where each player is standing. Roughly in that order.",
    [
     ["dub","Bass with echo behind it, which finds the room's corners"],

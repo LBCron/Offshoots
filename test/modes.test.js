@@ -159,7 +159,7 @@ const spell=n=>n<=20?WORDS[n]
   // not a failure. It is still a gap, so the ones waiting for art are named here rather
   // than tolerated quietly: adding a collection with no picture shows up in this diff.
   // The list is checked both ways, so it cannot outlive the gap it describes.
-  const AWAITING=["system"];
+  const AWAITING=[];   // every collection has its painting
   const fs=require("fs"), path=require("path");
   const dir=path.join(__dirname,"..","moods");
   const onDisk=m=>fs.existsSync(path.join(dir,m+".jpg"));
@@ -174,8 +174,10 @@ const spell=n=>n<=20?WORDS[n]
     stale.length===0 ? true : "has art now: "+stale.join(", "));
   // lazy loading means an off-screen circle has not tried yet, so the fallback is proved
   // on the one that is on screen rather than inferred from the ones that are not
+  // only the ones with a painting: a collection waiting for art has its broken img
+  // removed on error, so there is no src left to be named after anything
   say("  named for the collection it belongs to",
-    moodart.every(a=>a.src==="moods/"+a.mode+".jpg"));
+    moodart.filter(a=>onDisk(a.mode)).every(a=>a.src==="moods/"+a.mode+".jpg"));
   const torn=moodart.filter(a=>a.torn).map(a=>a.mode);
   say("  none of them torn", torn.length===0 ? true : torn.join(", "));
   say("  with the glyph still under it, for one that will not load",
@@ -272,11 +274,11 @@ const spell=n=>n<=20?WORDS[n]
   { const q=await seeded({road:5,party:2});
     const after=await q.$$eval(".mcirc .mclbl",e=>e.map(x=>x.textContent));
     say("a tally puts the most-opened first ("+after.slice(0,2).join(", ")+")",
-      after[0]==="Road trip" && after[1]==="Party");
+      after[0]==="Road trip" && after[1]==="Dance floor");
     say("  without losing any of the "+after.length,
       after.length===nModes && new Set(after).size===nModes);
     say("  and the rest keep their order",
-      after.slice(2).join("/")===before.filter(x=>x!=="Road trip"&&x!=="Party").join("/"));
+      after.slice(2).join("/")===before.filter(x=>x!=="Road trip"&&x!=="Dance floor").join("/"));
     // the list behind the heading is the stable reference, so it must not reorder
     await q.click(".sect-modes .secthead"); await onPage(q,"modes");
     const page=await q.$$eval(".ppage:not([hidden]) .modelist .mclbl",e=>e.map(x=>x.textContent));
@@ -589,9 +591,11 @@ const spell=n=>n<=20?WORDS[n]
   const onStyle=await p.evaluate(()=>({
     lbl:(document.querySelector("#panelBack .bklbl")||{}).textContent||"",
     aria:document.getElementById("panelBack").getAttribute("aria-label")||""}));
+  // and it names the collection, not its descriptor: the crumb used to read "Running or
+  // riding", which is what the page was titled before the page took the collection's name
   say("back out of "+opened+" is offered as the mood, not the map"
       +(onStyle.lbl?" ("+onStyle.lbl+")":": \""+onStyle.aria+"\""),
-    /running or riding/i.test(onStyle.lbl) && /running or riding/i.test(onStyle.aria));
+    /run or ride/i.test(onStyle.lbl) && /run or ride/i.test(onStyle.aria));
   await p.click("#panelBack"); await p.waitForTimeout(900);
   const back=await p.evaluate(()=>{
     const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden).pop();
