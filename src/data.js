@@ -1924,7 +1924,7 @@ const MODES = [
     ["frat","Three chords, a shouted chorus, a saxophone"],
     ["rnb","Where most of this started, and still works"]
    ],2],
-  ["showkid","Show a kid","Ages four to fifteen, usually played in the car.",
+  ["showkid","Show the kids","Music that shapes a listener, met while young.",
    "Not children's music, which is a genre a kid grows out of. The rule here is that the first question a kid asks, how is that sound being made, has an answer they can see: a washboard worn as a shirt, a games console with three channels, two turntables, hands moving faster than looks possible. That lands at four, where it is a body response, and at fifteen, where what gets through is that a person did this on purpose. Chosen so none of it needs skipping with someone small in the room.",
    [
     ["chiptune","A games console with three voices, and that is the whole band"],
