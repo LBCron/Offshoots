@@ -2176,8 +2176,11 @@ function inModesSect(n){
   if(typeof MODES==="undefined") return "";
   const mine=MODES.filter(m=>m[4].some(p=>p[0]===n.id));
   if(!mine.length) return "";
+  // the same side-scrolling row the artists above it use, which is the same row the root
+  // panel puts collections in. .mrow and .whorow.acrow are one rule, and the drag-to-
+  // scroll handler already binds to both.
   return sect("inmodes","Collections",
-    `<div class="modelist modegrid" role="list">${mine.map(modeTile).join("")}</div>`,
+    `<div class="mrow" role="list">${mine.map(modeTile).join("")}</div>`,
     `<span class="sectaside">${mine.length}</span>`,
     "", "Where this style turns up.");
 }

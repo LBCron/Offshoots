@@ -240,6 +240,18 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
           : "panel: "+(got?got.keys.join(" "):"no section")+" | data: "+want.join(" "));
       say("  with the count beside the heading",
         got && got.aside===String(want.length) ? true : got&&got.aside);
+      // the row scrolls sideways like the artists above it, and from the same edge: a
+      // grid here made the section read as a different component from its neighbour
+      const row=await p.evaluate(()=>{
+        const f=e=>e&&{scrolls:e.scrollWidth>e.clientWidth+2,
+          tile:Math.round(e.firstElementChild.getBoundingClientRect().width),
+          left:Math.round(e.getBoundingClientRect().left)};
+        return {mine:f(document.querySelector(".sect-inmodes .mrow")),
+          artists:f(document.querySelector(".whorow.acrow"))}; });
+      say("  laid out as the artists row is, and scrolling sideways with it",
+        row.mine && row.artists && row.mine.scrolls
+          && row.mine.tile===row.artists.tile && row.mine.left===row.artists.left
+          ? true : JSON.stringify(row));
       say("  and each circle labelled with the collection's name",
         got && String(got.labels)===String(want.map(k=>D.MODES.find(m=>m[0]===k)[1]))
           ? true : got&&got.labels.join(" | "));
