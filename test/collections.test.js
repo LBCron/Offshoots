@@ -148,7 +148,8 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     // again for each try rather than tapped repeatedly: the first draft of this loop
     // clicked a control that was no longer on the page and timed out.
     const backToCollection=async()=>{
-      await p.goto(URL); await arm(p); await shown(p,"#chart .n"); await settle(p);
+      await p.goto(URL); await p.reload();
+      await arm(p); await shown(p,"#chart .n"); await settle(p);
       if(await p.evaluate(()=>!document.body.classList.contains("open"))){
         await raise(p);
         await until(p,()=>document.body.classList.contains("open")); await settle(p); }
@@ -207,6 +208,63 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       miss.length===0 ? true : miss.join(" | "));
     say("  and the file is really there (3 opened)",
       unloaded.length===0 ? true : "blank: "+unloaded.join(" "));
+    // ---- the other direction: a style says which collections it is in ----
+    // the pair has to agree both ways. A style panel that names a collection the
+    // collection does not name back is a link into a page the style is not on.
+    {
+      const inmodes=id=>D.MODES.filter(m=>m[4].some(p=>p[0]===id)).map(m=>m[0]);
+      // one style in many, one in a couple, one in none
+      const many=D.DATA.map(r=>r[0]).sort((a,b)=>inmodes(b).length-inmodes(a).length)[0];
+      const none=D.DATA.map(r=>r[0]).find(id=>inmodes(id).length===0);
+      // a hash change on a page that is already loaded is a same-document navigation, so
+      // the style never opens: goto puts the hash on, reload makes it a real one
+      const read=async id=>{
+        await p.goto(URL+"#"+id); await p.reload();
+        await arm(p); await shown(p,"#chart .n"); await settle(p);
+        await p.evaluate(()=>document.body.classList.add("open"));
+        await settle(p);
+        return p.evaluate(()=>{
+          // "no section" only counts as an answer if the panel was built at all
+          if(!document.querySelector("#panelBody .sect")) return "panel never built";
+          const s=document.querySelector(".sect-inmodes");
+          if(!s) return null;
+          return {keys:[...s.querySelectorAll(".mcirc")].map(b=>b.dataset.mode),
+            aside:(s.querySelector(".sectaside")||{}).textContent,
+            labels:[...s.querySelectorAll(".mclbl")].map(e=>e.textContent)}; });
+      };
+      const got=await read(many);
+      const want=inmodes(many);
+      note("styles in no collection", D.DATA.filter(r=>!inmodes(r[0]).length).length+" of "+D.DATA.length);
+      say("a style's panel names every collection that names it ("+many+", "+want.length+")",
+        got && String(got.keys)===String(want) ? true
+          : "panel: "+(got?got.keys.join(" "):"no section")+" | data: "+want.join(" "));
+      say("  with the count beside the heading",
+        got && got.aside===String(want.length) ? true : got&&got.aside);
+      say("  and each circle labelled with the collection's name",
+        got && String(got.labels)===String(want.map(k=>D.MODES.find(m=>m[0]===k)[1]))
+          ? true : got&&got.labels.join(" | "));
+      const empty=await read(none);
+      say("a style in no collection gets no section rather than an empty one ("+none+")",
+        empty===null ? true : "section present");
+      // and the link works from inside a style panel, which is a different stack from
+      // the root panel the circles are usually tapped in
+      await p.goto(URL+"#"+many); await p.reload();
+      await arm(p); await shown(p,"#chart .n"); await settle(p);
+      await p.evaluate(()=>document.body.classList.add("open")); await settle(p);
+      await p.click(".sect-inmodes .mcirc");
+      await until(p,()=>!!document.querySelector(".ppage:not([hidden]) .pghead .pgi"));
+      await settle(p);
+      const open=await p.evaluate(()=>{
+        const u=document.querySelector(".ppage:not([hidden])");
+        return u?u.querySelector(".bigttl").textContent.trim():null; });
+      say("  and tapping one opens that collection",
+        open===D.MODES.find(m=>m[0]===want[0])[1] ? true : open);
+      await p.goto(URL); await p.reload();
+      await arm(p); await shown(p,"#chart .n"); await settle(p);
+      if(await p.evaluate(()=>!document.body.classList.contains("open"))){
+        await raise(p);
+        await until(p,()=>document.body.classList.contains("open")); await settle(p); }
+    }
     await p.close();
   }
   await b.close();

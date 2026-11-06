@@ -1461,6 +1461,7 @@ function panel(n,anc,desc){
     ${startSect(n)}
     ${artistsSect(n,who,artistsHtml)}
     ${acrossSect(n)}
+    ${inModesSect(n)}
     ${linksSect(n,anc,desc)}
     ${deepSect(n)}
     ${shareBtn(n)}</div></div>`;
@@ -2132,18 +2133,23 @@ function modeSortHtml(){
 //
 // The circles used to lean. That was for the jewel cases, which wanted to read as things
 // on a shelf; a circle has no up, so there is nothing to lean.
+// One collection, as a circle with its name under it. Three places draw this now: the
+// row on the root panel, the Collections page, and the collections a style belongs to.
+// They are the same thing, so they are the same markup.
+function modeTile(m){
+  return `<button type="button" class="mcirc lv${m[5]||3}" data-mode="${esc(m[0])}"`
+    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}">`
+    + `<i class="mco mi hasimg">${moodArt(m[0])}`
+    + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
+    + `<span class="mclbl">${esc(m[1])}</span></button>`;
+}
 function modeSect(){
   if(typeof MODES==="undefined") return "";
   // Apple Maps puts its Places on a row of filled circles you swipe through, with the
   // whole set one tap away behind the heading. Twenty-six modes suit that exactly: a
   // few are in reach, the heading opens the lot, and nothing is buried under a scroll
   // of its own.
-  const circles=modeOrder(true).map(m=>
-    `<button type="button" class="mcirc lv${m[5]||3}" data-mode="${esc(m[0])}"`
-    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}">`
-    + `<i class="mco mi hasimg">${moodArt(m[0])}`
-    + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
-    + `<span class="mclbl">${esc(m[1])}</span></button>`).join("");
+  const circles=modeOrder(true).map(modeTile).join("");
   // "Collections" and nothing under it: the page this opens is called Collections, the
   // pictures say what they are, and "By mood, place or task" was a caption for a row that
   // had already shown you a cat asleep, a nightcap and a coffee shop.
@@ -2159,13 +2165,21 @@ function modeSect(){
 // same label, laid out as a grid instead of a scroller, on the panel rather than in a box.
 function modeListHtml(){
   if(typeof MODES==="undefined") return "";
-  const tiles=modeOrderBy(modeSort()).map(m=>
-    `<button type="button" class="mcirc lv${m[5]||3}" data-mode="${esc(m[0])}"`
-    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}">`
-    + `<i class="mco mi hasimg">${moodArt(m[0])}`
-    + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
-    + `<span class="mclbl">${esc(m[1])}</span></button>`).join("");
+  const tiles=modeOrderBy(modeSort()).map(modeTile).join("");
   return `<div class="modelist modegrid" role="list">${tiles}</div>`;
+}
+// The collections this style turns up in. The rest of the panel says what the style is
+// and where it came from; this says what it is for, which is the question a collection
+// answers. 92 of the 461 styles are in none, and those get no section rather than an
+// empty one.
+function inModesSect(n){
+  if(typeof MODES==="undefined") return "";
+  const mine=MODES.filter(m=>m[4].some(p=>p[0]===n.id));
+  if(!mine.length) return "";
+  return sect("inmodes","Collections",
+    `<div class="modelist modegrid" role="list">${mine.map(modeTile).join("")}</div>`,
+    `<span class="sectaside">${mine.length}</span>`,
+    "", "Where this style turns up.");
 }
 
 // ---------- the panel as a stack of pages ----------
