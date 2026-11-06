@@ -1007,7 +1007,15 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 /* A collection, between its lede and its list: the shortcut past the list, drawn as the
    same row it is on the Explore panel, then a heading over the list with the order of it
    on the same line. */
-.modetop{margin:2px 0 16px}
+.modetop{margin:18px 0 16px}
+/* The Surprise row sits straight under the page header, so it reads as a third column
+   unless it lines up with the two above it: its icon centres on the header art and its
+   label starts where the title does. The header's own --pgart and --pggap do the
+   arithmetic, so the row follows the header rather than keeping a copy of its numbers. */
+.modetop .listrow{--mtico:34px;
+  padding-left:calc((var(--pgart) - var(--mtico)) / 2);
+  gap:calc(var(--pggap) + (var(--pgart) - var(--mtico)) / 2)}
+@media (min-width:900px) and (hover:hover) and (pointer:fine){ .modetop .listrow{--mtico:32px} }
 .secthead.picksort{margin:0 0 10px}
 /* Three words did not fit the panel, so the control scrolled and the third order sat off
    the edge; then it was four glyphs you had to press to identify. It is one inline picker
@@ -1074,13 +1082,14 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
    panel underneath both and left a hole next to the circle. Top-aligned rather than
    centred: a description can run to three lines and a circle floating in the middle of
    them reads as a mistake. */
-.ppage .pghead{display:flex;align-items:flex-start;gap:14px;
+.ppage .pghead{display:flex;align-items:flex-start;gap:var(--pggap);
   margin-top:calc(var(--tap) + 10px)}
 .ppage .pghead .bigttl{margin-top:0}
 .ppage .pghtx{flex:1 1 auto;min-width:0}
 .ppage .pghtx .pgdeck:last-child,.ppage .pghtx .pglede:last-child{margin-bottom:0}
 .ppage .bigttl .mn{display:block;min-width:0}
-.ppage .pghead .pgi{flex:none;display:grid;place-items:center;width:76px;height:76px;
+.ppage .pghead .pgi{flex:none;display:grid;place-items:center;
+  width:var(--pgart);height:var(--pgart);
   border-radius:50%;color:#fff;
   background:linear-gradient(160deg,color-mix(in srgb,var(--lvf) 80%,#fff) 0%,var(--lvf) 55%,
     color-mix(in srgb,var(--lvf) 74%,#000) 100%);
@@ -1094,10 +1103,10 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 .ppage .pghead .pgi.hasimg .facefb{position:absolute;inset:0;display:grid;place-items:center;
   z-index:0;color:#fff}
 .ppage .pghead .pgi.hasimg .facefb svg{width:36px;height:36px}
-@media (max-width:420px){ .ppage .pghead{gap:12px} }
+@media (max-width:420px){ .ppage{--pggap:12px} }
 /* --lvc tints a small tile; --lvf fills a circle under a white glyph, the darker pair the
    browse circles already use */
-.ppage{--lvc:#9aa0a6;--lvf:#6b6b73}
+.ppage{--lvc:#9aa0a6;--lvf:#6b6b73;--pgart:76px;--pggap:14px}
 .ppage.lv1{--lvc:#7aa2f7;--lvf:#4a6fc4}
 .ppage.lv2{--lvc:#5bbda4;--lvf:#2f8c73}
 .ppage.lv3{--lvc:#e8c24a;--lvf:#a8821c}
