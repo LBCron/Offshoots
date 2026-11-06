@@ -36,19 +36,42 @@ a commit or a chat.
 
 ## Go deeper and guest picks
 
-New Go deeper rows mostly arrive as suggestions. They are vetted on GitHub (edit the
-issue's JSON into a finished row, swap `pending` for `approved`), then:
-
-```
-node tools/ingest.js            # dry run: what is ready, what still needs edits
-node tools/ingest.js --write    # into src/data.js, and rebuild
-npm test                        # then commit and push
-node tools/ingest.js --close    # close the issues that landed
-```
-
-Adding a row by hand is still fine. Keep it to `test/read.test.js`'s rules: https, no
+New Go deeper rows mostly arrive as suggestions, and are pulled in as below. Adding a row
+by hand is still fine. Keep it to `test/read.test.js`'s rules: https, no
 encyclopedias, a note over 20 characters with no em dash, a known access value and medium,
 and a real year or 0.
 
 A guest's pick is an ordinary `READ` row with its URL in `PICKED`. `CONTRIBUTORS` maps each
 guest's secret key to a `PICKERS` id, and their personal link is `/contribute#k=<key>`.
+
+## Pulling suggestions in
+
+The owner decides whether a suggestion is worth having, by swapping `pending` for
+`approved` on its issue. Where it goes is decided here, by research, and shown to the
+owner before anything is written. The styles a sender picked are a hint, not the answer.
+
+This needs a token that can read and write issues in `bryanbell/Offshoots-submissions`.
+In a Claude session, attach that repo with push access; on the Mac, `gh auth login`.
+
+1. `git pull`. Then `node tools/ingest.js --brief` lists the approved issues and what each
+   still lacks, and `node tools/ingest.js --styles` lists every style on the map.
+2. Open each link and find out what it is actually about: the artists, the scene, the
+   place and the years. A YouTube title or a headline is not enough; read the description
+   or the piece. If the link will not open, say so and leave that one out of the plan.
+3. Place it on every style where someone exploring that style would want it, and no
+   others. Prefer the specific style over its parent (Shoegaze, not Alternative Rock)
+   unless the piece is about the broad one. A piece about one artist goes on the styles
+   that artist shaped. Overlap is fine; best fit is the goal.
+4. Fill in what the row lacks from the source itself: `title` as published, `publication`
+   (the channel, outlet or publisher), `year` (0 if the source does not say), `kind` (the
+   issue lists the usual ones), and `access`. `note` is one plain line on what it gives
+   you: over 20 characters, no em dash, nothing the source does not support.
+5. Before writing anything, show the owner a table: issue, title, styles by name, and one
+   line on why. Change whatever the owner changes.
+6. Write the plan to a scratch file, never into the repo, keyed by issue number:
+   `{"12": {"styles": ["shoegaze", "dreampop"], "kind": "documentary", "year": 1991, "why": "..."}}`.
+   `node tools/ingest.js --apply plan.json` checks every entry first, then rewrites each
+   issue's JSON and comments where it went and why. The dry run follows.
+7. When everything is READY: `node tools/ingest.js --write`, `node test/run.js read`,
+   commit and push, then `node tools/ingest.js --close`. Anything HELD says which field
+   to fix; fix it in the plan and apply again.

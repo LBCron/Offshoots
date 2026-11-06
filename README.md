@@ -33,18 +33,22 @@ or `/suggest` (the form, also linked at the bottom of every Go deeper list). Eac
 becomes an issue in the private `bryanbell/Offshoots-submissions` repo, labelled
 `pending`. Nothing reaches the map from there on its own.
 
-To publish one, edit the JSON block in the issue until it is a finished READ row
-(publication, kind, year, access, a note that says why), then swap `pending` for
-`approved`. To reject one, close it. Then:
+To accept one, swap `pending` for `approved`; to reject one, close it. Where an approved
+suggestion goes, and the rest of its row, is researched when suggestions are pulled in
+(the steps are in `CLAUDE.md`), recorded on the issue, and shown before anything is added:
 
 ```
-node tools/ingest.js            # what would be added, and what still needs edits
-node tools/ingest.js --write    # add approved rows to src/data.js and rebuild
-npm test                        # commit and push, then:
-node tools/ingest.js --close    # close the issues that landed
+node tools/ingest.js --brief          # approved issues, and what each still lacks
+node tools/ingest.js --styles         # every style, to place them on
+node tools/ingest.js --apply plan.json   # write the placements into the issues
+node tools/ingest.js                  # dry run
+node tools/ingest.js --write          # add them to src/data.js and rebuild
+node test/run.js read                 # commit and push, then:
+node tools/ingest.js --close          # close the issues that landed
 ```
 
-Ingest holds anything that would fail `test/read.test.js`, and says why.
+Editing an issue's JSON by hand overrules the research. Ingest holds anything that would
+fail `test/read.test.js`, and says why.
 
 Guests are credited by a key rather than a login. `CONTRIBUTORS` in Netlify's
 environment maps each key to a picker in `PICKERS`; a guest's link is
