@@ -62,7 +62,10 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const look=()=>p.evaluate(()=>{
       const pg=document.querySelector('.ppage[data-p="mode:dinner"]');
       const btn=pg.querySelector("[data-pickany]"), seg=pg.querySelector(".sortpick");
-      const lede=pg.querySelector(".pglede"), list=pg.querySelector(".picks");
+      // the deck, which is the one line under the name. The how-it-sounds paragraph
+      // that used to sit here as well is not shown any more: three stacked texts
+      // above the first playlist made a page you read before you got to use it.
+      const lede=pg.querySelector(".pgdeck"), list=pg.querySelector(".picks");
       const r=x=>x?x.getBoundingClientRect():null;
       return {names:[...pg.querySelectorAll(".pknm")].map(x=>x.textContent),
         label:btn?(btn.querySelector(".lrlbl")||{}).textContent:"(none)",
@@ -97,7 +100,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("    drawn as a go row in a card, saying what it picks from (\""+v.sub+"\")",
       v.carded && v.chev && v.sub==="One of these "+dinner[4].length+", at random");
     say("  clearing the tap floor ("+v.tap+"px)", v.tap>=44);
-    say("  sitting under the lede and above the list", v.belowLede && v.aboveList);
+    say("  sitting under the description and above the list", v.belowLede && v.aboveList);
     note("  sort", v.sorts.join(" "));
     say("  and the three orders, relevance first and selected",
       JSON.stringify(v.sorts)===JSON.stringify(["Relevance*","A–Z","Most used"]));

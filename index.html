@@ -7898,7 +7898,12 @@ function modePage(k){
   // the short descriptor instead, so Focus opened a page headed "Working or studying" and
   // nothing on it said Focus. The descriptor earns its keep as a line under the title.
   return {title:m[1], icon:moodArt(m[0])+`<b class="facefb">${MODEICON[m[0]]||""}</b>`,
-    iconCls:"hasimg", lv:m[5]||3, deck:m[2], lede:m[3], top:headTrack(k)+modeTop(m),
+    // The name, then one line on when you would reach for it, then the picks. m[3] is a
+    // longer paragraph on how the collection sounds; it is not shown. Three stacked texts
+    // above the first playlist was a page you read before you got to use it, and the
+    // paragraph was the one of the three nobody needed in order to choose. It stays in
+    // data.js rather than being deleted, so it can come back without being rewritten.
+    iconCls:"hasimg", lv:m[5]||3, deck:m[2], top:headTrack(k)+modeTop(m),
     html:`<div class="picks">${modePicks(m)}</div>`
       + pageShareBtn("mode:"+m[0], m[1])};
 }

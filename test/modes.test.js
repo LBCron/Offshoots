@@ -300,14 +300,19 @@ const spell=n=>n<=20?WORDS[n]
       key:up.length?up[0].dataset.p:null,
       title:up.length?up[0].querySelector(".bigttl .mn").textContent:null,
       icon:up.length?!!up[0].querySelector(".bigttl .pgi svg"):false,
-      lede:up.length?(up[0].querySelector(".pglede")||{}).textContent:null,
+      // the one line under the name. The longer paragraph on how it sounds is no
+      // longer rendered: the name and that line are what you read before choosing.
+      lede:up.length?(up[0].querySelector(".pgdeck")||{}).textContent:null,
+      para:up.length?!!up[0].querySelector(".pglede"):false,
       lvc:up.length?(up[0].className.match(/\blv([1-5])\b/)||[])[1]:null,
       picks:document.querySelectorAll(".ppage:not([hidden]) .picks [data-go]").length,
       back:!bk.hidden, backLbl:(bk.querySelector(".bklbl")||{}).textContent,
       top:document.getElementById("panelBody").scrollTop};});
   say("Focus pushes a page ("+pg.title+")", pg.key==="mode:focus" && pg.title && pg.title.length>0);
   say("  one page shown of "+pg.pages, pg.shown===1);
-  say("  with its own icon and its why-text", pg.icon && pg.lede && pg.lede.length>20);
+  say("  with its own icon and the line that says when to reach for it",
+    pg.icon && pg.lede && pg.lede.length>20);
+  say("    and nothing else between the name and the picks", pg.para===false);
   // the mark on the page is the circle you tapped, arrived at: a filled circle in the
   // same colour, the size of the cover art in the list underneath it
   const mark=await p.evaluate(()=>{

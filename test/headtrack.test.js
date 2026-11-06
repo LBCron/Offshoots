@@ -52,7 +52,9 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     const v=await p.evaluate(()=>{
       const pg=document.querySelector('.ppage[data-p="mode:system"]');
       const card=pg.querySelector(".trkcard"), a=pg.querySelector(".trkbtn");
-      const lede=pg.querySelector(".pglede"), sur=pg.querySelector("[data-pickany]");
+      // the one line under the name. The how-it-sounds paragraph that used to sit
+      // here too is no longer rendered, so this reads the line that is.
+      const lede=pg.querySelector(".pgdeck"), sur=pg.querySelector("[data-pickany]");
       const list=pg.querySelector(".picks");
       const r=x=>x?x.getBoundingClientRect():null;
       return {title:(card.querySelector(".trkttl")||{}).textContent,
@@ -62,7 +64,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
         rel:a.getAttribute("rel"), tap:Math.round(r(a).height),
         why:(card.querySelector(".trkwhy")||{}).textContent.trim().length,
         toStyle:(card.querySelector(".trkgo")||{}).dataset,
-        underLede: r(card).top>=r(lede).bottom-1,
+        underLede: !!lede && r(card).top>=r(lede).bottom-1,
         aboveTheRest: r(card).bottom<=r(sur).top+1 && r(card).bottom<=r(list).top,
         cards:pg.querySelectorAll(".trkcard").length};
     });
