@@ -8,12 +8,15 @@
 // prefixed PASS or FAIL. They load index.html over file://, so art/ resolves from the
 // repo's own folder and covers render exactly as they do when served.
 //
-// Why it runs them in parallel: almost none of the ~4 minutes is work. The build itself
-// is 50ms. The suites spend about 100 seconds sitting in waitForTimeout, waiting out
-// animations and sheet transitions, and the rest launching Chromium and painting 460
-// nodes. Sleeping processes do not contend, so four at a time on two cores cuts the wall
-// clock to roughly the longest suite plus change. Output is captured per suite and
-// printed whole, so interleaving never garbles a line.
+// Why it runs them in parallel: most of a suite's time is a page loading or a wait for
+// the page to settle, not CPU, so four at a time on two cores cuts the wall clock to
+// roughly the longest suite plus sheet.test.js. A full run is about five minutes. Output
+// is captured per suite and printed whole, so interleaving never garbles a line.
+//
+// The summary's "N dead waits" column counts waits that ran to their cap (see _wait.js).
+// Each one is ten seconds of nothing, and two suites were once nearly all of that: xplay
+// and contrast spent 363s and 495s waiting for a sheet to open on pages that open with
+// it shut by design, and passed. Run the suite alone to see which lines.
 //
 // One trap worth knowing: changing location.hash on a page that is already loaded is a
 // same-document navigation, so the app does not re-select. Every suite opens a style on
@@ -37,6 +40,25 @@ if(!files.length){ console.error("no suites matched "+only.join(" ")); process.e
 // checks each time. The serial tail is about eighty seconds and buys a run you can believe.
 const SOLO=["sheet.test.js"];
 
+// Longest first. Alphabetical order put the two longest suites (contrast, xplay: eight
+// and six minutes on a loaded machine) seventh and second-to-last in the queue, so the
+// whole run waited on whichever of them started last. The pool now takes suites in order
+// of how long they took last time, which is the classic way to pack a queue onto a fixed
+// number of workers: the long ones start at once and the short ones fill in behind them.
+// Timings are remembered in test/.timings.json (gitignored); a suite with no record runs
+// first, since it may be a new long one.
+const TIMES=path.join(__dirname,".timings.json");
+let past={}; try{ past=JSON.parse(fs.readFileSync(TIMES,"utf8")); }catch(e){}
+const rank=f=>past[f]==null ? 1e9 : past[f];
+const order=l=>l.slice().sort((a,b)=>rank(b)-rank(a) || a.localeCompare(b));
+
+// data.test.js runs before the pool, alone, and a failure there ends the run. It needs no
+// browser and takes milliseconds, and what it checks is what every other suite assumes:
+// a parent id that exists, a cover that points at a file, a table edited inside its own
+// range. When it fails, ten minutes of Chromium would only report the same slip as blank
+// spots and missing rows, so the run stops here and says which table and which row.
+const FIRST="data.test.js";
+
 const run=f=>new Promise(res=>{
   const t0=Date.now();
   execFile(process.execPath,[path.join(__dirname,f)],{encoding:"utf8",maxBuffer:1<<24},
@@ -44,7 +66,16 @@ const run=f=>new Promise(res=>{
 });
 
 (async()=>{
-  const queue=files.filter(f=>!SOLO.includes(f)), solo=files.filter(f=>SOLO.includes(f)), done=[];
+  const done=[];
+  if(files.includes(FIRST)){
+    const r=await run(FIRST); done.push(r);
+    if(r.crashed || /^FAIL/m.test(r.out)){
+      process.stdout.write(r.out.split("\n").filter(l=>!l.startsWith("PASS")).join("\n")
+        +"\n\n"+FIRST+" failed, so the browser suites did not run.\n");
+      process.exit(1);
+    }
+  }
+  const queue=order(files.filter(f=>!SOLO.includes(f) && f!==FIRST)), solo=files.filter(f=>SOLO.includes(f));
   await Promise.all(Array.from({length:Math.min(lim,queue.length)},async()=>{
     while(queue.length) done.push(await run(queue.shift()));
   }));
@@ -57,8 +88,9 @@ const run=f=>new Promise(res=>{
     const lines=r.out.split("\n").filter(Boolean);
     const bad=lines.filter(l=>l.startsWith("FAIL"));
     const n=lines.filter(l=>/^(PASS|FAIL)/.test(l)).length;
+    const dead=lines.filter(l=>/^     wait: .* ran to its /.test(l)).length;
     checks+=n; failed+=bad.length; if(r.crashed) crashed++;
-    rows.push([r.f, n, bad.length, r.crashed, (r.ms/1000).toFixed(1)]);
+    rows.push([r.f, n, bad.length, r.crashed, (r.ms/1000).toFixed(1), dead]);
     // a crashed suite stops early and reports no failures, which reads as a pass: print
     // everything so the exception is visible, not just the checks that got as far as running
     if(r.crashed || bad.length){
@@ -66,10 +98,16 @@ const run=f=>new Promise(res=>{
       if(r.crashed) process.stdout.write("  !! suite crashed\n");
     }
   }
+  // remember how long each suite took, for the next run's ordering
+  try{ done.forEach(r=>past[r.f]=r.ms); fs.writeFileSync(TIMES,JSON.stringify(past,null,1)+"\n"); }catch(e){}
   process.stdout.write("\n");
-  for(const [f,n,bad,crash,secs] of rows)
+  // "N dead waits": waits that ran to their cap. Each is ten seconds of nothing, and a
+  // suite that is long and green can be mostly that. The lines naming them are in the
+  // suite's own output (node test/run.js <suite>).
+  for(const [f,n,bad,crash,secs,dead] of rows)
     process.stdout.write(f.replace(".test.js","").padEnd(10)+String(n).padStart(4)+" checks"
-      + (crash?"  CRASHED":bad?"  "+bad+" FAILED":"         ")+secs.padStart(7)+"s\n");
+      + (crash?"  CRASHED":bad?"  "+bad+" FAILED":"         ")+secs.padStart(7)+"s"
+      + (dead?"   "+dead+" dead wait"+(dead>1?"s":""):"")+"\n");
   // A flake you cannot name is a flake you cannot fix, and twice now one has gone past
   // between two clean runs with nothing kept. Every failing run writes itself down.
   if(failed||crashed){

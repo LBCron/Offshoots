@@ -19,8 +19,13 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
 // A line that only records what happened, with no verdict in it. Keeping these out of
 // say() is what lets say() treat anything that is not true as a failure.
 const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
+// Arriving on a style link opens on the map with the sheet shut, by design (boot() in
+// app.js), so body.open never comes and a wait for it runs to its cap: ten seconds a
+// page, thirty-three pages, six minutes of a six-minute suite. What this suite reads is
+// the panel's rows, which are rendered when the style is selected whether or not the
+// sheet is up, so the wait is for the selection.
 const opened=async q=>{ await arm(q); await shown(q,"#chart .n"); await settle(q);
-  await until(q,()=>document.body.classList.contains("open")); await settle(q); };
+  await until(q,()=>!!document.querySelector("#chart .n.cur")); await settle(q); };
 
 (async()=>{
   const X=D.XPLAY||[];

@@ -141,7 +141,12 @@ const parse=s=>{
         if(p) await p.close();
         p=await ctx.newPage();
         await p.goto(URL+"#"+c.id); await ready(p);
-        await until(p,()=>document.body.classList.contains("open")).catch(()=>{});
+        // Arriving on a style link opens on the map with the sheet shut (boot() in
+        // app.js), so a wait for body.open here ran to its cap on every one of these
+        // pages: 44 of them, 440 seconds, with the colours read off the shut sheet
+        // each time anyway. The wait is for the selection the panel is drawn from;
+        // what is measured is unchanged.
+        await until(p,()=>!!document.querySelector("#chart .n.cur"));
         await settle(p);
         if(await p.$(".hasfb")) break;
       }

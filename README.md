@@ -7,8 +7,8 @@ the music does not stay put. Built for the School of Listening class.
 
 Live: https://musicatlas.us/
 
-460 styles across 16 families, 1,130 parent-to-child connections, 277 written
-descriptions, and 270 styles with a playlist on Apple Music and Spotify.
+461 styles across 18 families, 1,133 parent-to-child connections, 309 written
+descriptions, and 368 styles with a playlist on Apple Music and Spotify.
 
 ## What's in here
 
@@ -126,10 +126,16 @@ npm run setup          # playwright, once (installs into test/, not the root)
 npm test               # rebuilds, then runs every test/*.test.js
 ```
 
-92 checks across five suites, driving a real Chromium against the built page at
-mobile and desktop widths: the back trail, the listening modes, the browse menus,
-sharing from the title, and the root panel. Each prints one line per check and the
-runner exits non-zero if any fails.
+About 1,200 checks across thirty suites. All but a few drive a real Chromium against
+the built page at mobile and desktop widths; each prints one line per check and the
+runner exits non-zero if any fails. `test/data.test.js` runs first and alone, with no
+browser: it loads `src/data.js` and checks every relationship the app assumes (parent
+ids exist, lineage has no cycles, every cover stem has a file, every table is keyed by
+real style ids), in milliseconds. If it fails, the browser suites do not run, since
+they would only report the same slip as blank spots.
+
+The runner takes suites longest-first, from the timings it kept in `test/.timings.json`
+on the last run, so the two eight-minute suites start at once instead of at the end.
 
 They load `index.html` over `file://`, so `art/` resolves from this folder and covers
 render exactly as they do when served.
