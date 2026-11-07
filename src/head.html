@@ -33,7 +33,7 @@
    from those two, so Honky-Tonk is the same brown card on a white page as on a black
    one. That is why only the shell and the map need a light set at all. */
 :root{
-  --sectline:#c7c7cc; --sectw:1px; --sep:color-mix(in srgb,#1a1a1c 14%,transparent); --bg:#ffffff; --band:#f2f2f7; --mapbg:#fbfbfd; --panel:#ffffff; --fg:#1a1a1c; --muted:#5f5f66; --line:#d8d8dc; --grid:#ebebf0; --roots:#f4f4f7;
+  --sectline:#c7c7cc; --sectw:1px; --sep:color-mix(in srgb,#1a1a1c 14%,transparent); --bg:#ffffff; --band:#ededf1; --mapbg:#f3f3f6; --panel:#ffffff; --fg:#1a1a1c; --muted:#4e4e56; --line:#cfcfd4; --grid:#ebebf0; --roots:#f4f4f7;
 
   /* ---- the four things that stop a panel reading as one flat sheet ----
      A card is a step up from the panel, and it has an edge: a hairline ring so the shape
@@ -50,11 +50,11 @@
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.09'/%3E%3C/svg%3E");
   --grain:.022;
   --bandink:#1a1a1c; --bandA:.040; --bandB:.012;
-  --fill:#ebebf0; --fill2:#f2f2f6; --scrim:rgb(0 0 0 / .32); --halo:#ffffff; --ok:#248a3d; --accent:#007aff; --accent-fg:#ffffff; --blue:#007aff; --bluetx:#0057ab;
+  --fill:#e4e4ea; --fill2:#ececf1; --scrim:rgb(0 0 0 / .32); --halo:#ffffff; --ok:#248a3d; --accent:#007aff; --accent-fg:#ffffff; --blue:#007aff; --bluetx:#0057ab;
   /* a filled button off a family skin: the system blue holds white at 4.0:1 in light and
      3.7:1 in dark, so this one is a step deeper, 5.2:1, and the same in both */
   --bluebtn:#0068dc;
-  --glass:rgb(255 255 255 / .86); --shadow:0 1px 2px rgb(0 0 0 / .10), 0 10px 30px rgb(0 0 0 / .14);
+  --glass:rgb(255 255 255 / .98); --shadow:0 1px 2px rgb(0 0 0 / .10), 0 10px 30px rgb(0 0 0 / .14);
   --bar:0px; --gutter:16px;
   --node-s:62%; --node-l:44%; color-scheme:light;
   /* The family colours are fixed hexes chosen against a black map, so on white the
@@ -276,7 +276,7 @@ code{font-family:var(--f-mono);font-size:.92em;background:var(--fill2);
 .artists span{font-size:var(--t-foot);letter-spacing:0;color:var(--muted);font-weight:600;margin-right:2px}
 .artists b{font-weight:500}
 .artists b:not(:last-child)::after{content:" ·";color:var(--muted)}
-aside h3,.pcard h3.sec{font:600 var(--t-head)/var(--t-head-lh) var(--f-body);letter-spacing:-.01em;text-transform:none;color:var(--fg);margin:24px 0 10px}
+aside h3,.pcard h3.sec{font:700 var(--t-head)/var(--t-head-lh) var(--f-body);letter-spacing:-.012em;text-transform:none;color:var(--fg);margin:30px 0 10px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{display:inline-flex;align-items:center;gap:8px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:0;max-width:100%;min-height:calc(var(--tap) - 4px);box-sizing:border-box;font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body);padding:0 12px;border-radius:999px;border:0;background:var(--fill2);color:var(--fg);cursor:pointer;transition:background .15s}
 .chip::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--c)}
@@ -1075,8 +1075,11 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 .tart{position:relative;width:84px;height:84px;flex:none}
 .tcirc .tart .tco{width:100%;height:100%;border-radius:50%;overflow:hidden;position:relative;
   background:var(--fill2);
-  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 16%,transparent),
-    0 1px 3px rgb(0 0 0 / .26)}
+  /* a keyline: a hairline of ink outside, a hairline of the panel inside, so a light
+     tile does not melt into a light page and a dark one is not a hole in it */
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--fg) 14%,transparent),
+    0 0 0 1px var(--panel), 0 0 0 2px color-mix(in srgb,var(--fg) 12%,transparent),
+    0 1px 3px rgb(0 0 0 / .18)}
 /* The sleeves are drawn with a worn paper edge, lighter than the art inside them. Square
    that reads as the edge of a record sleeve; cropped round it becomes a bright rim around
    the disc, brightest where the art itself is dark, like Post-Punk and Trap. Scaled so the
@@ -1597,6 +1600,10 @@ body.searching #bottomSearch{display:block}
 /* ---- docked layout: left sidebar on desktop, bottom sheet on phones ---- */
 #app{display:flex;flex-direction:row}
 #treeView{position:relative;flex:1 1 auto;min-width:0;min-height:0}
+/* While the sheet is up on a phone the map behind it steps back, so the panel is in
+   front of it rather than beside it. Desktop docks the panel and needs no scrim. */
+#treeView::after{content:"";position:absolute;inset:0;background:var(--fg);opacity:0;pointer-events:none;transition:opacity .25s;z-index:5}
+@media (max-width:899px){ body.open #treeView::after{opacity:.1} }
 #bar{position:absolute;z-index:41;top:calc(env(safe-area-inset-top,0px) + 10px);left:14px;display:flex;flex-direction:column;align-items:flex-start}
 aside#panel{position:relative;z-index:30;flex:0 0 var(--sidew);width:var(--sidew);height:100%;max-height:none;top:auto;right:auto;left:auto;
   border-radius:0;box-shadow:none;border-left:.5px solid var(--line);background:var(--panel);
@@ -1735,7 +1742,10 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
 /* One heading size across the app. The root panel's section headings were 20px/700 and
    every heading inside a pushed page was 17px/600, so going one level in made the type
    get smaller rather than the page get deeper. These match .subh now. */
-.secttl{font:600 var(--t-head)/var(--t-head-lh) var(--f-body);letter-spacing:-.01em;text-transform:none;color:var(--fg);margin:0 0 12px}
+/* Section headings were the same weight as the row titles under them, so the panel had
+   no hierarchy. Bold rather than semibold, and more air above than below. Not caps:
+   type.test.js pins no all-caps labels, an earlier decision that stands. */
+.secttl{font:700 var(--t-head)/var(--t-head-lh) var(--f-body);letter-spacing:-.012em;text-transform:none;color:var(--fg);margin:0 0 10px}
 .sect{margin-top:32px;padding:0}
 .sect:first-child{margin-top:20px}
 
