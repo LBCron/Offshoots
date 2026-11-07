@@ -1,9 +1,129 @@
-:root{color-scheme:dark;--bg:#13171a;--surface:#1b2124;--paper:#f1e5ce;--muted:#b9b6aa;--line:#384044;--accent:#9cdbc5;--orange:#efa969;font:16px/1.55 system-ui,sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--paper)}a{color:var(--accent);text-underline-offset:.22em}a:hover{color:#fff}button,input,select{font:inherit}button,select{cursor:pointer}
-:focus-visible{outline:2px solid var(--orange);outline-offset:4px}
-.shell{max-width:1320px;margin:auto;display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
-.sidebar{border-right:1px solid var(--line);padding:2.2rem 1.25rem}.brand{display:block;color:var(--paper);font-weight:800;font-size:1.25rem;text-decoration:none}.sidebar small,.eyebrow{color:var(--orange);font:700 .72rem/1.4 system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase}.sidebar nav{display:grid;gap:.35rem;margin:2rem 0}.sidebar nav a{display:block;text-decoration:none;color:var(--muted);padding:.65rem .75rem;border-radius:.4rem}.sidebar nav a[aria-current]{background:var(--surface);color:var(--paper);box-shadow:inset 2px 0 var(--accent)}
-main{padding:clamp(1.4rem,5vw,4.8rem);min-width:0}h1,h2,h3{line-height:1.12}h1{font-family:Georgia,serif;font-size:clamp(2.8rem,7vw,5rem);letter-spacing:-.045em;margin:.28em 0}.detail h1{font-size:clamp(2rem,5vw,3.5rem)}h2{font-size:1.6rem;margin:1.6em 0 .5em}h3{margin:.2em 0 .55em}.lede{font-size:1.22rem;max-width:38em}.prose{max-width:70ch}.muted,small{color:var(--muted)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1rem;margin:2rem 0}.card,.controls,.record,.swatchcard{background:var(--surface);border:1px solid var(--line);border-radius:.65rem;padding:1.15rem}.card{text-decoration:none;color:var(--paper)}.card:hover{border-color:var(--accent)}.card p{color:var(--muted);margin:0}.card strong{display:block;margin-bottom:.45rem}.controls{display:flex;align-items:end;gap:.8rem;flex-wrap:wrap;margin:1.6rem 0 .6rem}.controls label{display:grid;gap:.35rem;font-size:.88rem;color:var(--muted)}.controls label:first-child{flex:1;min-width:min(100%,240px)}input,select{width:100%;color:var(--paper);background:var(--bg);border:1px solid var(--line);border-radius:.38rem;padding:.6rem}.result-list,.track-list{list-style:none;padding:0}.result-list li,.track-list li{padding:.85rem 0;border-bottom:1px solid var(--line)}.result-list a{font-weight:700}.result-list small{display:block}.track-list li{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:.6rem}.track-list b,.track-list small{display:block}.track-list .seq{color:var(--orange);font-variant-numeric:tabular-nums}.actions{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0}.pill{display:inline-block;padding:.4rem .7rem;border:1px solid var(--line);border-radius:3rem}.detail header{display:flex;align-items:center;gap:1.3rem}.cover{width:clamp(84px,18vw,155px);aspect-ratio:1;object-fit:cover;border-radius:.35rem}.sample{margin:.4rem 0;display:flex;gap:.6rem;align-items:center}.chip{width:1.3rem;height:1.3rem;border:1px solid #888;border-radius:.25rem}.sample code{margin-left:auto}.skip{position:absolute;left:-1000px}.skip:focus{left:1rem;top:1rem;background:var(--bg);padding:.5rem}.long{overflow-wrap:anywhere}
-@media(max-width:710px){.shell{display:block}.sidebar{padding:1rem;border-right:0;border-bottom:1px solid var(--line)}.sidebar nav{display:flex;flex-wrap:wrap;gap:.2rem;margin:.5rem 0 0}.sidebar nav a{padding:.4rem .55rem}main{padding:1.35rem}}
-.cards figure{margin:0}.art-example{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:.3rem;margin-bottom:.55rem}.sample{flex-wrap:wrap}
+/* Music Atlas wiki. A reference, so it looks like one: paper ground, a serif for reading,
+   a sans for the chrome, a contents list for every page, tables for the things that are
+   tables. Light by default, with a dark scheme for anyone who asked their system for it. */
+:root{color-scheme:light dark;
+  --bg:#f6f3ec;--surface:#fcfbf7;--ink:#1e1c1a;--muted:#5f5a52;--line:#d9d3c6;--rule:#c8c1b1;
+  --accent:#6b2440;--link:#1f4d8a;--mark:#fff3c4;--code:#efeae0;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font:17px/1.6 var(--serif)}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#17191c;--surface:#1f2226;--ink:#e9e4d8;--muted:#a9a397;--line:#33373c;--rule:#444a51;
+  --accent:#e7b2c6;--link:#8fb8ef;--mark:#4a4320;--code:#262a2f}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:1rem}
+body{margin:0;background:var(--bg);color:var(--ink)}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.18em}
+a:hover{text-decoration-thickness:2px}
+button,input,select{font:inherit}button,select{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+code{font:.88em var(--mono);background:var(--code);padding:.1em .35em;border-radius:.25rem}
+pre{font:.86rem/1.5 var(--mono);background:var(--code);border:1px solid var(--line);border-radius:.4rem;padding:1rem 1.1rem;overflow:auto;white-space:pre-wrap}
+pre code{background:none;padding:0;font-size:inherit}
+hr{border:0;border-top:1px solid var(--line);margin:2.4rem 0}
+mark{background:var(--mark);color:inherit;padding:0 .15em}
+
+/* ---- shell: sidebar with the site nav and this page's contents ---- */
+.shell{max-width:1240px;margin:auto;display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.sidebar{border-right:1px solid var(--line);padding:2rem 1.25rem;font-family:var(--sans);font-size:.9rem;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}
+.brand{display:block;color:var(--ink);font-weight:800;font-size:1.15rem;text-decoration:none;letter-spacing:-.01em}
+.sidebar small,.eyebrow{display:block;color:var(--muted);font:700 .7rem/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase}
+.sidebar nav{display:grid;gap:.1rem;margin:1.4rem 0}
+.sidebar nav a{display:block;text-decoration:none;color:var(--ink);padding:.45rem .6rem;border-radius:.35rem}
+.sidebar nav a:hover{background:var(--surface)}
+.sidebar nav a[aria-current]{background:var(--surface);font-weight:700;box-shadow:inset 3px 0 var(--accent)}
+.toc{margin:1.8rem 0 0;padding:1rem 0 0;border-top:1px solid var(--line)}
+.toc small{margin-bottom:.5rem}
+.toc ol{list-style:none;margin:0;padding:0}
+.toc li{margin:0}
+.toc a{display:block;color:var(--muted);text-decoration:none;padding:.28rem .6rem;border-left:2px solid transparent;font-size:.86rem;line-height:1.35}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--ink);border-left-color:var(--accent)}
+.toc li.h3 a{padding-left:1.4rem;font-size:.8rem}
+
+/* ---- the page ---- */
+main{padding:clamp(1.4rem,4vw,3.6rem) clamp(1.2rem,5vw,4.4rem);min-width:0;max-width:78ch}
+main.wide{max-width:none}
+h1,h2,h3{font-family:var(--serif);line-height:1.15;font-weight:700;letter-spacing:-.015em}
+h1{font-size:clamp(2.1rem,5vw,3rem);margin:.2em 0 .4em;padding-bottom:.3em;border-bottom:1px solid var(--rule)}
+.detail h1{font-size:clamp(1.6rem,4vw,2.3rem);border:0;padding:0}
+h2{font-size:1.5rem;margin:2em 0 .6em;padding-bottom:.25em;border-bottom:1px solid var(--line)}
+h3{font-size:1.12rem;margin:1.6em 0 .4em}
+h2 a.anchor,h3 a.anchor{color:var(--muted);text-decoration:none;opacity:0;margin-left:.4em;font-weight:400}
+h2:hover a.anchor,h3:hover a.anchor{opacity:1}
+p{margin:0 0 1em}
+.lede{font-size:1.18rem;color:var(--muted);max-width:40em;margin-bottom:1.6em}
+.prose{max-width:70ch}
+.muted,small{color:var(--muted)}
+ul,ol{padding-left:1.4em}li{margin:.3em 0}
+li::marker{color:var(--muted)}
+dl{margin:1em 0}dt{font-weight:700;margin-top:.8em}dd{margin:.2em 0 0 1.2em}
+blockquote{margin:1.2em 0;padding:.6em 1em;border-left:3px solid var(--rule);color:var(--muted)}
+
+/* ---- tables, which a wiki is mostly made of ---- */
+table{border-collapse:collapse;width:100%;margin:1.2em 0;font-size:.93rem;font-family:var(--sans)}
+th,td{text-align:left;vertical-align:top;padding:.5rem .6rem;border-bottom:1px solid var(--line)}
+th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--rule)}
+tbody tr:hover{background:var(--surface)}
+td code{white-space:nowrap}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.swatch{display:inline-block;width:1.05em;height:1.05em;border-radius:.2em;border:1px solid rgb(0 0 0 / .18);vertical-align:-.18em;margin-right:.45em}
+.infobox{float:right;width:min(100%,300px);margin:0 0 1.2rem 1.6rem;padding:.9rem 1rem;background:var(--surface);border:1px solid var(--line);border-radius:.4rem;font:.86rem/1.45 var(--sans)}
+.infobox h3{font:700 .72rem/1.4 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem}
+.infobox table{margin:0;font-size:.84rem}.infobox th,.infobox td{padding:.3rem .2rem;border:0}.infobox th{text-transform:none;letter-spacing:0;font-weight:700;color:var(--ink);width:40%}
+.note{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:.3rem;padding:.8rem 1rem;margin:1.2em 0;font-size:.95rem}
+.note b{font-family:var(--sans)}
+
+/* ---- overview cards ---- */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:1rem;margin:1.6rem 0}
+.card,.swatchcard{background:var(--surface);border:1px solid var(--line);border-radius:.5rem;padding:1rem 1.1rem}
+.card{text-decoration:none;color:var(--ink);font-family:var(--sans)}
+.card:hover{border-color:var(--accent)}
+.card p{color:var(--muted);margin:0;font-size:.92rem}
+.card strong{display:block;margin-bottom:.4rem;font-size:1.05rem}
+
+/* ---- catalog ---- */
+.controls{display:flex;align-items:end;gap:.8rem;flex-wrap:wrap;margin:1.2rem 0 .6rem;font-family:var(--sans)}
+.controls label{display:grid;gap:.3rem;font-size:.82rem;color:var(--muted)}
+.controls label:first-child{flex:1;min-width:min(100%,260px)}
+input,select{width:100%;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:.35rem;padding:.55rem .7rem;font-family:var(--sans)}
+#count{font-family:var(--sans);font-size:.88rem;color:var(--muted)}
+.result-list,.track-list{list-style:none;padding:0;margin:0}
+.result-list li{padding:.7rem 0;border-bottom:1px solid var(--line)}
+.result-list a{font-weight:700;font-family:var(--sans);font-size:.98rem}
+.result-list small{display:block;margin-top:.15rem;font-size:.86rem}
+.track-list li{display:grid;grid-template-columns:2.2rem minmax(0,1fr);gap:.6rem;padding:.55rem 0;border-bottom:1px solid var(--line);font-family:var(--sans);font-size:.93rem}
+.track-list b,.track-list small{display:block}.track-list small{font-size:.84rem}
+.track-list .seq{color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;padding-right:.4rem}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin:1rem 0;font-family:var(--sans);font-size:.9rem}
+.pill{display:inline-block;padding:.38rem .75rem;border:1px solid var(--rule);border-radius:3rem;text-decoration:none;color:var(--ink);background:var(--surface)}
+.pill:hover{border-color:var(--accent)}
+.detail header{display:flex;align-items:center;gap:1.3rem;margin:1rem 0}
+.detail label{display:block;font:.82rem var(--sans);color:var(--muted);margin:1em 0 .3em}
+.detail select{width:auto;min-width:14rem}
+.cover{width:clamp(84px,18vw,150px);aspect-ratio:1;object-fit:cover;border-radius:.3rem;box-shadow:0 1px 3px rgb(0 0 0 / .18)}
+
+/* ---- art page ---- */
+.sample{margin:.35rem 0;display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;font:.88rem var(--sans)}
+.chip{flex:none;width:1.25rem;height:1.25rem;border:1px solid rgb(0 0 0 / .18);border-radius:.25rem}
+.sample code{margin-left:auto;font-size:.8rem}
+.swatchcard h3{margin:0 0 .5rem;font:700 .95rem var(--sans)}
+.cards figure{margin:0}
+.art-example{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:.3rem;margin-bottom:.5rem}
+figcaption{font:.86rem var(--sans);color:var(--muted)}
+.shelves td:first-child{font-variant-numeric:tabular-nums;width:3.2rem}.shelves td:nth-child(2){width:11rem}.shelves td{white-space:nowrap}
+
+.skip{position:absolute;left:-1000px}.skip:focus{left:1rem;top:1rem;background:var(--surface);padding:.5rem;z-index:2}
+.long{overflow-wrap:anywhere}
+
+@media (max-width:760px){
+  .shell{display:block}
+  .sidebar{position:static;max-height:none;padding:1rem;border-right:0;border-bottom:1px solid var(--line)}
+  .sidebar nav{display:flex;flex-wrap:wrap;gap:.2rem;margin:.6rem 0 0}
+  .sidebar nav a{padding:.4rem .55rem}
+  .toc{display:none}
+  main{padding:1.3rem 1.1rem}
+  .infobox{float:none;width:auto;margin:1rem 0}
+  table{display:block;overflow-x:auto}
+}
