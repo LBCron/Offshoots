@@ -25,8 +25,7 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
 const wrote=(q,n)=>until(q,n=>window.__copied.length>n
   && !!document.querySelector("#panel [data-share].done, #panel [data-aboutcopy].done"),n);
 // the share button says "Link copied" for 1600ms and then puts its own label back
-const relabelled=q=>until(q,()=>{const b=document.querySelector("#panel [data-share]");
-  return !b || !b.classList.contains("done");});
+const relabelled=q=>until(q,()=>![...document.querySelectorAll("#panel [data-share]")].some(b=>b.classList.contains("done")));
 // a page that lands on a fold opens the sheet and pushes the page 420ms after boot
 const landed=(q,p)=>until(q,p=>{const d=document.querySelector('.ppage[data-p="'+p+'"]');
   return !!d && !d.hidden && document.body.classList.contains("open");},p);
@@ -46,9 +45,22 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
 (async()=>{
   const b=await chromium.launch(); skipWelcome(b);
 
-  // ---------- the old footer is gone ----------
+  // ---------- the old footer is gone; the docked sidebar has a new one ----------
+  // The old #pshare footer sat over the content on every screen. On a docked sidebar
+  // the share button now has a footer of its own, #sharefoot, below the scroller, so it
+  // is in the same place on a short style and a long one; the in-flow button stays in
+  // the card for phones and is hidden here. Only one share control is ever visible.
   let d=await fresh(b,Dk,"#disco");
   say("footer button removed", (await d.$$("#pshare, #pfoot")).length===0);
+  const pinned=await d.evaluate(()=>{ const f=document.getElementById("sharefoot"), body=document.getElementById("panelBody"), panel=document.getElementById("panel");
+    const w=f&&f.querySelector(".shbtn.wide[data-share]"); if(!w) return null;
+    const fr=f.getBoundingClientRect(), br=body.getBoundingClientRect(), pr=panel.getBoundingClientRect();
+    return {belowBody:Math.round(fr.top-br.bottom), toFoot:Math.round(pr.bottom-fr.bottom), hairline:getComputedStyle(f).borderTopWidth,
+      inflow:[...body.querySelectorAll(".shbtn.wide[data-share]")].map(e=>getComputedStyle(e).display),
+      visible:[...document.querySelectorAll("#panel [data-share]")].filter(e=>e.getClientRects().length).length}; });
+  say("on a docked sidebar Share is pinned in a footer below the scroller", !!pinned && pinned.belowBody>=0 && pinned.toFoot===0);
+  say("  with a hairline over it ("+(pinned&&pinned.hairline)+")", !!pinned && parseFloat(pinned.hairline)>0);
+  say("  and the in-flow button hidden, so one share control shows", !!pinned && pinned.inflow.every(x=>x==="none") && pinned.visible===1);
   // The title used to be the lineage control, which hid the map's own relationships in a
   // menu and put them in the same bar as Back. The name is a heading in the body now and
   // the lineage is a section of its own; Share stays its own button at the foot.
@@ -62,18 +74,17 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   say("the lineage is a section, not a menu on the title",
     (await d.$$(".sect-connections")).length===1
     && (await d.$$("button.navttl, .navttl[aria-haspopup]")).length===0);
-  const sb=await d.evaluate(()=>{ const w=document.querySelector(".shbtn.wide");
+  const sb=await d.evaluate(()=>{ const w=document.querySelector("#sharefoot .shbtn.wide");
     if(!w) return null;
     const r=w.getBoundingClientRect(), body=document.getElementById("panelBody");
-    const tally=document.querySelector(".tally").getBoundingClientRect();
+    const br=body.getBoundingClientRect();
     return {label:w.querySelector(".shlbl").textContent, pos:getComputedStyle(w).position,
       width:Math.round(r.width), room:Math.round(body.clientWidth),
-      tall:Math.round(r.height), beforeTally:Math.round(tally.top-r.bottom),
-      only:document.querySelectorAll("#panel [data-share]").length}; });
+      tall:Math.round(r.height), belowBody:Math.round(r.top-br.bottom),
+      only:[...document.querySelectorAll("#panel [data-share]")].filter(e=>e.getClientRects().length).length}; });
   say("share is a labelled button at the foot ("+(sb&&sb.label)+")", !!sb && /Share/.test(sb.label));
   say("  running the full width, "+sb.width+" of "+sb.room, sb.width>=sb.room-48);
-  say("  in the flow, not pinned over the text ("+sb.pos+")", sb.pos==="static");
-  say("  below the tally by "+(-sb.beforeTally)+"px", sb.beforeTally<=0);
+  say("  below the scroller, not over the text (+"+sb.belowBody+"px)", sb.pos==="static" && sb.belowBody>=0);
   say("  tap target "+sb.tall+"px", sb.tall>=34);
   // the button used to be the one blue thing on a panel painted the family's own
   // colours, which read as app chrome dropped into the style. It now borrows --acc from
@@ -84,7 +95,7 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // Open playlist button that is meant to be the heaviest thing on it, so what has to
   // hold is the other way round: play is opaque, share is a tint of the family colour.
   const sc=await d.evaluate(()=>{
-    const w=document.querySelector(".shbtn.wide"), p=document.getElementById("panel");
+    const w=document.querySelector("#sharefoot .shbtn.wide"), p=document.getElementById("panel");
     const play=document.querySelector(".plbtn");
     // a bare rgb() is opaque; only rgba()/color() carry a fourth value
     const alpha=c=>{const m=/^(?:rgba|color)\(/.test(c) ? c.match(/[\d.]+\s*\)\s*$/) : null;
@@ -110,12 +121,12 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   say("the name starts at the card edge ("+c+"px in)", c>=0 && c<=24);
 
   // ---------- sharing ----------
-  await d.click(".shbtn.wide"); await wrote(d,0); await settle(d);
+  await d.click("#sharefoot .shbtn.wide"); await wrote(d,0); await settle(d);
   note("copied the style link", await d.evaluate(()=>window.__copied[0]||""));
-  note("the button confirms", await d.$eval(".shbtn .shlbl",e=>e.textContent));
+  note("the button confirms", await d.$eval("#sharefoot .shbtn .shlbl",e=>e.textContent));
   say("  and the title is left alone", await d.$eval(".pttl .ptnm",e=>e.textContent)==="Disco");
   await relabelled(d); await settle(d);
-  note("label comes back", await d.$eval(".shbtn .shlbl",e=>e.textContent));
+  note("label comes back", await d.$eval("#sharefoot .shbtn .shlbl",e=>e.textContent));
 
   // overview shares the map
   d=await fresh(b,Dk);
@@ -125,7 +136,9 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   const rb=await d.evaluate(()=>{ const card=document.querySelector(".ovcard"),
     sh=document.querySelector("#panelBody .shbtn"), row=card.querySelector(".navrow");
     if(!sh) return null;
-    const sr=sh.getBoundingClientRect(), body=document.getElementById("panelBody");
+    // the in-flow row keeps its place in the list; the pinned copy is the one with a size here
+    const vis=document.querySelector("#sharefoot .shbtn")||sh;
+    const sr=vis.getBoundingClientRect(), body=document.getElementById("panelBody");
     return {label:sh.querySelector(".shlbl").textContent, width:Math.round(sr.width),
       room:body.clientWidth, pos:getComputedStyle(sh).position,
       round:document.querySelectorAll("#panelBody .shbtn.round").length,
@@ -138,22 +151,25 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   say("  the last row of the colophon list", rb.last && rb.pos!=="absolute" && rb.pos!=="fixed");
   say("  nothing round left in the header", rb.round===0 && rb.inHeader===0);
   say("  and it is the only share control here", rb.only===1);
-  await d.$eval("#panelBody .shbtn",e=>e.scrollIntoView({block:"center"})); await settle(d);
-  await d.click("#panelBody .shbtn"); await wrote(d,0); await settle(d);
+  // on the docked sidebar the pinned copy is the one you can press
+  say("  pinned in the footer as \"Share this app\"",
+    await d.$eval("#sharefoot .shbtn .shlbl",e=>e.textContent)==="Share this app");
+  await d.click("#sharefoot .shbtn"); await wrote(d,0); await settle(d);
   const u=await d.evaluate(()=>window.__copied[0]||"");
   say("copied the map link (no #)", !u.includes("#") ? true : u);
   say("  and says so in its label",
-    await d.$eval("#panelBody .shbtn .shlbl",e=>e.textContent)==="Link copied");
+    await d.$eval("#sharefoot .shbtn .shlbl",e=>e.textContent)==="Link copied");
   await relabelled(d); await settle(d);
   say("  then goes back to the label",
-    await d.$eval("#panelBody .shbtn .shlbl",e=>e.textContent)==="Share this app");
+    await d.$eval("#sharefoot .shbtn .shlbl",e=>e.textContent)==="Share this app");
   // the title on the map is a heading, not a second way to do the same thing
   const mh=await d.evaluate(()=>{ const h=document.querySelector("#maphead .mh");
     return {tag:h.tagName, share:document.querySelectorAll("#maphead [data-share]").length,
       buttons:document.querySelectorAll("#maphead button, #maphead a").length}; });
   say("the map title is a heading ("+mh.tag+")", mh.tag==="H1");
   say("  with nothing to click on the band", mh.share===0 && mh.buttons===0);
-  say("  so the panel is the only place to share from", (await d.$$("[data-share]")).length===1);
+  say("  so the panel is the only place to share from",
+    (await d.$$eval("[data-share]",l=>l.filter(e=>e.getClientRects().length).length))===1);
 
   // ---------- mobile: the minimised sheet still expands on a title tap ----------
   // the title no longer shares, so tapping it has one job: open the sheet. The share

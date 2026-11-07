@@ -1864,11 +1864,33 @@ addEventListener("keydown",e=>{
 // the title carries the label now; it is rebuilt on every select, so this only has
 // to catch the case where the panel is left standing
 function syncShare(){
-  const b=document.querySelector("#panel [data-share]:not([data-sharekey])"); if(!b) return;
   const l=state.sel?"Share this style":"Share this app";
+  document.querySelectorAll("#panel [data-share]:not([data-sharekey])").forEach(b=>{
   if(!b.classList.contains("done")){ b.setAttribute("aria-label",l); b.setAttribute("title",l);
-    const t=b.querySelector(".shlbl"); if(t) t.textContent=l; }
+    const t=b.querySelector(".shlbl"); if(t) t.textContent=l; } });
 }
+// The pinned copy for the docked sidebar (#sharefoot, shown by the desktop CSS). The
+// in-flow button stays where it is in the card, the page stack and the root list, so a
+// phone is unchanged and every test of the reading order still holds; this keeps a
+// copy of the one the showing page carries. It follows the body with an observer rather
+// than being told by select(), pushPage() and the rest, so a page that arrives by any
+// route, or goes away by any route, is covered. A page on its way out (.pgin, removed
+// after its slide) is skipped, so a pop shows the page underneath straight away.
+function syncShareFoot(){
+  const foot=$("sharefoot"), body=$("panelBody"); if(!foot||!body) return;
+  const pages=[...body.querySelectorAll(".ppage")].filter(x=>!x.hidden && !x.classList.contains("pgin"));
+  const scope=pages.length ? pages[pages.length-1] : body;
+  const src=[...scope.querySelectorAll(".shbtn.wide[data-share]")]
+    .find(b=>(b.closest(".ppage")||null)===(pages.length?scope:null));
+  const have=foot.firstElementChild;
+  if(!src){ if(have) foot.textContent=""; foot.hidden=true; return; }
+  // same button, same label: leave it, so a "Link copied" flash is not cut short
+  if(have && have.dataset.sharekey===src.dataset.sharekey && have.getAttribute("aria-label")===src.getAttribute("aria-label")) return;
+  foot.innerHTML=src.outerHTML; foot.hidden=false;
+}
+{ const body=$("panelBody"); if(body && window.MutationObserver){ let raf=0;
+  new MutationObserver(()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; syncShareFoot(); }); })
+    .observe(body,{childList:true,subtree:true,attributes:true,attributeFilter:["hidden","class","aria-label","data-sharekey"]}); } }
 
 // the panel takes a wash of the family's cover-art ground; strength lives in CSS
 // A skin is two trios: the family's cover-art ground for dark mode, and a pale wash of

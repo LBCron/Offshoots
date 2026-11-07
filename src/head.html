@@ -422,6 +422,7 @@ body:not(.open) #panelBody{overflow:visible}
 .more .note{margin-top:16px}
 body.open .more{display:block}
 #ptoggle{display:none}
+#sharefoot{display:none}
 #pclose{display:grid;position:absolute;top:10px;right:10px;z-index:3;width:var(--tap);height:var(--tap);border:0;border-radius:50%;background:var(--fill);color:var(--fg);cursor:pointer;place-items:center}
 body:not(.open) #pclose{transform:rotate(180deg)}
 #pclose:hover{background:color-mix(in srgb,var(--fill) 75%,var(--fg))}
@@ -1639,6 +1640,16 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
 :root{--sidew:402px}
 @media (min-width:900px){
   .more{display:block}
+  /* Share, pinned. On a docked sidebar the share button sat wherever the content ended:
+     mid-panel over empty space on a short style, off-screen on a long one. It is a
+     footer of its own below the scroller now, so it is in the same place on every
+     panel, and the content scrolls under its hairline. app.js keeps a copy of whichever
+     in-flow button the showing page carries (style, root or the top pushed page), and
+     the in-flow one is hidden here; on a phone the sheet keeps it in the flow. */
+  #sharefoot:not([hidden]){display:block;flex:none;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));
+    border-top:.5px solid var(--line);background:inherit}
+  #sharefoot .shbtn.wide{margin:0}
+  #panelBody .shbtn.wide{display:none}
   body:not(.open) .pcard>h3.sec{display:block}
   .pcard .links{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:16px}
   #pclose{display:none}
@@ -2539,7 +2550,7 @@ button,[role="button"]{-webkit-user-select:none; user-select:none}
     <filter id="fbink" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
       <feFlood result="ink"/><feComposite in="ink" in2="SourceGraphic" operator="in"/>
     </filter></defs></svg>
-  <div id="panelBody"></div><div id="ptoggle"><button id="expand" aria-label="Show details" aria-expanded="false"><span class="lbl">Details</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l5 5 5-5"/></svg></button></div></aside>
+  <div id="panelBody"></div><div id="sharefoot" hidden></div><div id="ptoggle"><button id="expand" aria-label="Show details" aria-expanded="false"><span class="lbl">Details</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l5 5 5-5"/></svg></button></div></aside>
 </div>
 <div id="hello" hidden>
   <div id="hellobd" data-hclose></div>
