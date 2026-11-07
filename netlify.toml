@@ -1,15 +1,21 @@
-# Netlify serves this directory as-is: index.html is committed already built, so there
-# is no build command. These lines pin what the project's settings already say, so the
-# setup lives in the repo and not only in a dashboard.
+# Netlify builds the page from src/ on every deploy and serves this directory. index.html
+# and musicatlas.json are generated and not in git: the build is a 30-line Node script
+# with no dependencies, so building on Netlify costs about a second and removes the two
+# ways a committed build went wrong (a src/ edit pushed without a rebuild never reached
+# the site; two branches that each rebuilt always conflicted on a 1.2 MB generated file).
+# These lines pin what the project's settings already say, so the setup lives in the
+# repo and not only in a dashboard.
 
 [build]
   publish = "."
+  command = "node src/build.js"
   # Skip the deploy when nothing served changed. Netlify runs this in the repo; exit 0
-  # means "nothing to do". Most commits touch only src/, test/, tools/ or the docs, and
-  # those are not the site. Add a path here if it starts being served.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- index.html musicatlas.json suggest.html contribute.html appicon.svg netlify.toml netlify art artists covers moods styles xplay"
+  # means "nothing to do". Commits that touch only test/, the tools that are not the
+  # build, or the docs are not the site. Add a path here if it starts being served.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- src tools/catalog.js suggest.html contribute.html appicon.svg netlify.toml netlify art artists covers moods styles xplay"
 
 [build.environment]
+  NODE_VERSION = "22"
   # The root package.json has no dependencies (Playwright lives in test/package.json), so
   # Netlify's install step installs nothing. This stays as a guard: if a dependency ever
   # lands at the root again, it keeps the deploy from downloading browsers.

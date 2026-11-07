@@ -1,0 +1,44 @@
+# Builds the page and runs every suite on each pull request and each push to main. This is
+# the check that index.html no longer being committed relies on: a src/ edit that does not
+# build, or that breaks a suite, is caught here before Netlify builds it for the site.
+#
+# The data suite runs first and alone (see test/run.js); if a table is wrong the run stops
+# there in a second instead of after five minutes of Chromium. The browsers are cached by
+# the Playwright version in test/package-lock.json, so a run that changes nothing in test/
+# skips the download.
+name: test
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run setup
+      - name: cache the Playwright browser
+        id: pw
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('test/package-lock.json') }}
+      - if: steps.pw.outputs.cache-hit != 'true'
+        run: cd test && npx playwright install --with-deps chromium
+      - if: steps.pw.outputs.cache-hit == 'true'
+        run: cd test && npx playwright install-deps chromium
+      - run: npm test
+      - name: keep the failure log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-failures
+          path: test/failures/
+          if-no-files-found: ignore
