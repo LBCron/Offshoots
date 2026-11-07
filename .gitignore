@@ -3,5 +3,5 @@ test/screens/
 .DS_Store
 test/failures/
 test/.timings.json
-index.html
-musicatlas.json
+/index.html
+/musicatlas.json
