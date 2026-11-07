@@ -2,3 +2,4 @@ node_modules/
 test/screens/
 .DS_Store
 test/failures/
+test/.timings.json

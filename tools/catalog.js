@@ -113,6 +113,15 @@ const out={
 };
 
 const file=path.join(ROOT,"musicatlas.json");
+// "generated" is the day the data last changed, not the day of the last build. A build
+// with nothing new keeps the old stamp, so the file is byte-identical and a rebuild for
+// an app.js or CSS change does not touch it: no churn in git, and no deploy for a file
+// that did not change.
+try{
+  const prev=JSON.parse(fs.readFileSync(file,"utf8"));
+  const was=prev.generated; prev.generated=out.generated;
+  if(JSON.stringify(prev)===JSON.stringify(out)) out.generated=was;
+}catch(e){}
 // Compact, not pretty-printed. The reader is a model with a context window, and the
 // indentation was 160 KB of spaces it would have to pay for.
 fs.writeFileSync(file, JSON.stringify(out));

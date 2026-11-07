@@ -29,9 +29,22 @@ const CAP = 10000;
 // rather than the 400-800ms the sleeps charged.
 const IDLE = 110;
 
+// A wait that ran out is a wait for something that never happened, and it costs the full
+// cap every time: the xplay suite spent six minutes of a six-minute run waiting for a
+// sheet to open on a page that opens with it shut by design, and passed anyway. So every
+// cap hit says so, as a note (no verdict), with the line in the suite that asked for it.
+// The runner counts these lines per suite, so a dead wait is visible in the summary
+// instead of hidden inside a long but green run.
+function overran(kind, cap){
+  const at=(new Error().stack.split("\n").find(l=>/\.test\.js:\d+/.test(l) && !/_wait\.js/.test(l))||"")
+    .replace(/^\s*at\s+/,"").replace(/.*\//,"").replace(/\)$/,"");
+  console.log("     wait: "+kind+" ran to its "+cap+"ms cap at "+at);
+}
+
 async function settle(p, opts){
   const idle = (opts && opts.idle) || IDLE;
   const cap  = (opts && opts.cap)  || CAP;
+  const t0 = Date.now();
   // Restart this call's clock. The cap is a per-call backstop, and it used to be stamped
   // when the observer was installed instead — so on a page that lives for the whole file,
   // every settle() after the first ten seconds returned instantly and waited for nothing.
@@ -62,6 +75,7 @@ async function settle(p, opts){
       return true;
     }, {idle, cap}, {timeout: cap + 1000, polling: 40});
   }catch(e){ /* the assertion that follows is the one that should fail, not this */ }
+  if(Date.now()-t0 >= cap) overran("settle", cap);
   // one frame, so anything scheduled for the next paint has run before we measure
   await p.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>r())));
 }
@@ -79,7 +93,7 @@ async function arm(p){
 
 async function until(p, fn, arg, cap){
   try{ await p.waitForFunction(fn, arg, {timeout: cap || CAP, polling: 40}); return true; }
-  catch(e){ return false; }
+  catch(e){ if(/Timeout|timeout/.test(String(e))) overran("until", cap || CAP); return false; }
 }
 
 async function gone(p, sel, cap){

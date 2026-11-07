@@ -16,6 +16,10 @@ older copy or a scratchpad: that silently reverts whatever landed since.
   and the rebuilt `index.html` together; Netlify serves the committed `index.html`.
 - Edit a `data.js` table inside its own range (`const READ = {` to its `};`), never with a
   global replace: ids repeat across tables, and a global replace has corrupted data twice.
+  Every table is one entry per line, `"key":value,` with a trailing comma, so a diff shows
+  the entry that changed and `tools/manifest.js` can find it. Keep it that way.
+- `node test/run.js data` after any edit to `data.js`: no browser, under a second, and it
+  names the id or file that is wrong. The full run starts with it and stops if it fails.
 - Run the suites that cover what changed (`node test/run.js read search`), or all of them
   for a change to `app.js` or `head.html`. Playwright installs with `npm run setup` (into
   `test/`, so the root has no dependencies and Netlify installs nothing on deploy).
