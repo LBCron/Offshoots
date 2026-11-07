@@ -129,7 +129,7 @@ function xrow(x,id){
     + `<span class="plline"><span class="plsvc"></span><span class="plgo">${OPENGO}</span></span></span></a>`;
 }
 function paintPlay(){
-  document.querySelectorAll("#panelBody a.plrow, #panelBody a.plbtn, #panelBody a.xopen, #panelBody a.trkbtn").forEach(a=>{
+  document.querySelectorAll("#panelBody a.plrow, #panelBody a.plbtn, #panelBody a.xopen, #panelBody a.trkbtn, #panelBody a.pklis").forEach(a=>{
     const ap=a.dataset.ap||"", sp=a.dataset.spid||"", nm=a.dataset.style||"";
     const lbl=a.querySelector(".plsvc"); if(!lbl) return;
     const track=a.classList.contains("trkbtn");
@@ -143,20 +143,29 @@ function paintPlay(){
       const base=a.classList.contains("trkbtn")?"trkbtn"
         : a.classList.contains("plbtn")?"plbtn"
         : a.classList.contains("xopen")?"xopen"
+        : a.classList.contains("pklis")?"pklis"
         : "plrow"+(a.classList.contains("xplay")?" xplay":"");
       a.className=base+" "+(SVC==="spotify"?"sp":"pl");
       a.href=url; if(SVC==="spotify") a.dataset.sp=sp; else delete a.dataset.sp;
-      // the button says where it is going; a row says what it is
-      lbl.textContent=(a.dataset.lbl||"Playlist on")+" "+svcName();
+      a.hidden=false;
+      // the button says where it is going; a row says what it is; a short one says only
+      // the act and leaves the destination to its title and accessible name
+      const short="short" in a.dataset;
+      lbl.textContent=short ? (a.dataset.lbl||"Listen") : (a.dataset.lbl||"Playlist on")+" "+svcName();
       a.title=track ? "Open "+nm+" in "+svcName()
         : "Open the "+nm+" playlist in "+svcName();
+      if(short) a.setAttribute("aria-label",a.title);
     } else {
       // the row stays so the section keeps its shape; it just can't be played here yet
       const base2=a.classList.contains("trkbtn")?"trkbtn"
         : a.classList.contains("plbtn")?"plbtn"
         : a.classList.contains("xopen")?"xopen"
+        : a.classList.contains("pklis")?"pklis"
         : "plrow"+(a.classList.contains("xplay")?" xplay":"");
       a.className=base2+" off";
+      // a pill with nowhere to go comes off the row rather than saying so forty times
+      // down a list; the row itself still opens the style, where the full line is said
+      if(base2==="pklis") a.hidden=true;
       a.removeAttribute("href"); delete a.dataset.sp;
       a.setAttribute("aria-disabled","true");
       lbl.textContent="Not on "+svcName()+" yet";
@@ -1350,7 +1359,23 @@ function styleHead(n){
   return `<div class="sthead">`
     + `<h1 class="pttl"><span class="ptnm">${esc(n.name)}</span>`
     + `<span class="ptyr">${n.year<1950?esc(n.disp):"c. "+n.year}</span></h1>`
+    + fromModeLine(n)
     + aboutFold(n) + `</div>`;
+}
+// The collection this style was reached from, and the line that put it there. The
+// collection's page says why each style fits; the style's own panel said what the style
+// is and where it came from, and the reason you were sent here was gone the moment you
+// arrived. pushTrail() runs before the panel is built, so the trail's top is the page
+// you just left: when that is a collection holding this style, the line comes along.
+// The one line only, in the collection's words; "what it is" stays in About this style.
+function fromModeLine(n){
+  const v=TRAIL.length ? TRAIL[TRAIL.length-1] : null;
+  if(!v || !v.page || v.page.indexOf("mode:")!==0 || typeof MODES==="undefined") return "";
+  const m=MODES.find(x=>x[0]===v.page.slice(5)); if(!m) return "";
+  const pick=m[4].find(p=>p[0]===n.id); if(!pick) return "";
+  // plain text, not a control: the back pill above it already goes to the collection
+  return `<p class="frommode"><span class="frommodein">In <b>${esc(m[1])}</b></span>`
+    + `<span class="frommodewhy">${esc(pick[1])}</span></p>`;
 }
 // Collapsed, because the description is what you read once and the playlist is what you
 // came for. Open, it is the description and the one link that goes deeper on the style
@@ -1936,14 +1961,27 @@ let MODE=null;
 function modePicks(m){
   return pickOrder(m,pickSort()).map(([id,why])=>{
     const n=byId[id]; if(!n) return "";
-    // the playlist's own cover, which is the thing you would recognise before you
-    // recognised the name. Where there is no file the shared handler swaps in the tile
-    // it uses on the playlist row: family colour, initials, same square.
-    return `<button type="button" class="pick c withart" style="--c:${FAM[n.fam].c}" data-go="${esc(id)}" title="Show ${esc(n.name)} on the map">`
+    // Two acts on one row, said apart. The row is the style: it opens the style's own
+    // panel and lands the map on it, which is where the "why" gets its answer. The pill
+    // on the right is the music: the style's playlist, in your service, straight from
+    // the collection, because the collection was built to be listened to rather than
+    // read. It was one button that did the first and was titled "Show on the map", so
+    // the shortest path to hearing anything was two taps and a guess.
+    const ap=(typeof PLAY!=="undefined"&&PLAY[id])||"";
+    const sp=(typeof SPLAY!=="undefined"&&SPLAY[id])||"";
+    const listen = (ap||sp)
+      ? `<a class="pklis pl" target="_blank" rel="noopener" data-lbl="Listen" data-short`
+        + ` data-ap="${ap?esc("https://music.apple.com"+ap):""}" data-spid="${esc(sp)}"`
+        + ` data-style="${esc(n.name)}"><span class="plsvc"></span>${OPENGO}</a>`
+      : "";
+    return `<div class="pk">`
+      + `<button type="button" class="pick c withart" style="--c:${FAM[n.fam].c}" data-go="${esc(id)}"`
+      + ` aria-label="Explore ${esc(n.name)}. ${esc(why)}" title="Explore ${esc(n.name)}">`
       + cover(id,n,true)
       + `<span class="pknm">${esc(n.name)}</span>`
       + `<span class="pkwhy">${esc(why)}</span>`
-      + `<span class="pkfam">${esc(FAM[n.fam].short)} · ${n.year}</span></button>`;
+      + `<span class="pkfam">${esc(FAM[n.fam].short)} · ${n.year}</span></button>`
+      + listen + `</div>`;
   }).join("");
 }
 // twelve chips fill a phone screen, so the picks can open out of sight below them
@@ -2209,12 +2247,19 @@ function modeSortHtml(){
 // One collection, as a circle with its name under it. Three places draw this now: the
 // row on the root panel, the Collections page, and the collections a style belongs to.
 // They are the same thing, so they are the same markup.
-function modeTile(m){
-  return `<button type="button" class="mcirc lv${m[5]||3}" data-mode="${esc(m[0])}"`
-    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])}">`
+function modeTile(m,deck){
+  // With deck, the one-line descriptor is printed under the name. The row upstairs stays
+  // name-only (the pictures do that work at a glance), but the Collections page is where
+  // you choose between thirty-four, and "Sit with it" or "Third eye" do not say what they
+  // are for until you are told. Opening one is the act the whole tile does, so the name
+  // reads as the way in and nothing on it suggests playback.
+  return `<button type="button" class="mcirc lv${m[5]||3}${deck?" withdeck":""}" data-mode="${esc(m[0])}"`
+    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])} Opens the collection.">`
     + `<i class="mco mi hasimg">${moodArt(m[0])}`
     + `<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
-    + `<span class="mclbl">${esc(m[1])}</span></button>`;
+    + `<span class="mclbl">${esc(m[1])}</span>`
+    + (deck?`<span class="mcdeck">${esc(m[2])}</span>`:"")
+    + `</button>`;
 }
 function modeSect(){
   if(typeof MODES==="undefined") return "";
@@ -2222,7 +2267,7 @@ function modeSect(){
   // whole set one tap away behind the heading. Twenty-six modes suit that exactly: a
   // few are in reach, the heading opens the lot, and nothing is buried under a scroll
   // of its own.
-  const circles=modeOrder(true).map(modeTile).join("");
+  const circles=modeOrder(true).map(m=>modeTile(m)).join("");
   // "Collections" and nothing under it: the page this opens is called Collections, the
   // pictures say what they are, and "By mood, place or task" was a caption for a row that
   // had already shown you a cat asleep, a nightcap and a coffee shop.
@@ -2238,7 +2283,7 @@ function modeSect(){
 // same label, laid out as a grid instead of a scroller, on the panel rather than in a box.
 function modeListHtml(){
   if(typeof MODES==="undefined") return "";
-  const tiles=modeOrderBy(modeSort()).map(modeTile).join("");
+  const tiles=modeOrderBy(modeSort()).map(m=>modeTile(m,true)).join("");
   return `<div class="modelist modegrid" role="list">${tiles}</div>`;
 }
 // The collections this style turns up in. The rest of the panel says what the style is
@@ -2253,7 +2298,7 @@ function inModesSect(n){
   // panel puts collections in. .mrow and .whorow.acrow are one rule, and the drag-to-
   // scroll handler already binds to both.
   return sect("inmodes","Collections",
-    `<div class="mrow" role="list">${mine.map(modeTile).join("")}</div>`,
+    `<div class="mrow" role="list">${mine.map(m=>modeTile(m)).join("")}</div>`,
     `<span class="sectaside">${mine.length}</span>`,
     "", "Where this style turns up.");
 }

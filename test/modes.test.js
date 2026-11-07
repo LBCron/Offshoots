@@ -220,8 +220,12 @@ const spell=n=>n<=20?WORDS[n]
       rows:[...g.querySelectorAll(".listrow")].length,
       labelled:t.every(x=>((x.querySelector(".mclbl")||{}).textContent||"").trim().length>0),
       tall:t.every(x=>x.getBoundingClientRect().height>=44)};});
+  // two across on a phone since the page took the one-line descriptor under each name:
+  // a sentence in a third of the width was four lines of eleven characters
   say("listing all "+all.n+" as a grid of circles, "+all.cols+" across",
-    all.n===nModes && all.grid==="grid" && all.cols>=3);
+    all.n===nModes && all.grid==="grid" && all.cols>=2);
+  say("  each saying what it is for", await p.$$eval(".ppage:not([hidden]) .modegrid .mcirc",
+    e=>e.every(x=>((x.querySelector(".mcdeck")||{}).textContent||"").trim().length>12)));
   say("  at the same size the row upstairs draws them ("+all.disc+"px vs "+upDisc+"px)",
     all.disc===upDisc && all.disc>=80);
   say("  with no card around them", !all.boxed && /rgba\(0, 0, 0, 0\)|transparent/.test(all.bg)
@@ -392,7 +396,8 @@ const spell=n=>n<=20?WORDS[n]
   // the rows came out of their card: each one now spans the panel, and what lines up is
   // the art, with the heading above it, rather than the row's own edges
   const box=await p.evaluate(()=>{
-    const r=document.querySelector(".ppage:not([hidden]) .picks [data-go]").getBoundingClientRect();
+    // the row is the style button and its Listen pill together
+    const r=document.querySelector(".ppage:not([hidden]) .picks .pk").getBoundingClientRect();
     const body=document.getElementById("panelBody").getBoundingClientRect();
     const art=document.querySelector(".ppage:not([hidden]) .pick img.pcov,.ppage:not([hidden]) .pick .pcovph").getBoundingClientRect();
     // the page's left content edge. The circle used to sit inside the h1, so .bigttl was
@@ -421,8 +426,8 @@ const spell=n=>n<=20?WORDS[n]
     && (await p.$$(".ppage")).length===2);
 
   // picking a style leaves the stack behind
-  const target=await p.$eval(".ppage:not([hidden]) .picks [data-go]:nth-child(2)",e=>e.dataset.go);
-  await p.click(".ppage:not([hidden]) .picks [data-go]:nth-child(2)");
+  const target=await p.$eval(".ppage:not([hidden]) .picks .pk:nth-child(2) [data-go]",e=>e.dataset.go);
+  await p.click(".ppage:not([hidden]) .picks .pk:nth-child(2) [data-go]");
   // the pick is through when the hash names it and the map has lit the node
   await until(p,t=>location.hash==="#"+t && !!document.querySelector("#chart .n.cur"),target);
   await settle(p);
@@ -456,7 +461,7 @@ const spell=n=>n<=20?WORDS[n]
     return {cols:new Set(t.map(x=>Math.round(x.getBoundingClientRect().left))).size,
       clipped:t.filter(x=>x.getBoundingClientRect().right>gb.right+1)
                .map(x=>x.querySelector(".mclbl").textContent)};});
-  say("and its full set runs "+dl.cols+" across", dl.cols>=3);
+  say("and its full set runs "+dl.cols+" across", dl.cols>=2);
   await d.click("#panelBack"); await onPage(d,"root");
   say("and clips nothing"+(dl.clipped.length?": "+dl.clipped.join(", "):""), dl.clipped.length===0);
   await d.click('[data-mode="sit"]'); await onPage(d,"mode:sit");

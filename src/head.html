@@ -327,12 +327,23 @@ aside h3,.pcard h3.sec{font:700 var(--t-head)/var(--t-head-lh) var(--f-body);let
    featured row carries .pick too and stays its own card. */
 .picks{display:flex;flex-direction:column;gap:0;border-radius:14px;
   --seplead:33px}   /* 16 padding + 8 dot + 9 gap: the separator lines up with the title */
-.picks>.pick{position:relative;background:transparent;border-radius:0}
-.picks>.pick:first-child{border-radius:14px 14px 0 0}
-.picks>.pick:last-child{border-radius:0 0 14px 14px}
-.picks>.pick+.pick::after{content:"";position:absolute;left:var(--seplead);right:16px;top:0;
+/* a row is the style (the button) and the music (the pill beside it): two acts, two
+   controls, one line. The wrapper carries the hairline and the hover ground so both sit
+   on the same row, and the pill is sized to a thumb rather than to its word. */
+.pk{position:relative;display:flex;align-items:center;gap:0}
+.pk>.pick{flex:1 1 auto;min-width:0}
+.picks>.pk{background:transparent;border-radius:0}
+.picks>.pk+.pk::after{content:"";position:absolute;left:var(--seplead);right:16px;top:0;
   height:.5px;background:var(--sep);pointer-events:none}
-.picks>.pick:hover::after,.picks>.pick:hover+.pick::after{opacity:0}
+.picks>.pk:hover::after,.picks>.pk:hover+.pk::after{opacity:0}
+.pklis{flex:none;display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 12px 0 13px;
+  margin-right:var(--ppad);border-radius:999px;text-decoration:none;cursor:pointer;
+  font:600 var(--t-sub)/1 var(--f-body);color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,transparent);transition:background .15s}
+.pklis svg{width:13px;height:13px;flex:none}
+.pklis:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}
+.pklis:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+.pklis[hidden]{display:none}
 .pick{all:unset;display:grid;grid-template-columns:auto 1fr auto;column-gap:9px;align-items:baseline;
   box-sizing:border-box;width:100%;min-height:var(--tap);padding:12px 16px;border-radius:14px;cursor:pointer;
   background:var(--fill2);transition:background .15s}
@@ -859,19 +870,23 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 /* a pick carries its playlist's cover: the square is what you recognise before the name,
    and it gives the three lines of text something to sit against. It replaces the family
    dot rather than joining it, since the tile already carries the family colour. */
-.picks>.pick.withart{grid-template-columns:var(--pkart) 1fr;column-gap:14px;align-items:start;
+.picks .pick.withart{grid-template-columns:var(--pkart) 1fr;column-gap:14px;align-items:start;
   --pkart:76px}
-.picks>.pick.withart::before{display:none}
+.picks .pick.withart::before{display:none}
 .pick.withart img.pcov,.pick.withart .pcovph{grid-row:1 / span 3;align-self:start;margin:2px 0 0;
   width:var(--pkart);height:var(--pkart);border-radius:0;aspect-ratio:1;object-fit:cover;
   box-shadow:0 0 0 .5px var(--line),0 1px 3px rgb(0 0 0 / .14)}
 .pick.withart .pcovph{display:grid;place-items:center;
   background:linear-gradient(145deg,color-mix(in srgb,var(--c) 70%,#000) 0%,color-mix(in srgb,var(--c) 32%,#000) 100%)}
 .pick.withart .pcovph b{font:700 25px var(--f-body);color:#fff;opacity:.92}
+/* with a Listen pill taking the right edge, the family and year go under the name at
+   every width rather than sharing its line and wrapping "Modern Classical" in two */
+.picks .pick.withart .pkfam{grid-column:2;grid-row:2;margin-top:2px}
+.picks .pick.withart .pkwhy{grid-column:2;grid-row:3}
 /* the hairline starts past the art so the eye runs down the names */
 .picks:has(.pick.withart){--seplead:90px}
 @media (max-width:899px){ .picks:has(.pick.withart){--seplead:90px}
-  .picks>.pick.withart{--pkart:76px;column-gap:14px} .pick.withart .pcovph b{font-size:25px} }
+  .picks .pick.withart{--pkart:76px;column-gap:14px} .pick.withart .pcovph b{font-size:25px} }
 /* ---------- the lists come out of their boxes ----------
    Every list in the panel sat on its own shaded, rounded card, which put a second frame
    inside a panel that is already a card and pushed every row in by the width of two
@@ -886,12 +901,12 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
    at the label. */
 .picks{background:transparent;border-radius:0;overflow:visible;
   margin-inline:calc(var(--ppad) * -1)}
-.picks>.pick{border-radius:0;background:transparent;
+.picks .pick{border-radius:0;background:transparent;
   padding-inline:var(--ppad);width:100%;margin-inline:0;box-sizing:border-box}
-.picks>.pick:first-child,.picks>.pick:last-child{border-radius:0}
+.picks .pk:has(>.pklis:not([hidden]))>.pick{padding-right:10px}
 .pick:hover,.pick:focus-visible{background:color-mix(in srgb,var(--fg) 7%,transparent)}
 /* the picks' hairline ends at the panel margin, since there is no card edge to meet */
-.picks>.pick+.pick::after{right:0}
+.picks>.pk+.pk::after{right:0}
 /* The left column used to start flush at the card edge, from when this list sat unboxed
    on the Explore panel and had to line up with the heading. It lives in a card now, so
    both columns take the same inset from their own edge: the card on the left, the gutter
@@ -1111,6 +1126,17 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 /* the row sets a tile width from the scroller it lives in; in the grid the column is the
    width, and the disc inside it stays the size it is on the row */
 .modegrid .mcirc{width:100%}
+/* The Collections page says what each one is for, under the name. Three to a row on a
+   phone is too narrow for a sentence, so with decks the grid loosens to two columns and
+   the disc keeps its size; the row upstairs never carries a deck and is unaffected. */
+.modegrid:has(.withdeck){grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:22px 14px}
+.mcdeck{display:block;margin-top:3px;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted);
+  text-wrap:pretty;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* the collection you came from, under the style's name */
+.frommode{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;margin:2px 0 10px;
+  font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted);text-wrap:pretty}
+.frommodein{flex:none;color:var(--fg)} .frommodein b{font-weight:600}
+.frommodewhy{flex:1 1 auto}
 
 /* and the page it opens carries the same colour on the title */
 /* The title mark is the circle you tapped, arrived at: same fill, same colour, the size
