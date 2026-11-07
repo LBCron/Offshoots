@@ -95,8 +95,10 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
       playA:play?alpha(getComputedStyle(play).backgroundColor):0};});
   say("  wearing the family accent, not the system blue",
     !!sc.acc && !/10,\s*132,\s*255/.test(sc.col));
-  say("  and sitting under the play button ("+sc.shareA+" vs "+sc.playA+")",
-    sc.playA===1 && sc.shareA<sc.playA);
+  // And then the other way again: a tint read as a caption, so the owner asked for every
+  // share button filled. Both are opaque now; contrast.test holds the label legible on it.
+  say("  filled, as the play button is ("+sc.shareA+" and "+sc.playA+")",
+    sc.playA===1 && sc.shareA===1);
   say("  and it is the only share control on the panel", sb.only===1);
 
   // the name is left-aligned under the nav row now, so what matters is that it starts at
