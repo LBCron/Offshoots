@@ -606,7 +606,12 @@ body.open .pcnt{display:none}
 .navback:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
 @media (max-width:899px){ .navback{min-width:var(--tap);height:var(--tap)} .navback svg{width:20px;height:20px} .navback .bklbl{font-size:var(--t-sub)} }
 /* on the overview the row has no empty slot to hold, so the button simply goes away */
-#panel.pscrolled .navrow{box-shadow:0 .5px 0 var(--line);background:var(--panel)}
+/* The bar that sticks when the panel scrolls is opaque, so nothing reads through the
+   title (share.test.js), but at the colour the sheet's glass composites to over the map,
+   not pure white. Pure white matched the glass by accident while the map was near-white;
+   on a greyer map it became a white strip the rows slid under. --barglass is set beside
+   the sheet glass on a phone; desktop keeps the solid panel for the docked sidebar. */
+#panel.pscrolled .navrow{box-shadow:0 .5px 0 var(--line);background:var(--barglass,var(--panel))}
 #panel.pscrolled .pcard .navrow{border-radius:0}
 @media (prefers-reduced-motion:reduce){ .navrow{transition:none} }
 .navttl{min-width:0;text-align:center;overflow:hidden}
@@ -643,7 +648,7 @@ body.open .pcnt{display:none}
    its own at 53, which is the double rule. The band takes whichever is taller and carries
    the only hairline; the row's own is turned off wherever the band paints. */
 #panel.pscrolled .pcard .navrow::before{content:"";position:absolute;left:0;right:0;top:0;
-  height:max(var(--tap), 100%);background:var(--panel);box-shadow:0 .5px 0 var(--line);z-index:0}
+  height:max(var(--tap), 100%);background:var(--barglass,var(--panel));box-shadow:0 .5px 0 var(--line);z-index:0}
 #panel.pscrolled .pcard .navrow{box-shadow:none}
 /* the back button and the close button are both positioned out of the grid, which leaves
    the title as the only item in flow and parks it in the first column. It spans the bar
@@ -1694,6 +1699,9 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
        solid, so the blur under it was work nobody saw. The blur goes up with it: at 36px
        a style label behind the glass was still a smear with the shape of a word in it,
        and the point is colour and line, not text you half recognise. */
+    /* opaque (share.test.js: a translucent bar lets the rows read through the title),
+       at the colour the glass composites to over the map, so it matches the sheet */
+    --barglass:color-mix(in srgb,var(--panel) 78%,var(--mapbg));
     background:color-mix(in srgb,var(--panel) 78%,transparent);
     -webkit-backdrop-filter:saturate(165%) blur(44px);backdrop-filter:saturate(165%) blur(44px)}
   /* the family wash goes translucent too, over its own ground rather than the root's */

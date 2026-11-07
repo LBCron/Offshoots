@@ -132,6 +132,9 @@ const state=p=>p.evaluate(()=>{
     badge.unclipped && badge.legible);
   // the sleeves carry a worn paper edge, lighter than the art inside them, which a round
   // crop turns into a bright rim. The art is scaled past it rather than cropped at it.
+  // wait for the tiles' images to exist: on a loaded runner this read the page before
+  // they had been placed and failed once in a few dozen runs, with nothing wrong
+  await until(p,()=>document.querySelectorAll('.ppage[data-p="top"] .tco img').length>=12);
   say("    with the art scaled past the sleeve's own edge",
     await p.$$eval('.ppage[data-p="top"] .tco img', e=>e.length>0 && e.every(x=>{
       const m=getComputedStyle(x).transform.match(/matrix\(([-\d.]+)/);
