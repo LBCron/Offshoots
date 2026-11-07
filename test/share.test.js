@@ -110,6 +110,13 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   // share button filled. Both are opaque now; contrast.test holds the label legible on it.
   say("  filled, as the play button is ("+sc.shareA+" and "+sc.playA+")",
     sc.playA===1 && sc.shareA===1);
+  // Open playlist is the main action and Share the second, so Share is the shorter one
+  // and its label a step down; both still clear the 44px tap floor.
+  const wt=await d.evaluate(()=>{ const h=s=>Math.round(document.querySelector(s).getBoundingClientRect().height);
+    const f=s=>parseFloat(getComputedStyle(document.querySelector(s)).fontSize);
+    return {play:h(".plbtn"), share:h("#sharefoot .shbtn.wide"), playFs:f(".plbtn"), shareFs:f("#sharefoot .shbtn.wide")}; });
+  say("  and shorter than Open playlist ("+wt.share+" under "+wt.play+"px), label a step down",
+    wt.play>wt.share && wt.share>=44 && wt.shareFs<wt.playFs);
   say("  and it is the only share control on the panel", sb.only===1);
 
   // the name is left-aligned under the nav row now, so what matters is that it starts at
@@ -199,6 +206,8 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
   say("the control at the foot does the sharing", (await p.evaluate(()=>window.__copied.length))===1);
   const tb=await p.$eval("#panelBody .shbtn",e=>[Math.round(e.getBoundingClientRect().height)]);
   say("tap target "+tb[0]+"px tall", tb[0]>=44);
+  say("  and the play button above it is the taller ("+(await p.$eval(".plbtn",e=>Math.round(e.getBoundingClientRect().height)))+"px)",
+    (await p.$eval(".plbtn",e=>Math.round(e.getBoundingClientRect().height)))>tb[0]);
   // a long name must not let the tap area reach back on one side or the pair on the other
   await p.goto(URL+"#skapunk"); await arm(p); await shown(p,"#chart .n");
   await p.reload(); await arm(p); await shown(p,"#chart .n");
