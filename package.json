@@ -4,9 +4,7 @@
   "description": "Interactive map of North American music styles, for the School of Listening class.",
   "scripts": {
     "build": "node src/build.js",
-    "test": "node src/build.js && node test/run.js"
-  },
-  "devDependencies": {
-    "playwright": "^1.56.0"
+    "test": "node src/build.js && node test/run.js",
+    "setup": "npm --prefix test install"
   }
 }

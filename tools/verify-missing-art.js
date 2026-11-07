@@ -2,8 +2,9 @@
 // missing-art.js reimplements the note parser, so it can drift from the app. This opens
 // a sample of styles in the real page, reads what each Key artists page actually draws,
 // and compares. A disagreement here means the list is lying, which is worse than no list.
-const {chromium}=require("playwright");
 const path=require("path");
+// playwright is installed under test/, not the root (see test/package.json)
+const {chromium}=require(require.resolve("playwright",{paths:[path.join(__dirname,"..","test")]}));
 const skipWelcome=require(path.join(__dirname,"..","test","_hello"));
 const {settle,until,shown,arm}=require(path.join(__dirname,"..","test","_wait"));
 const D=require(path.join(__dirname,"..","src","data.js"));

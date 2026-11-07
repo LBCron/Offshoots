@@ -1,0 +1,8 @@
+{
+  "name": "musicatlas-tests",
+  "private": true,
+  "description": "The test suites' only dependency. It lives here, not at the repo root, so Netlify's install step on every deploy has nothing to install: the site itself has no dependencies.",
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  }
+}
