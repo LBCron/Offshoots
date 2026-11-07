@@ -14,8 +14,8 @@ descriptions, and 368 styles with a playlist on Apple Music and Spotify.
 
 | Path | What it is |
 |---|---|
-| `index.html` | The whole app, built and ready to serve. Generated: edit `src/`, not this |
-| `src/` | The files it is built from |
+| `src/` | The app: CSS and markup, data, code. `node src/build.js` joins them into `index.html` |
+| `index.html` | The whole app as one page. Generated, not in git: Netlify builds it on deploy, `npm test` builds it locally |
 | `test/` | Browser checks that drive the built page |
 | `art/` | Playlist cover art, one square JPEG per style |
 | `suggest.html` | The form for suggesting a Go deeper link |
@@ -23,10 +23,11 @@ descriptions, and 368 styles with a playlist on Apple Music and Spotify.
 | `netlify/functions/` | `suggest.mjs`, which files each suggestion as an issue |
 | `tools/ingest.js` | Brings approved suggestions into `src/data.js` |
 
-Netlify serves this directory as-is. No build command, no publish subdirectory:
-`index.html` is committed already built. `netlify.toml` pins that, plus the function,
-a week of browser caching for the image folders, and an ignore rule that skips the
-deploy when a push touches nothing that is served (`src/`, `test/`, `tools/`, docs).
+Netlify runs `node src/build.js` and serves this directory. `netlify.toml` pins that,
+plus the function, a week of browser caching for the image folders, and an ignore rule
+that skips the deploy when a push touches nothing that is served (`test/`, docs, the
+tools that are not the build). GitHub Actions builds the page and runs every suite on
+each pull request and each push to `main` (`.github/workflows/test.yml`).
 
 ## Suggestions
 
@@ -118,8 +119,10 @@ like this possible without a browser:
 node -e 'const {DATA,COVER}=require("./src/data.js"); /* ... */'
 ```
 
-Commit `index.html` along with the source change. Netlify serves the committed file,
-so a source edit that is not rebuilt will not reach the site.
+Commit the `src/` change; Netlify builds `index.html` from it on deploy, so there is no
+built file to commit and no way to push a source edit that is not what the site shows.
+`index.html` and `musicatlas.json` are gitignored; a fresh clone makes them with
+`node src/build.js`.
 
 ### Why it is still one file
 

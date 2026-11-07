@@ -12,8 +12,9 @@ older copy or a scratchpad: that silently reverts whatever landed since.
 
 ## Making a change
 
-- Edit `src/` (`head.html`, `data.js`, `app.js`), then `node src/build.js`. Commit `src/`
-  and the rebuilt `index.html` together; Netlify serves the committed `index.html`.
+- Edit `src/` (`head.html`, `data.js`, `app.js`), then `node src/build.js` to see it.
+  Commit `src/` only: `index.html` and `musicatlas.json` are generated and gitignored, and
+  Netlify builds them from `src/` on every deploy.
 - Edit a `data.js` table inside its own range (`const READ = {` to its `};`), never with a
   global replace: ids repeat across tables, and a global replace has corrupted data twice.
   Every table is one entry per line, `"key":value,` with a trailing comma, so a diff shows
@@ -23,9 +24,10 @@ older copy or a scratchpad: that silently reverts whatever landed since.
 - Run the suites that cover what changed (`node test/run.js read search`), or all of them
   for a change to `app.js` or `head.html`. Playwright installs with `npm run setup` (into
   `test/`, so the root has no dependencies and Netlify installs nothing on deploy).
-- A push to `main` is live in about a minute. A branch or PR gets a deploy preview first.
-  A push that changes nothing served (only `src/`, `test/`, `tools/`, docs) is skipped by
-  the ignore rule in `netlify.toml`; `index.html` must be in the push for the site to move.
+- A push to `main` is live in about a minute. A branch or PR gets a deploy preview first,
+  and GitHub Actions runs the whole suite on it (`.github/workflows/test.yml`). A push
+  that changes nothing served (only `test/`, docs, tools other than `catalog.js`) is
+  skipped by the ignore rule in `netlify.toml`.
 
 ## Files that are not the map
 
@@ -33,7 +35,7 @@ older copy or a scratchpad: that silently reverts whatever landed since.
 |---|---|
 | `suggest.html`, `contribute.html` | The suggestion form and the bookmarklet page. Standalone pages, not built from `src/` |
 | `netlify/functions/suggest.mjs` | Files each suggestion as an issue in the private `bryanbell/Offshoots-submissions` repo |
-| `netlify.toml` | Publish `.`, functions in `netlify/functions`, the `/suggest` and `/contribute` addresses, image cache headers, and the deploy ignore rule |
+| `netlify.toml` | Builds with `node src/build.js`, publishes `.`, functions in `netlify/functions`, the `/suggest` and `/contribute` addresses, image cache headers, and the deploy ignore rule |
 | `tools/ingest.js` | Approved suggestion issues into `READ` and `PICKED` |
 
 The function needs `GITHUB_TOKEN` and `CONTRIBUTORS`. Both live only in Netlify's
