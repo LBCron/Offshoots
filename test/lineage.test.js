@@ -34,6 +34,12 @@ const pick=D.DATA.find(r=>{ const ps=parents(r[0]); const gps=ps.flatMap(parents
     say("  and no grandparent ("+(anc2.size-anc1.size)+" exist)", [...anc2].filter(k=>!anc1.has(k)).every(k=>!lit.has(k)));
     say("  every child and grandchild ("+desc2.size+")", [...desc2].every(k=>lit.has(k)));
     say("  and no great-grandchild ("+(desc3.size-desc2.size)+" exist)", [...desc3].filter(k=>!desc2.has(k)).every(k=>!lit.has(k)));
+    // every lit line is a step along the lineage: its child exactly one generation past
+    // its parent, counted from the selection. Cross-links between lit nodes stay dark.
+    const bad=await p.$$eval("#chart .e.on",(l,arg)=>{ const {id,anc1,desc1,desc2}=arg; const dep=k=>k===id?0:anc1.includes(k)?-1:desc1.includes(k)?1:desc2.includes(k)?2:null;
+      return l.map(e=>[e.dataset.p,e.dataset.c]).filter(([p,c])=>{ const a=dep(p),b=dep(c); return a==null||b==null||b!==a+1; }).slice(0,4).map(x=>x.join(">")); },
+      {id, anc1:[...anc1], desc1:[...gen(id,s=>kids[s]||[],1)], desc2:[...desc2].filter(k=>!gen(id,s=>kids[s]||[],1).has(k))});
+    say("  and every lit line is one generation step along the lineage", bad.length? bad.join(", ")+(bad.length>=4?" (+)":"") : true);
     // a lit edge is solid enough to see: the direct ones at full strength
     const e=await p.evaluate(()=>{ const g=s=>{const x=document.querySelector(s); return x?+getComputedStyle(x).opacity:null;}; return {dir:g("#chart .e.dir"), on:g("#chart .e.on:not(.dir):not(.d2)"), d2:g("#chart .e.on.d2")}; });
     say("  direct links at full strength, the next generation at least .5 ("+JSON.stringify(e)+")", e.dir===1 && (e.on==null||e.on>=.7) && (e.d2==null||e.d2>=.5));

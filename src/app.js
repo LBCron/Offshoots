@@ -874,8 +874,13 @@ function select(id,{scroll=true,smooth=true,keepPlace=false,repaint=true}={}){
   svg.querySelectorAll(".n").forEach(g=>{ const k=g.dataset.id, dp=k===id?0:depth(k); g.classList.toggle("on",on.has(k)); g.classList.toggle("cur",k===id); g.classList.toggle("d2",dp===2); g.classList.toggle("d3",dp>=3&&dp<99); });
   svg.querySelectorAll(".e").forEach(e=>{
     const p=e.dataset.p, c=e.dataset.c;
-    const a = showA && ancV.has(p) && (c===id||ancV.has(c));
-    const d = showD && descV.has(c) && (p===id||descV.has(p));
+    // A line lights only if it is a step along the lineage: the child exactly one
+    // generation past the parent, counted from the selected style. Both ends being lit
+    // used to be enough, which on a hub like R&B also lit every cross-link between its
+    // grandchildren (Soul to Funk, Funk to every sibling it feeds) and fanned the map.
+    const dA=k=>k===id?0:ancV.get(k), dD=k=>k===id?0:descV.get(k);
+    const a = showA && ancV.has(p) && (c===id||ancV.has(c)) && dA(p)===dA(c)+1;
+    const d = showD && descV.has(c) && (p===id||descV.has(p)) && dD(c)===dD(p)+1;
     e.classList.toggle("on",a||d);
     e.classList.toggle("dir",(a&&c===id)||(d&&p===id));
     const ed = a ? ancV.get(p) : d ? descV.get(c) : 0;
