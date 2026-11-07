@@ -94,7 +94,7 @@
   --glass:rgb(44 44 48 / .86); --shadow:0 1px 2px rgb(0 0 0 / .4), 0 10px 30px rgb(0 0 0 / .5);
   --node-s:72%; --node-l:64%; --sectline:#5a5a60; --sectw:1px; --sep:color-mix(in srgb,#f5f5f7 15%,transparent);
   --link:#5aa9ff; --lite:#f5f5f7; --lite-fg:#1a1a1c; --lite-mut:#6a6a70;
-  --cdot:var(--c); --labelmix:85%; color-scheme:dark}}
+  --cdot:var(--c); --labelmix:85%; --sheetmix:78%; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#000000; --band:#141416; --mapbg:#0f0f11; --panel:#2b2b2f; --fg:#f5f5f7; --muted:#b0b0b6; --line:#3a3a3c; --grid:#232326; --roots:#161618;
 
@@ -108,7 +108,7 @@
   --glass:rgb(44 44 48 / .86); --shadow:0 1px 2px rgb(0 0 0 / .4), 0 10px 30px rgb(0 0 0 / .5);
   --node-s:72%; --node-l:64%; --sectline:#5a5a60; --sectw:1px; --sep:color-mix(in srgb,#f5f5f7 15%,transparent);
   --link:#5aa9ff; --lite:#f5f5f7; --lite-fg:#1a1a1c; --lite-mut:#6a6a70;
-  --cdot:var(--c); --labelmix:85%; color-scheme:dark}
+  --cdot:var(--c); --labelmix:85%; --sheetmix:78%; color-scheme:dark}
 *{box-sizing:border-box}
 
 html,body{height:100%}
@@ -606,11 +606,11 @@ body.open .pcnt{display:none}
 .navback:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
 @media (max-width:899px){ .navback{min-width:var(--tap);height:var(--tap)} .navback svg{width:20px;height:20px} .navback .bklbl{font-size:var(--t-sub)} }
 /* on the overview the row has no empty slot to hold, so the button simply goes away */
-/* The bar that sticks when the panel scrolls is opaque, so nothing reads through the
-   title (share.test.js), but at the colour the sheet's glass composites to over the map,
-   not pure white. Pure white matched the glass by accident while the map was near-white;
-   on a greyer map it became a white strip the rows slid under. --barglass is set beside
-   the sheet glass on a phone; desktop keeps the solid panel for the docked sidebar. */
+/* The bar that sticks when the panel scrolls is the opaque panel colour, with a hairline
+   under it: a toolbar over scrolling content, as on iOS. It has to be opaque (share.test.js:
+   rows read through a translucent title) and cannot carry its own blur (sheet.test.js:
+   a second backdrop layer doubles a drag frame). So it will never composite to exactly
+   the glass beside it; the sheet glass is kept close to it instead (--sheetmix). */
 #panel.pscrolled .navrow{box-shadow:0 .5px 0 var(--line);background:var(--barglass,var(--panel))}
 #panel.pscrolled .pcard .navrow{border-radius:0}
 @media (prefers-reduced-motion:reduce){ .navrow{transition:none} }
@@ -1695,17 +1695,20 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
        opaque to stand on and let the sheet itself stay well back. Unboxed, the rows sit
        straight on the glass, so the glass carries more of the ground and blurs harder:
        what shows through should read as weather behind the sheet, not as labels.
-       78%, not 96%. At 96 only a twentieth of the map came through and the sheet read as
-       solid, so the blur under it was work nobody saw. The blur goes up with it: at 36px
+       85% on light, 78% on dark (--sheetmix). It was 78 on both; once the light map went
+       a step greyer (#38) the glass composited to a visible grey while the sticky title
+       bar, which must be opaque, stayed white, and the two no longer matched in Safari.
+       At 85 (the most sheet.test.js allows) the map still reads through and the bar
+       is within a shade. The blur goes up with it: at 36px
        a style label behind the glass was still a smear with the shape of a word in it,
        and the point is colour and line, not text you half recognise. */
     /* opaque (share.test.js: a translucent bar lets the rows read through the title),
        at the colour the glass composites to over the map, so it matches the sheet */
-    --barglass:color-mix(in srgb,var(--panel) 78%,var(--mapbg));
-    background:color-mix(in srgb,var(--panel) 78%,transparent);
+    --barglass:var(--panel);
+    background:color-mix(in srgb,var(--panel) var(--sheetmix,85%),transparent);
     -webkit-backdrop-filter:saturate(165%) blur(44px);backdrop-filter:saturate(165%) blur(44px)}
   /* the family wash goes translucent too, over its own ground rather than the root's */
-  aside#panel.tinted{background:color-mix(in srgb,var(--panel) 78%,transparent)}
+  aside#panel.tinted{background:color-mix(in srgb,var(--panel) var(--sheetmix,85%),transparent)}
   /* The grain has to stop blending here. mix-blend-mode on a child composites against the
      backdrop, and that defeats the backdrop-filter on the sheet above it: the blur was
      wired up, declared, reported by getComputedStyle, and doing nothing. Map labels came
