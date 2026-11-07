@@ -672,7 +672,12 @@ function sect(key,label,html,aside,page,lede,seeall,fold){
   return `<div class="sect sect-${key}${label?"":" nohead"}${lede?" haslede":""}">`
     + head + sub + `<div class="secbody">${html}</div></div>`;
 }
-const HOPS=2; // generations of lineage drawn on the map
+// Generations of lineage drawn on the map from the selected style: two forward, one back.
+// Forward is the question the map answers (what came out of this); back is context, and
+// a second generation of it is six or eight lines fanning up the page at half strength,
+// which is what made a selection read as a haze rather than a shape. The panel still
+// lists the whole ancestry.
+const HOPS=2, HOPS_BACK=1;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // center a node in the part of the map that is actually visible:
@@ -850,9 +855,9 @@ function select(id,{scroll=true,smooth=true,keepPlace=false,repaint=true}={}){
   syncPull();
   const n=byId[id];
   const anc=walk(id,"parents"), desc=walk(id,"children");
-  // the map highlights two generations each way; the panel still lists the full ancestry
-  const near=m=>new Map([...m].filter(([,d])=>d<=HOPS));
-  const ancV=near(anc), descV=near(desc);
+  // two generations forward, one back (HOPS, HOPS_BACK); the panel lists the full ancestry
+  const near=(m,h)=>new Map([...m].filter(([,d])=>d<=h));
+  const ancV=near(anc,HOPS_BACK), descV=near(desc,HOPS);
   const showA = state.mode!=="desc", showD = state.mode!=="anc";
   const on=new Set([id]); if(showA) ancV.forEach((_,k)=>on.add(k)); if(showD) descV.forEach((_,k)=>on.add(k));
   const svg=$("chart"); svg.classList.add("sel");
