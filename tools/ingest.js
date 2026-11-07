@@ -4,6 +4,11 @@
 //   node tools/ingest.js --write    add them to src/data.js and rebuild index.html
 //   node tools/ingest.js --close    after committing and pushing, close what landed
 //
+// Placing them, which a session does by research before the dry run (CLAUDE.md has how):
+//   node tools/ingest.js --brief          approved issues as JSON, with what each still lacks
+//   node tools/ingest.js --styles         every style on the map, one line each, to choose from
+//   node tools/ingest.js --apply plan.json   write the chosen styles and fields into each issue
+//
 // Suggestions arrive through /suggest as issues in bryanbell/Offshoots-submissions, each
 // with a JSON block shaped like a READ row. Vetting is editing that block on GitHub until
 // it is ready to publish, then swapping the pending label for approved. This script only
@@ -147,6 +152,34 @@ function context(d){
   return {ids:new Set(d.DATA.map(r=>r[0])), read:d.READ, pickers:d.PICKERS||{}, kinds};
 }
 
+// ---------- placing ----------
+// Placement is researched, not guessed from the form: whoever sent a link knows what it is,
+// not where it sits on the map. A plan is {"<issue number>": {styles, ...fields, why}}, and
+// applying one rewrites that issue's JSON block, so the issue stays the record of what was
+// decided and ingest reads it back the same way as an edit made by hand. url, medium, by
+// and at are what was sent, and a plan cannot change them.
+const PLACE=["styles","title","publication","year","kind","access","note","record"];
+function applyPlan(body, entry, ids){
+  if(!entry || typeof entry!=="object") throw new Error("a plan entry has to be an object");
+  for(const k of Object.keys(entry))
+    if(k!=="why" && PLACE.indexOf(k)<0) throw new Error("a plan cannot set "+k);
+  if("styles" in entry){
+    if(!Array.isArray(entry.styles) || !entry.styles.length) throw new Error("styles has to list at least one");
+    const bad=entry.styles.filter(id=>!ids.has(id));
+    if(bad.length) throw new Error("not styles on the map: "+bad.join(", "));
+  }
+  const rec=parseRecord(body);
+  for(const k of PLACE) if(Object.prototype.hasOwnProperty.call(entry,k)) rec[k]=entry[k];
+  const block=JSON.stringify(rec,null,2).replace(/`/g,"\\u0060");
+  // a function, so a note with $& or $1 in it is written as it is
+  return body.replace(/```json\s*\n[\s\S]*?\n```/, ()=>"```json\n"+block+"\n```");
+}
+function printStyles(){
+  const j=JSON.parse(fs.readFileSync(path.join(ROOT,"musicatlas.json"),"utf8"));
+  for(const s of j.styles)
+    console.log([s.id, s.name, s.yearLabel||s.year, s.family, s.description||""].join(" | "));
+}
+
 // ---------- GitHub ----------
 function token(){
   if(process.env.GH_TOKEN||process.env.GITHUB_TOKEN) return process.env.GH_TOKEN||process.env.GITHUB_TOKEN;
@@ -173,11 +206,47 @@ const git=(...a)=>execFileSync("git",a,{cwd:ROOT,encoding:"utf8"}).trim();
 
 async function main(){
   const args=process.argv.slice(2), write=args.includes("--write"), close=args.includes("--close");
+  if(args.includes("--styles")){ printStyles(); return; }
   const T=token();
   if(!T){ console.error("No GitHub token. Run `gh auth login`, or set GH_TOKEN."); process.exit(2); }
   const d=load(), ctx=context(d);
+  const NAME=new Map(d.DATA.map(r=>[r[0],r[1]]));
+  const names=ids=>ids.map(id=>NAME.get(id)||id).join(", ");
+
+  const ap=args.indexOf("--apply");
+  if(ap>=0){
+    const file=args[ap+1];
+    if(!file){ console.error("--apply needs the plan file after it."); process.exit(2); }
+    const plan=JSON.parse(fs.readFileSync(file,"utf8"));
+    const open=new Map((await approved(T)).map(i=>[String(i.number),i]));
+    // every entry is checked before any issue is touched, so a bad plan changes nothing
+    const todo=Object.entries(plan).map(([n,entry])=>{
+      const i=open.get(String(n).replace(/^#/,""));
+      if(!i) throw new Error("#"+n+" is not an open, approved issue");
+      return [i,entry,applyPlan(i.body,entry,ctx.ids)];
+    });
+    for(const [i,entry,body] of todo){
+      await gh(T,"PATCH","/repos/"+REPO+"/issues/"+i.number,{body});
+      const where=entry.styles ? "Placed on "+names(entry.styles)+"." : "Filled in.";
+      await gh(T,"POST","/repos/"+REPO+"/issues/"+i.number+"/comments",
+        {body:where+(entry.why?"\n\n"+String(entry.why):"")});
+      console.log("  #"+i.number+" "+where);
+    }
+    console.log("Applied "+todo.length+" placement(s). The dry run follows.\n");
+  }
+
   const issues=await approved(T);
   if(!issues.length){ console.log("Nothing approved and open in "+REPO+"."); return; }
+
+  if(args.includes("--brief")){
+    const out=issues.map(i=>{
+      let rec=null, missing=[];
+      try{ rec=parseRecord(i.body); missing=check(rec,ctx).errors; }catch(e){ missing=[e.message]; }
+      return {number:i.number, title:i.title, record:rec, missing};
+    });
+    console.log(JSON.stringify(out,null,2));
+    return;
+  }
 
   const ready=[], held=[];
   for(const i of issues){
@@ -196,7 +265,7 @@ async function main(){
     for(const [i,c] of ready){
       // landed means on every style it names, which is also true of one that was already there
       if(!c.all.every(id=>(ctx.read[id]||[]).some(r=>r[0]===c.url))){ console.log("  #"+i.number+" not in data.js yet, left open"); continue; }
-      await gh(T,"POST","/repos/"+REPO+"/issues/"+i.number+"/comments",{body:"Added to Music Atlas in "+sha+"."});
+      await gh(T,"POST","/repos/"+REPO+"/issues/"+i.number+"/comments",{body:"Added to Music Atlas in "+sha+", on "+names(c.all)+"."});
       await gh(T,"PATCH","/repos/"+REPO+"/issues/"+i.number,{state:"closed",state_reason:"completed"});
       console.log("  #"+i.number+" closed"); n++;
     }
@@ -230,5 +299,5 @@ async function main(){
   console.log("\nNext: git diff src/data.js, npm test, commit and push, then node tools/ingest.js --close");
 }
 
-module.exports={parseRecord, normalizeUrl, check, insert, context};
+module.exports={parseRecord, normalizeUrl, check, insert, context, applyPlan};
 if(require.main===module) main().catch(e=>{ console.error(e.message); process.exit(1); });

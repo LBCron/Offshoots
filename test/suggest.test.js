@@ -106,6 +106,24 @@ const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?
   say("an impossible year is held", bad("year",1850));
   say("a 33 1/3 can stand on its record", ing.check({...good,kind:"33 1/3",medium:"book",note:"",record:"Fats Domino"},ctx).errors.length===0);
 
+  // ---------- ingest: placing ----------
+  { const body=shape({...base,styles:["nola_rnb"],note:""},{}).issue.body;
+    const placed=ing.applyPlan(body,{styles:["shoegaze","nola_rnb"],kind:"documentary",publication:"NPR",
+      note:"Costs $& nothing and repays $1 hour of it.",why:"Covers both scenes"},ctx.ids);
+    const r=ing.parseRecord(placed);
+    say("a plan sets where it goes", JSON.stringify(r.styles)==='["shoegaze","nola_rnb"]');
+    say("and fills what was missing", r.kind==="documentary" && r.publication==="NPR");
+    say("a note with $ in it is written as it is", r.note==="Costs $& nothing and repays $1 hour of it.");
+    say("what was sent stays", r.url===base.url && r.medium==="listen" && r.by==="" && !!r.at);
+    say("the reasoning stays out of the row", !("why" in r));
+    say("the rest of the issue is untouched", placed.split("```json")[0]===body.split("```json")[0]);
+    const no=e=>{ try{ ing.applyPlan(body,e,ctx.ids); return false; }catch(x){ return true; } };
+    say("a style not on the map is refused", no({styles:["nola_rnb","not_a_style"]}));
+    say("so is an empty list of styles", no({styles:[]}));
+    say("and a plan cannot change what was sent", no({url:"https://elsewhere.example"}) && no({by:"pete"}));
+    say("a placed suggestion passes ingest", ing.check({...r,year:2019,note:"A long enough note to pass the rule."},ctx).errors.length===0);
+  }
+
   // ---------- ingest: writing ----------
   const src=fs.readFileSync(path.join(__dirname,"..","src","data.js"),"utf8");
   const bare=d.DATA.map(r=>r[0]).filter(id=>!d.READ[id]).slice(0,2);
