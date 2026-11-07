@@ -4,10 +4,15 @@
 
 [build]
   publish = "."
+  # Skip the deploy when nothing served changed. Netlify runs this in the repo; exit 0
+  # means "nothing to do". Most commits touch only src/, test/, tools/ or the docs, and
+  # those are not the site. Add a path here if it starts being served.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- index.html musicatlas.json suggest.html contribute.html appicon.svg netlify.toml netlify art artists covers moods styles xplay"
 
 [build.environment]
-  # package.json lists Playwright for the tests. Netlify installs it on every deploy;
-  # this keeps it from downloading browsers nothing on the server will run.
+  # The root package.json has no dependencies (Playwright lives in test/package.json), so
+  # Netlify's install step installs nothing. This stays as a guard: if a dependency ever
+  # lands at the root again, it keeps the deploy from downloading browsers.
   PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 
 [functions]
@@ -24,3 +29,38 @@
   from = "/contribute"
   to = "/contribute.html"
   status = 200
+
+# Images. Netlify's default is max-age=0, so every cover is revalidated on every visit:
+# a round trip per image even when nothing changed. Filenames are stable stems, not
+# content hashes, so these cannot be immutable; a week plus stale-while-revalidate means a
+# repeat visit paints from cache and a replaced file shows up within a day or so.
+# index.html keeps the default and is always fresh.
+[[headers]]
+  for = "/art/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"
+
+[[headers]]
+  for = "/artists/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"
+
+[[headers]]
+  for = "/covers/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"
+
+[[headers]]
+  for = "/moods/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"
+
+[[headers]]
+  for = "/styles/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"
+
+[[headers]]
+  for = "/xplay/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"

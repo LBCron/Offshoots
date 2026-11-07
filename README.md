@@ -24,7 +24,9 @@ descriptions, and 270 styles with a playlist on Apple Music and Spotify.
 | `tools/ingest.js` | Brings approved suggestions into `src/data.js` |
 
 Netlify serves this directory as-is. No build command, no publish subdirectory:
-`index.html` is committed already built. `netlify.toml` pins that, plus the function.
+`index.html` is committed already built. `netlify.toml` pins that, plus the function,
+a week of browser caching for the image folders, and an ignore rule that skips the
+deploy when a push touches nothing that is served (`src/`, `test/`, `tools/`, docs).
 
 ## Suggestions
 
@@ -120,7 +122,7 @@ exists because `art/x.jpg` resolved against the parent directory and every cover
 ## Tests
 
 ```
-npm install            # playwright, once
+npm run setup          # playwright, once (installs into test/, not the root)
 npm test               # rebuilds, then runs every test/*.test.js
 ```
 
