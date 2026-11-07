@@ -29,6 +29,8 @@ html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 var(--f-body);
   -webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 main{max-width:560px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(32px + env(safe-area-inset-bottom,0px))}
+/* room to scroll into while the phone keyboard is up, so the last fields can rise above it */
+main.kb{padding-bottom:60vh}
 a{color:var(--accent)}
 .home{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:var(--muted);
   text-decoration:none;font-weight:600;font-size:13px;letter-spacing:.02em}
@@ -121,6 +123,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,.seg input:focus
           <label><input type="radio" name="medium" value="watch"><span>Video</span></label>
           <label><input type="radio" name="medium" value="listen"><span>Podcast or audio</span></label>
           <label><input type="radio" name="medium" value="look"><span>Photos</span></label>
+          <label><input type="radio" name="medium" value="site"><span>Website</span></label>
         </div>
       </div>
       <div class="field picker">
@@ -283,6 +286,31 @@ $("f").addEventListener("submit",async e=>{
 $("again").onclick=()=>{ $("f").reset(); picked=[]; drawChips(); touched=false; meta.publication=""; meta.year="";
   $("done").hidden=true; $("f").hidden=false; $("url").focus(); };
 $("close").onclick=()=>window.close();
+
+// ---------- the phone keyboard ----------
+// iOS scrolls a focused field just far enough to be under the keyboard's own toolbar,
+// and the note box sits at the foot of the page with nowhere to scroll to. So while the
+// keyboard is up the page gets room below, and the field is moved into what is left of
+// the screen: the style search to the top, so its list has space under it, anything else
+// with its bottom clear of the toolbar.
+const vv=window.visualViewport, BAR=84;
+let typing=null;
+function lift(){
+  if(!typing || !vv) return;
+  const up = vv.height < window.innerHeight - 120;
+  document.querySelector("main").classList.toggle("kb", up);
+  if(!up) return;
+  const r=typing.getBoundingClientRect(), top=r.top-vv.offsetTop, bottom=r.bottom-vv.offsetTop;
+  let d=0;
+  if(typing.id==="sq") d=top-12;
+  else if(bottom > vv.height-BAR) d=bottom-(vv.height-BAR);
+  else if(top < 12) d=top-12;
+  if(Math.abs(d)>2) window.scrollBy({top:d, behavior:"smooth"});
+}
+document.addEventListener("focusin",e=>{ if(e.target.matches("input[type=url],input[type=text],input[type=search],textarea")){
+  typing=e.target; setTimeout(lift,350); } });
+document.addEventListener("focusout",()=>{ typing=null; setTimeout(()=>{ if(!typing) document.querySelector("main").classList.remove("kb"); },150); });
+if(vv) vv.addEventListener("resize",()=>setTimeout(lift,50));
 if(!$("url").value) $("url").focus();
 })();
 </script>

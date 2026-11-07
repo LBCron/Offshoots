@@ -20,12 +20,21 @@ const FIXTURE=`<!doctype html><html><head><title>Raw title | Site</title>
 <meta property="og:site_name" content="Gambit">
 <meta property="article:published_time" content="2014-06-02T10:00:00Z">
 </head><body>hello</body></html>`;
+// YouTube after clicking from one video to the next: the title tag has moved on, and
+// everything else still describes the first video
+const TUBE=`<!doctype html><html><head><title>(3) The Second Video - YouTube</title>
+<link rel="canonical" href="/watch?v=first">
+<meta property="og:title" content="The First Video">
+<meta property="og:site_name" content="YouTube">
+<meta itemprop="datePublished" content="2001-01-01">
+</head><body>hello</body></html>`;
 const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascript",".css":"text/css",".jpg":"image/jpeg",".png":"image/png",".svg":"image/svg+xml"};
 
 (async()=>{
   const srv=http.createServer((q,r)=>{
     let u=decodeURIComponent(q.url.split("?")[0]);
     if(u.startsWith("/fixture")){ r.writeHead(200,{"content-type":"text/html"}); return r.end(FIXTURE); }
+    if(u.startsWith("/watch")){ r.writeHead(200,{"content-type":"text/html"}); return r.end(TUBE); }
     if(u==="/suggest"||u==="/contribute") u+=".html";
     if(u.endsWith("/")) u+="index.html";
     const f=path.join(ROOT,path.normalize(u));
@@ -45,7 +54,7 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
   await p.goto(B+"contribute");
   const plain=await p.$eval("#bm",a=>a.href);
   say("the contribute page hands out a bookmarklet", plain.indexOf("javascript:")===0);
-  say("an ordinary one carries no key", decodeURIComponent(plain).indexOf('p.set("k"')<0);
+  say("an ordinary one carries no key", /,""\)$/.test(decodeURIComponent(plain)));
   say("and the personal notice stays hidden", await p.$eval("#mine",e=>e.hidden));
   await p.click("#bm");
   say("clicking it here says to drag it instead", /Drag it/.test(await p.textContent("#nudge")));
@@ -54,7 +63,7 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
   p=await page();
   await p.goto(B+"contribute#k="+KEY);
   const mine=await p.$eval("#bm",a=>a.href);
-  say("a personal one carries its key", decodeURIComponent(mine).indexOf('p.set("k","'+KEY+'")')>0);
+  say("a personal one carries its key", decodeURIComponent(mine).endsWith(',"'+KEY+'")'));
   say("and says it is personal", !(await p.$eval("#mine",e=>e.hidden)));
   say("its form link carries the key too", (await p.$eval("#form",a=>a.getAttribute("href")))==="suggest#k="+KEY);
   await p.close();
@@ -80,6 +89,19 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
     && q.get("p")==="Gambit" && q.get("d")==="2014-06-02T10:00:00Z");
   say("the key", q.get("k")===KEY);
   say("and it returns nothing, so the page underneath is left alone", opened.returned);
+  await p.close();
+
+  // on YouTube, the details are read from what is live, not from the page's stale description.
+  // The fixture is served from 127.0.0.1, so the check is told it is youtube.com.
+  p=await page();
+  await p.goto(B+"watch?v=second&list=RD1");
+  const tube=await p.evaluate(code=>{ let got=null; window.open=u=>{ got=u; return null; };
+    const live=code.replace("/(^|\\.)youtube\\.com$/.test(location.hostname)","true");
+    (0,eval)(live); return got; }, decodeURIComponent(plain.slice("javascript:".length)));
+  const tq=new URLSearchParams(new URL(tube).hash.slice(1));
+  say("on YouTube it takes the video playing now, not the first one", tq.get("u")===B+"watch?v=second&list=RD1");
+  say("with its live title, minus the site and the notification count", tq.get("t")==="The Second Video");
+  say("and leaves the stale date out", tq.get("d")==="" && tq.get("p")==="YouTube");
   await p.close();
 
   // ---------- filling in and sending ----------
@@ -140,6 +162,24 @@ const TYPES={".html":"text/html",".json":"application/json",".js":"text/javascri
   await until(p,()=>document.getElementById("url").value==="https://example.org/second");
   say("a second page sent to the open window replaces the first", (await p.inputValue("#url"))==="https://example.org/second");
   await ctx.close();
+
+  // ---------- the phone keyboard ----------
+  // Chromium has no on-screen keyboard to raise, so the page is told the visible area is
+  // 400px tall, which is what an iPhone reports with the keyboard up.
+  { const kc=await b.newContext({viewport:M}); await kc.addInitScript(()=>{
+      Object.defineProperty(window,"visualViewport",{configurable:true,
+        value:{height:400,offsetTop:0,addEventListener(){}}}); });
+    p=await kc.newPage(); p.on("pageerror",e=>errs.push(String(e)));
+    await p.goto(B+"suggest"); await p.waitForLoadState("networkidle");
+    await p.focus("#note"); await p.waitForTimeout(1200);
+    const k=await p.evaluate(()=>{ const r=document.getElementById("note").getBoundingClientRect();
+      return {room:document.querySelector("main").classList.contains("kb"), top:Math.round(r.top), bottom:Math.round(r.bottom)}; });
+    say("with the keyboard up, the page makes room below", k.room);
+    say("and the note box clears the keyboard's toolbar ("+k.bottom+"px of 400)", k.bottom<=400-84+3 && k.top>=0);
+    await p.focus("#sq"); await p.waitForTimeout(1200);
+    const sq=await p.evaluate(()=>Math.round(document.getElementById("sq").getBoundingClientRect().top));
+    say("the style search goes to the top, leaving its list room ("+sq+"px)", sq>=0 && sq<=40);
+    await kc.close(); }
 
   // ---------- the link in Go deeper ----------
   p=await page();

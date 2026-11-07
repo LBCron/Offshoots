@@ -4603,7 +4603,7 @@ const SONGS = {
 // Rows are [url, title, publication, year, kind, access, why it is worth your time, medium].
 // A link has to serve the material, not describe it. Three entries were cut for pointing at
 // catalogue records that name a box and a folder and show you nothing.
-// medium is read / listen / watch / look / book, and it is what the icon promises: an
+// medium is read / listen / watch / look / book / site, and it is what the icon promises: an
 // oral history can be a tape you play or a transcript you read, and the row has to say which.
 // access is "" for open, or paywall / partial / registration, which the panel says out loud.
 // [url, title, publication, year, kind, access, note]
