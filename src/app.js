@@ -1,9 +1,21 @@
 (function(){
 const FAM = {}; FAMS.forEach((f,i)=>FAM[f[0]]={key:f[0],name:f[1],h:f[2],short:f[3]||f[1],i,
   c:(typeof FAMMAP!=="undefined"&&FAMMAP[f[0]])||`hsl(${f[2]} 72% 64%)`});
-const nodes = DATA.map(d=>({id:d[0],name:d[1],year:d[2],fam:d[3],parents:d[4]?d[4].split(" "):[],note:d[5]||"",disp:d[6]||String(d[2]),children:[],artists:(typeof ART!=="undefined"&&ART[d[0]])||[],sources:d[7]||[],roster:(typeof ROSTER!=="undefined"&&ROSTER[d[0]])||[],songs:(typeof SONGS!=="undefined"&&SONGS[d[0]])||[],done:(typeof PLAY!=="undefined"&&!!PLAY[d[0]])}));
-nodes.forEach(n=>{ n.search=(n.note+" "+n.artists.join(" ")+" "+n.roster.join(" ")).toLowerCase();
-  n.songsearch=n.songs.join(" | ").toLowerCase(); });
+const nodes = DATA.map(d=>({id:d[0],name:d[1],year:d[2],fam:d[3],parents:d[4]?d[4].split(" "):[],note:d[5]||"",disp:d[6]||String(d[2]),children:[],artists:(typeof ART!=="undefined"&&ART[d[0]])||[],sources:d[7]||[],done:(typeof PLAY!=="undefined"&&!!PLAY[d[0]])}));
+// ROSTER and SONGS are the bulk of the page and only search and the artist panel read
+// them, so build.js ships them (with ACTIVE, ROLE, COVERART and PHOTO) as inert JSON the
+// page parses on first use rather than as script it parses before the map can draw. Each
+// node's roster, songs and search strings are worked out the first time something asks
+// and kept; until then the tables cost nothing. (The names still resolve: build.js gives
+// each one a getter on globalThis, so ROSTER[id] reads the same as it always did.)
+const lazy=(n,k,make)=>Object.defineProperty(n,k,{configurable:true,enumerable:true,
+  get(){ const v=make(n); Object.defineProperty(n,k,{value:v,writable:true,enumerable:true}); return v; }});
+nodes.forEach(n=>{
+  lazy(n,"roster",n=>(typeof ROSTER!=="undefined"&&ROSTER[n.id])||[]);
+  lazy(n,"songs",n=>(typeof SONGS!=="undefined"&&SONGS[n.id])||[]);
+  lazy(n,"search",n=>(n.note+" "+n.artists.join(" ")+" "+n.roster.join(" ")).toLowerCase());
+  lazy(n,"songsearch",n=>n.songs.join(" | ").toLowerCase());
+});
 // Apple Music artist links: start as a search URL, upgrade to the artist page once the iTunes Search API resolves an ID (cached).
 let AMID={}; try{ AMID=JSON.parse(localStorage.getItem("amid")||"{}") }catch(e){}
 // On Apple devices use the music:// scheme so the Music app opens directly (no browser tab / in-app browser pane).
@@ -21,6 +33,14 @@ function wiki(n){
 // Emily's own Apple Music class playlists, keyed by style id (paths are relative to music.apple.com)
 // cover art, if art/<id>.jpg is sitting next to the page; missing files remove themselves
 const ART_DIR="art/", STYLE_DIR="styles/", XPLAY_DIR="xplay/", ART_EXT=".jpg";
+// On the live site the playlist covers go through Netlify's image CDN, which resizes
+// the 640px, ~95 KB JPEG to the width a panel actually shows and hands back WebP or
+// AVIF to a browser that takes it: a quarter of the bytes for the same picture. Anywhere
+// else (a file:// test, a mailed copy, another host) the file is used as it is. A cover
+// the CDN cannot produce falls back to the file too: see the error handler on panelBody.
+const CDN = /(^|\.)(musicatlas\.us|netlify\.app)$/.test(location.hostname);
+const COVER_W = 480;   // 200px panel cover at 2x and a 112px row cover at 3x both fit
+const artURL = (path,w) => CDN ? `/.netlify/images?url=/${path}&w=${w||COVER_W}&q=75` : path;
 // the machine-readable copy of all this, written beside the page by the build
 // One file: the structure of the map and what each style is. It carried every artist and
 // every song title once, which made it half a megabyte, and the thing that fails when you
@@ -45,9 +65,10 @@ const cover = (id,n,bare) => {
   const node = n || byId[id];
   const c = node ? FAM[node.fam].c : "";
   const ini = initials(node?node.name:id);
-  const src = s ? `${STYLE_DIR}${encodeURIComponent(s)}${ART_EXT}`
+  const raw = s ? `${STYLE_DIR}${encodeURIComponent(s)}${ART_EXT}`
                 : `${ART_DIR}${encodeURIComponent(f)}${ART_EXT}`;
-  return `<img class="pcov" src="${src}" alt="" loading="lazy" decoding="async" data-c="${esc(c)}" data-ini="${esc(ini)}">`;
+  const src = artURL(raw);
+  return `<img class="pcov" src="${src}" alt="" loading="lazy" decoding="async"${CDN?` data-raw="${raw}"`:""} data-c="${esc(c)}" data-ini="${esc(ini)}">`;
 };
 // cover plus a playlist title say what the section is; a heading on top of that is noise
 function playLabel(n){
@@ -481,6 +502,10 @@ function layout(avail){
 }
 
 function draw(){
+  // Read the toolbar height before writing anything. It was read after the 461-node SVG
+  // had been replaced, which forced a full synchronous layout of the fresh map just to
+  // learn a number that had not changed since the last frame: about a third of boot.
+  const bar=BAR();
   let ax=`<svg width="${W}" height="${AXH}"><text class="rt" x="${X0}" y="19">Roots, before 1950</text>`;
   ax += `<text x="${xOf(END)}" y="19" text-anchor="middle" class="now">${END}</text>`;
   for(let yr=1950; yr<=2025; yr+=5){ const x=xOf(yr); if(yr===2025) continue; ax += yr%10===0 ? `<text x="${x}" y="19" text-anchor="middle">${yr}</text>` : `<text x="${x}" y="19" text-anchor="middle" opacity=".55">’${String(yr).slice(2)}</text>`; }
@@ -519,7 +544,7 @@ function draw(){
   s+=`</g>`;
   const svg=$("chart"); svg.setAttribute("width",W); svg.setAttribute("height",H); svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.style.setProperty("--fs",FS+"px"); svg.innerHTML=s;
   $("inner").style.width=W+"px";
-  const L=$("lanes"); L.style.top=(BAR()+AXH)+"px"; L.style.setProperty("--lz",1);
+  const L=$("lanes"); L.style.top=(bar+AXH)+"px"; L.style.setProperty("--lz",1);
   L.innerHTML = `<div class="lane fill" style="top:0;height:${HEADH}px;left:0;width:${LABELW-8}px"></div>` + lanes.map((l,i)=>`<div class="lane c" data-fam="${l.k}" style="--c:${FAM[l.k].c};top:${l.y0}px;height:${l.h}px;left:0;width:${LABELW-8}px" title="${esc(FAM[l.k].name)} · ${l.count} styles"><span class="vt">${esc(FAM[l.k].short)}</span><span class="cnt">${l.count}</span></div>`).join("");
   L.style.transform=`translateX(${scroller.scrollLeft}px)`;
 }
@@ -2939,6 +2964,8 @@ function go(id){ clearQ(); select(id);
 // and then a tile keeps the row the same shape instead of collapsing it
 $("panelBody").addEventListener("error",e=>{
   const t=e.target; if(!t||t.tagName!=="IMG"||!t.classList.contains("pcov")) return;
+  // a cover the image CDN would not serve: ask for the file itself before giving up
+  if(t.dataset.raw){ const raw=t.dataset.raw; delete t.dataset.raw; t.src=raw; return; }
   if(!t.dataset.retried){
     t.dataset.retried="1";
     const src=(t.getAttribute("src")||"").split("?")[0];
@@ -3130,13 +3157,22 @@ if(window.ResizeObserver){
 //
 // 0.75 rather than 0.8 because 0.9 minus 0.1 is 0.8 exactly but 0.8 minus 0.1 is
 // 0.7000000000000001, and a threshold should not depend on which way the float fell.
+// the scroller's size at the last render, so the observer below can tell a resize from
+// its own first notification
+let RSW=-1, RSH=-1;
 function render(){ RENDERED=true; dims(); LOD = Z<0.75; $("chart").classList.toggle("lod",LOD); fit();
   const res=SRES(); $("inner").style.paddingBottom=res+"px"; measureHead();
-  layout(scroller.clientHeight-AXH-BAR()-res-HEADH); draw(); }
+  RSW=scroller.clientWidth; RSH=scroller.clientHeight;
+  layout(RSH-AXH-BAR()-res-HEADH); draw(); }
 let lastW=0,lastH=0,rt;
 // the panel is docked, so opening or closing it changes the map viewport: re-lay out when that happens
 let ro;
-if(window.ResizeObserver){ let rot; ro=new ResizeObserver(()=>{ clearTimeout(rot); rot=setTimeout(()=>{ if(!RENDERED||DRAGGING) return; render(); if(state.sel) select(state.sel,{scroll:false,repaint:false}); },120); }); ro.observe(scroller); }
+// A ResizeObserver reports once on observe() whether or not anything changed, so this
+// used to lay out and draw the whole map a second time 120ms after boot had just done it.
+// Now it only renders when the scroller is a different size from the one last rendered.
+if(window.ResizeObserver){ let rot; ro=new ResizeObserver(()=>{ clearTimeout(rot); rot=setTimeout(()=>{ if(!RENDERED||DRAGGING) return;
+  if(scroller.clientWidth===RSW && scroller.clientHeight===RSH) return;
+  render(); if(state.sel) select(state.sel,{scroll:false,repaint:false}); },120); }); ro.observe(scroller); }
 addEventListener("resize",()=>{ clearTimeout(rt); rt=setTimeout(()=>{
   if(innerWidth===lastW && Math.abs(innerHeight-lastH)<120) return; // ignore mobile toolbar jitter
   lastW=innerWidth; lastH=innerHeight;

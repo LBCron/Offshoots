@@ -98,6 +98,18 @@ src/app.js      layout, rendering, interaction
 src/build.js    joins the three into index.html
 ```
 
+The six artist-keyed tables (`ROSTER`, `SONGS`, `ACTIVE`, `ROLE`, `COVERART`, `PHOTO`) are
+most of `data.js` by bytes and nothing reads them until a search or a panel opens, so the
+build puts them in the page as inert `<script type="application/json">` blocks and a
+getter parses each one the first time its name is read. In `data.js` they are ordinary
+consts; in the page `ROSTER[id]` reads the same as it always did. The page is still one
+file; it just does not compile 470 KB of names before it can draw the map.
+
+On the live site the playlist covers are requested through Netlify's image CDN
+(`/.netlify/images?url=/art/…&w=480`), which resizes and re-encodes them; from a
+`file://` copy or any other host the JPEGs are used as they are, and a cover the CDN
+will not serve falls back to its file.
+
 `data.js` ends with a `module.exports` tail so scripts and tests can `require()` it;
 the build strips that tail, since the page has no module system. That makes checks
 like this possible without a browser:
