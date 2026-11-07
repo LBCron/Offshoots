@@ -12,7 +12,7 @@
   # Skip the deploy when nothing served changed. Netlify runs this in the repo; exit 0
   # means "nothing to do". Commits that touch only test/, the tools that are not the
   # build, or the docs are not the site. Add a path here if it starts being served.
-  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- src tools/catalog.js suggest.html contribute.html appicon.svg netlify.toml netlify art artists covers moods styles xplay"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- src tools/catalog.js suggest.html contribute.html appicon.svg netlify.toml netlify art artists covers moods styles xplay wiki"
 
 [build.environment]
   NODE_VERSION = "22"
@@ -70,3 +70,8 @@
   for = "/xplay/*"
   [headers.values]
     Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"
+
+[[headers]]
+  for = "/wiki/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

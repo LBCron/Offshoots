@@ -163,3 +163,20 @@ One trap worth knowing before adding a test: setting `location.hash` on a page t
 is already loaded is a same-document navigation, so the app does not re-select and
 the panel keeps showing the previous style. Open each style on a fresh page. Several
 false failures in this project came from reusing one.
+
+## Wiki
+
+`/wiki/` is a standalone, unlinked companion to Music Atlas. Its catalog
+contains a public listening snapshot from the School of Listening workbook.
+The workbook itself, private library links, teaching notes and revision logs
+stay out of the deploy. The wiki requests no indexing and is accessible by URL.
+
+Refresh the snapshot after curriculum changes, from this checkout:
+
+```sh
+python3 tools/wiki-export.py "/path/to/School of Listening.xlsx"
+```
+
+Review and commit the resulting `wiki/catalog.json`. The exporter reads the
+workbook without changing it and matches public playlist URLs to Atlas nodes.
+The handbook and art guide are maintained under `wiki/`.
