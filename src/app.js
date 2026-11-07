@@ -180,6 +180,10 @@ function about(n){
 const SPK=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.2H2.2v3.6H4L7.2 12V4z"/><path d="M9.8 6a2.6 2.6 0 0 1 0 4"/><path d="M11.8 4.2a5 5 0 0 1 0 7.6"/></svg>`;
 const BRAND={apple:"#fa233b",spotify:"#1db954",qobuz:"#0070ef"};
 let SVC="apple"; try{ SVC=localStorage.getItem("svc")||"apple" }catch(e){}
+// whether anyone has ever chosen: the default is Apple Music until someone says otherwise,
+// and the first playlist button a new visitor meets says so, once, so the choice is made
+// where it matters (at the moment of listening) and not on the welcome card
+const svcChosen=()=>{ try{ return !!localStorage.getItem("svc"); }catch(e){ return true; } };
 const spHref = name=>`https://open.spotify.com/search/${encodeURIComponent(name)}`;
 const qbHref = name=>`https://www.qobuz.com/us-en/search?q=${encodeURIComponent(name)}`;
 const svcHref = name=> SVC==="spotify" ? spHref(name) : SVC==="qobuz" ? qbHref(name) : amHref(name);
@@ -285,6 +289,7 @@ const amCirc = name=>{
 const am = name=>`<a class="am" href="${svcHref(name)}" data-name="${esc(name)}" target="_blank" rel="noopener" title="Open ${esc(name)} in ${svcName()}" aria-label="${esc(name)}, open in ${svcName()}"><span>${esc(name)}</span><i class="amgo" aria-hidden="true">${OPENGO}</i></a>`;
 function setSvc(s){
   SVC=s; try{ localStorage.setItem("svc",s) }catch(e){}
+  document.querySelectorAll(".svcnote").forEach(n=>n.remove());
   // every link that names an artist, not only the chip-shaped ones: the circles in the
   // row and the rows on the Key artists page carry data-name too, and a.am missed both,
   // so switching service left them pointing at the service you had just left
@@ -1375,7 +1380,8 @@ function startSect(n){
     + `<b class="startttl">The essential ${esc(n.name)} playlist</b>`
     + `<span class="startsub">Meet the style through its defining songs.</span></span></div>`
     + open
-    + `<div class="svcline"><span class="svclbl">Your music service</span>${svcPicker("inline")}</div>`);
+    + `<div class="svcline"><span class="svclbl">Your music service</span>${svcPicker("inline")}</div>`
+    + (svcChosen() ? "" : `<p class="svcnote">Opens in Apple Music unless you pick another. Kept on this device.</p>`));
 }
 // Key artists, with the style in the heading so the row says whose list this is when you
 // have scrolled past the name.
@@ -3246,15 +3252,6 @@ function markHello(){
   helloShown=true;
   try{ localStorage.setItem(HELLO_KEY,"1"); }catch(e){}
 }
-let helloAt=1;
-function helloStep(n){
-  const w=$("hello"); if(!w) return;
-  helloAt=n;
-  w.querySelectorAll(".hstep").forEach(sec=>{ sec.hidden = +sec.dataset.step !== n; });
-  w.querySelectorAll(".hdots i").forEach((d,i)=>d.classList.toggle("on", i === n-1));
-  const c=$("hellocard");
-  if(c){ c.scrollTop=0; setTimeout(()=>c.focus({preventScroll:true}),40); }
-}
 function closeHello(then){
   const w=$("hello"); if(!w||w.hidden) return;
   w.hidden=true; markHello();
@@ -3263,28 +3260,23 @@ function closeHello(then){
 }
 function openHello(){
   const w=$("hello"); if(!w) return;
-  const n=$("hellon"); if(n) n.textContent=nodes.length;
-  const p=$("hellop"); if(p) p.textContent=playable().length;
-  // the service picker shows what is already stored rather than a blank set of three:
-  // a default nobody chose is still the answer until somebody changes it, and saying so
-  // is honest about what will happen if they just carry on
-  w.querySelectorAll("[data-svc]").forEach(bt=>
-    bt.setAttribute("aria-checked",String(bt.dataset.svc===SVC)));
-  helloStep(1);
+  // three collection tiles stand in for "Collections": the first three in the order,
+  // which are the ones the row shows first too
+  const arts=w.querySelectorAll(".hpart img");
+  MODES.slice(0,arts.length).forEach((m,i)=>{ arts[i].src=MOOD_DIR+m[0]+".jpg"; });
   w.hidden=false; document.body.classList.add("hello-open");
-  // the card takes focus, not the button: a ring on a primary button reads as pressed,
-  // and the dialog still announces itself and still hands Tab to the button
+  // the card takes focus, not a button: a ring on a filled button reads as pressed, and
+  // the dialog still announces itself and still hands Tab to the first path
   const c=$("hellocard"); if(c) setTimeout(()=>c.focus({preventScroll:true}),60);
 }
 
-// ---------- how the card ends ----------
-// It used to end on a third step asking where you wanted to start, offering a view of
-// playlists or the bare map. That question confused people, and it deserved to: the two
-// destinations are one tap apart in the live app, so the fork was never real, and the
-// step's own subtitle ("the whole map is one tap behind it") was the screen apologising
-// for itself. Worse, the two choices were the only way out of the card. Someone who
-// wanted neither had Back, the backdrop and Escape, none of which look like a way in.
-// The card ends on the service picker now, with one button that closes it.
+// ---------- what the card asks ----------
+// One question, two answers: Explore Collections (music for the moment, the panel's own
+// Collections page) or Explore the Atlas (the map, with the sheet down). Earlier cards
+// led with the size of the map and ended on the service picker. The counts asked people
+// to admire the thing before they had used it, and the picker asked a question nobody
+// could answer yet. The service stays on its default (Apple Music) until something
+// actually opens, and the first time it does, the button says so and offers the switch.
 
 // ---------- after the card: keeping it ----------
 // Offered after the view you asked for is on screen, not before: an install prompt makes
@@ -3315,29 +3307,19 @@ function openTip(){
   if(w){
     w.addEventListener("click",e=>{
       if(e.target.closest("[data-hclose]")) { closeHello(); return; }
-      // the picker sets the app's own preference, the same one the panel's menu sets, and
-      // leaves the card open: choosing where you listen is not choosing to start
-      { const sv=e.target.closest("[data-svc]");
-        if(sv){ setSvc(sv.dataset.svc);
-          w.querySelectorAll("[data-svc]").forEach(bt=>
-            bt.setAttribute("aria-checked",String(bt.dataset.svc===sv.dataset.svc)));
-          return; } }
-      // every Continue and every Back says which step it goes to, so the order lives in
-      // the markup rather than in a chain of handlers that have to agree with it
-      { const to=e.target.closest("[data-to]");
-        if(to){ helloStep(+to.dataset.to); return; } }
-      // the one way out. Nothing to navigate to: the app already boots onto Explore, with
-      // the map behind it, which is where both of the old destinations led anyway.
-      { if(e.target.closest("[data-hstart]")){
-          closeHello(()=>setTimeout(openTip,1200));
+      { const go=e.target.closest("[data-hgo]");
+        if(go){
+          const where=go.dataset.hgo;
+          closeHello(()=>{
+            if(where==="modes"){ setOpen(true); openAbout(true,"modes"); }
+            else { setOpen(false); }   // the map, sheet down, nothing selected
+          });
           return; } }
     });
     document.addEventListener("keydown",e=>{
       if(e.key!=="Escape" || w.hidden) return;
       e.stopPropagation();
-      // Escape on step two goes back a step rather than out: the card is two questions
-      // deep and leaving from the second one would throw away the first answer
-      if(helloAt>1) helloStep(helloAt-1); else closeHello();
+      closeHello();
     },true);
   } }
 
