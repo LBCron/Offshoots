@@ -1695,20 +1695,22 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
        opaque to stand on and let the sheet itself stay well back. Unboxed, the rows sit
        straight on the glass, so the glass carries more of the ground and blurs harder:
        what shows through should read as weather behind the sheet, not as labels.
-       85% on light, 78% on dark (--sheetmix). It was 78 on both; once the light map went
-       a step greyer (#38) the glass composited to a visible grey while the sticky title
-       bar, which must be opaque, stayed white, and the two no longer matched in Safari.
-       At 85 (the most sheet.test.js allows) the map still reads through and the bar
-       is within a shade. The blur goes up with it: at 36px
+       Opaque on light, 78% glass on dark (--sheetmix). It was 78 on both. Once the
+       light map went a step greyer (#38) the glass composited to a visible grey while the
+       sticky title bar, which has to be opaque, stayed white, and no value of the glass
+       matched the bar in Safari (85 was tried). On light the sheet is now the same solid
+       panel as the bar, so the two cannot differ; the blur still runs on the drag handle
+       area above the sheet. Dark keeps the glass: the map is near black there and the
+       bar's mismatch never showed. The blur goes up with it: at 36px
        a style label behind the glass was still a smear with the shape of a word in it,
        and the point is colour and line, not text you half recognise. */
     /* opaque (share.test.js: a translucent bar lets the rows read through the title),
        at the colour the glass composites to over the map, so it matches the sheet */
     --barglass:var(--panel);
-    background:color-mix(in srgb,var(--panel) var(--sheetmix,85%),transparent);
+    background:color-mix(in srgb,var(--panel) var(--sheetmix,100%),transparent);
     -webkit-backdrop-filter:saturate(165%) blur(44px);backdrop-filter:saturate(165%) blur(44px)}
   /* the family wash goes translucent too, over its own ground rather than the root's */
-  aside#panel.tinted{background:color-mix(in srgb,var(--panel) var(--sheetmix,85%),transparent)}
+  aside#panel.tinted{background:color-mix(in srgb,var(--panel) var(--sheetmix,100%),transparent)}
   /* The grain has to stop blending here. mix-blend-mode on a child composites against the
      backdrop, and that defeats the backdrop-filter on the sheet above it: the blur was
      wired up, declared, reported by getComputedStyle, and doing nothing. Map labels came

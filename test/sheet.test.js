@@ -412,6 +412,9 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     return {overlap:Math.round(Math.min(s.bottom,pan.bottom)-Math.max(s.top,pan.top)), mapH:Math.round(s.height)};});
   const g1=await geo();
   say("the map runs behind the sheet ("+g1.overlap+"px)", g1.overlap>100);
+  // the frost is dark mode's: on light the sheet is opaque, the same panel as the sticky
+  // title bar, since no glass value matched that bar in Safari once the map went greyer
+  await p.emulateMedia({colorScheme:"dark"}); await settle(p);
   const frost=await p.evaluate(()=>{const e=document.getElementById("panel");
     const cs=getComputedStyle(e), af=getComputedStyle(e,"::after");
     const a=(cs.backgroundColor.match(/[\/,]\s*(0?\.\d+|0|1)\s*\)?$/)||[])[1];
@@ -422,6 +425,7 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // 0.96 was translucent on paper and solid to look at: a twentieth of the map came
   // through, so the blur under it was work nobody saw.
   say("  enough to see the map through ("+frost[2]+")", frost[2]<=0.85);
+  await p.emulateMedia({colorScheme:"light"}); await settle(p);
   // And the blur has to actually blur. A mix-blend-mode on the grain layer composites
   // against the backdrop, which silently defeats backdrop-filter on the sheet above it:
   // the filter was declared, reported by getComputedStyle, and did nothing. Map labels
@@ -460,7 +464,8 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     tint.ground===tint.neutral && tint.pair.indexOf(tint.ground)<0);
   say("  with the family ground kept for the label on a filled accent button ("+tint.accfg+")",
     tint.pair.indexOf(tint.accfg)>=0);
-  say("and frosted over it", /blur/.test(tint.bf) && /rgba|\/ 0\./.test(tint.bg));
+  // frosted on dark; on light the sheet is opaque (see the frost check above)
+  say("and frosted over it", /blur/.test(tint.bf));
   await tp.close();
   // 1. a style chosen with the sheet open must land in the band still showing
   await p.click('[data-mode="winddown"]'); await rest(p);
