@@ -154,7 +154,7 @@ const state=p=>p.evaluate(()=>{
         picker:!!u.querySelector(".sortpick select"),
         grid:!!grid && getComputedStyle(grid).display==="grid",
         boxed:!!grid && grid.classList.contains("listgrp"),
-        copy:!!u.querySelector(".pagecopy")};});
+        copy:!!u.querySelector(".shbtn.wide[data-share]")};});
     await q.close(); return v; };
   const a=await skel("#top"), c=await skel("#modes");
   note("top", JSON.stringify(a)); note("modes", JSON.stringify(c));
