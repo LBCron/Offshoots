@@ -393,12 +393,21 @@ $("stats").textContent = `${nodes.length} styles · ${nodes.filter(n=>n.year<195
 const AXH=30, END=2026;
 const BAR=()=>$("spacer").offsetHeight;
 let Z=1; const BASE=.576, ZMIN=.7, ZMAX=3.3; let LOD=false; // Z is shown as %, 100% = BASE scale
+// What 100% means differs by screen. On a phone the map opened too close: the view people
+// settled on was 80%, so that is now where a phone starts, and it reads 100% there.
+// ZS turns the zoom shown into the zoom the map is drawn at; everything that sizes the
+// map works from ZE, the control and the readout from Z.
+let NARROWZ = innerWidth<700; const ZS=()=>NARROWZ?0.8:1; const ZE=()=>Z*ZS();
+// On a desktop the timeline ran narrower per year than on a phone, so a lane filled
+// its width early and stacked its styles into tall columns of rows. DESKX spreads the
+// years on wider screens only; type and row height are untouched.
+const DESKX=1.5;
 let NARROW, OVERLAY, LABELW, ROOTW, PX, RH, FS, R, PAD, X0, FSMIN, FSMAX, TK;
 function dims(){
-  NARROW = innerWidth<700; OVERLAY = innerWidth<900;
+  NARROW = NARROWZ = innerWidth<700; OVERLAY = innerWidth<900; const z=ZE();
   LABELW = NARROW?36:40; ROOTW = NARROW?280:340; PX = NARROW?38:34;
   RH = NARROW?25:21; FS = NARROW?13:12; R = NARROW?5:4.5; PAD = NARROW?7:9; X0 = LABELW+18;
-  const k=Z*BASE; RH*=k; FS*=k; R*=k; PAD*=k; X0=LABELW+18*k;
+  const k=z*BASE; RH*=k; FS*=k; R*=k; PAD*=k; X0=LABELW+18*k;
   // Labels scale with the zoom, with a floor under them. Pinning them to a fixed size
   // kept every label legible but made zooming feel broken: the dots and the spacing grew
   // and the names stayed put, so the map looked like it was sliding under the type rather
@@ -408,14 +417,14 @@ function dims(){
   // going under it. Past that point density is the LOD's job, which drops leaf labels on
   // zoom out the way Maps does.
   FSMIN = NARROW?11:11.5; FSMAX = NARROW?14:14.5;
-  TK = Z;
+  TK = z;
   // The year scale was a fixed number of pixels per year, so on a wide window it ran
   // out before the canvas did and left dead space to the right of the last year.
   // Work out what 100% has to mean for this viewport so the span reaches the edge.
   // Width only: type and row height keep their own scale, so a wide screen spreads the
   // timeline rather than magnifying it.
   const room = scroller.clientWidth - (LABELW+18*BASE) - 40;
-  const span = (ROOTW + (END-1950)*PX) * BASE;        // the axis at 100%, before filling
+  const span = (ROOTW + (END-1950)*PX) * BASE * (NARROW?1:DESKX); // the axis at 100%, before filling
   // never below 1: on an ordinary screen the scale is untouched and the map scrolls,
   // and zooming out still shrinks, because the factor is fixed at 100% rather than
   // recomputed against the current zoom
@@ -430,7 +439,7 @@ function dims(){
   // BASE is .576, so a test on k would have damped 100% as well and widened the map
   // everybody sees by default.  At the 70% floor the years sit 22% further apart than a
   // straight scale puts them, which is most of a decade of extra room on a 1400px window.
-  const KX = (Z<1 ? Math.pow(Z,0.45) : Z) * BASE;
+  const KX = (z<1 ? Math.pow(z,0.45) : z) * BASE * (NARROW?1:DESKX);
   PX*=KX*FILL; ROOTW*=KX*FILL;
 }
 const xOf = y=> y<1950 ? X0+(Math.max(y,1895)-1895)/55*ROOTW : X0+ROOTW+(y-1950)*PX;
@@ -3192,7 +3201,7 @@ if(window.ResizeObserver){
 // the scroller's size at the last render, so the observer below can tell a resize from
 // its own first notification
 let RSW=-1, RSH=-1;
-function render(){ RENDERED=true; dims(); LOD = Z<0.75; $("chart").classList.toggle("lod",LOD); fit();
+function render(){ RENDERED=true; dims(); LOD = ZE()<0.75; $("chart").classList.toggle("lod",LOD); fit();
   const res=SRES(); $("inner").style.paddingBottom=res+"px"; measureHead();
   RSW=scroller.clientWidth; RSH=scroller.clientHeight;
   layout(RSH-AXH-BAR()-res-HEADH); draw(); }
