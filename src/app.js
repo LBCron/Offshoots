@@ -2346,11 +2346,11 @@ function headTrack(k){
 }
 // The foot of a collection, where the style panel keeps its own: in the flow under
 // everything, so it scrolls away rather than sitting over the list.
-function pageShareBtn(key,name){
+function pageShareBtn(key,name,label){
   return `<button type="button" class="shbtn wide" data-share`
     + ` data-sharekey="${esc(key)}" data-sharename="${esc(name)}"`
     + ` aria-label="Share ${esc(name)}" title="Share ${esc(name)}">`
-    + SHAREGLYPH + TICKGLYPH + `<span class="shlbl">Share this collection</span></button>`;
+    + SHAREGLYPH + TICKGLYPH + `<span class="shlbl">${esc(label||"Share this collection")}</span></button>`;
 }
 function modePage(k){
   const m=typeof MODES!=="undefined" && MODES.find(x=>x[0]===k);
@@ -2539,7 +2539,9 @@ const PAGES_DEF={
   modes:()=>({title:"Collections",
     lede:spellCount(MODES.length)+" moods, places and tasks, each opening the styles that suit it.",
     top:modeSortHtml(),
-    html:modeListHtml()+copyRow("modes")}),
+    // the same share button every collection page ends with, not the bare copy-link
+    // that About and How to install carry: this page is something to hand to someone
+    html:modeListHtml()+pageShareBtn("modes","Collections","Share the collections")}),
   picks:()=>picksPage("pete"),
   roots:()=>({title:"Roots",
     lede:"Styles with nothing before them here. Everything else on the map descends from these.",
@@ -2547,7 +2549,7 @@ const PAGES_DEF={
   top:()=>({title:"Most Influential",
     lede:"The styles that led to the most, counted by what came directly out of them.",
     top:topSortHtml(),
-    html:topGridHtml()+copyRow("top")}),
+    html:topGridHtml()+pageShareBtn("top","Most influential","Share this list")}),
   about:()=>{ const np=playable().length,
       withSrc=DATA.filter(r=>Array.isArray(r[7])&&r[7].length).length;
     return {title:"About This Map", html:`

@@ -228,11 +228,12 @@ const spell=n=>n<=20?WORDS[n]
     && all.rows===0);
   say("  none spilling out of the grid", all.over===false);
   say("  every one labelled and a real tap target", all.labelled && all.tall);
-  // the page has a link of its own, the way About and How to install do
-  const share=await p.evaluate(()=>{const c=document.querySelector(".ppage:not([hidden]) .pagecopy");
-    return c?{hash:c.dataset.aboutcopy, lbl:(c.querySelector(".lbl")||{}).textContent}:null;});
-  say("  with a link to copy ("+(share&&share.lbl)+")",
-    !!share && share.hash==="modes" && /copy a link/i.test(share.lbl));
+  // the page ends with the share button every collection page has, not the bare
+  // copy-link About and How to install carry (#28): this is a page to hand to someone
+  const share=await p.evaluate(()=>{const c=document.querySelector(".ppage:not([hidden]) .shbtn.wide[data-share]");
+    return c?{key:c.dataset.sharekey, lbl:(c.querySelector(".shlbl")||{}).textContent}:null;});
+  say("  with a share button of its own ("+(share&&share.lbl)+")",
+    !!share && share.key==="modes" && /share/i.test(share.lbl));
   await p.click("#panelBack"); await onPage(p,"root");
 
   // ---------- how loud it is ----------
