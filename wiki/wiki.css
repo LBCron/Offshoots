@@ -29,6 +29,8 @@ mark{background:var(--mark);color:inherit;padding:0 .15em}
 .sidebar{border-right:1px solid var(--line);padding:2rem 1.25rem;font-family:var(--sans);font-size:.9rem;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto}
 .brand{display:block;color:var(--ink);font-weight:800;font-size:1.15rem;text-decoration:none;letter-spacing:-.01em}
 .sidebar small,.eyebrow{display:block;color:var(--muted);font:700 .7rem/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase}
+.backlink{display:inline-block;margin-top:.7rem;font-size:.84rem;text-decoration:none;color:var(--link);padding:.3rem .6rem;border:1px solid var(--line);border-radius:2rem}
+.backlink:hover{border-color:var(--accent);color:var(--ink)}
 .sidebar nav{display:grid;gap:.1rem;margin:1.4rem 0}
 .sidebar nav a{display:block;text-decoration:none;color:var(--ink);padding:.45rem .6rem;border-radius:.35rem}
 .sidebar nav a:hover{background:var(--surface)}
