@@ -1880,8 +1880,13 @@ button.navttl[aria-expanded="true"] .lrcv{transform:rotate(180deg);opacity:1}
 .shbtn .shg{width:20px;height:20px;opacity:.75;vertical-align:0}
 .shbtn:hover .shg{opacity:1}
 .shbtn.round{width:var(--tap);height:var(--tap);border-radius:50%;flex:none}
-.shbtn.wide{display:flex;width:100%;margin:18px 0 0;min-height:52px;
-  border-radius:14px;font:600 var(--t-body)/1 var(--f-body)}
+/* Open playlist is the main action on a style panel and Share is the second, so Share
+   is the shorter of the two: 44px, the tap-target floor on a phone (the pointer tier
+   sets --tap lower, and this stays at 44 there too), with the label a step down. Open
+   playlist takes the 52px Share used to have. The welcome card's share button keeps its
+   own height below; it is the one action on that card. */
+.shbtn.wide{display:flex;width:100%;margin:18px 0 0;min-height:max(var(--tap),44px);
+  border-radius:14px;font:600 var(--t-sub)/1 var(--f-body)}
 /* ---------- the one button on the page ----------
    Everything else in a panel opens something; Share acts. So it is the only thing shaped
    like a button. It used to be the only thing in blue as well, which read as a piece of
@@ -2351,7 +2356,7 @@ a.am .amgo{display:none}
   font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){ .trkbtn{transition:none} }
 .plbtn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;
-  box-sizing:border-box;min-height:var(--tap);padding:13px 18px;border-radius:14px;
+  box-sizing:border-box;min-height:52px;padding:13px 18px;border-radius:14px;
   text-decoration:none;cursor:pointer;
   background:var(--acc,var(--blue));color:var(--accfg,var(--accent-fg));
   font:600 var(--t-body)/1.2 var(--f-body);letter-spacing:-.01em;
