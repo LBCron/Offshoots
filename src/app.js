@@ -2398,11 +2398,12 @@ function wrapStack(card){
 }
 function resetPages(){ PSTACK=[]; }
 // Twelve picks fitted on a screen and needed no order but the one they were written in.
-// Forty do not, so the order is stated and chosen. Relevance is that written order, which
-// is the collection's own argument about what fits it best, and stays the default.
+// Forty do not, so the order is stated and chosen. Best fit is that written order, which
+// is the collection's own argument about what fits it best, and stays the default. It was
+// labelled Relevance, which reads like a search score; nothing is scored, it is editorial.
 const PICKSORT_KEY="musicatlas.picksort";
 const PICKSORTS=[
-  ["fit","Relevance","Best fit for this collection first"],
+  ["fit","Best fit","Best fit for this collection first"],
   ["az","A\u2013Z","By name, A to Z"],
   ["used","Most used","What this browser opens most"]];
 function pickSort(){
@@ -2445,7 +2446,10 @@ function modeTop(m){
         ` data-pickany="${esc(m[0])}"`,
         `Open one of these ${n} styles, chosen at random`)
     + `</div>`
-    + `<div class="secthead picksort"><h3 class="secttl">Styles That Fit</h3>`
+    // the count beside the heading, so "these 31" above has its referent and the length
+    // of the shelf is known before scrolling it
+    + `<div class="secthead picksort"><h3 class="secttl">Styles That Fit`
+    + `<span class="pkcount" aria-label="${n} styles">${n}</span></h3>`
     + pickSortHtml() + `</div>`;
 }
 // A collection lists styles. Sometimes one recording is the whole point of it, and

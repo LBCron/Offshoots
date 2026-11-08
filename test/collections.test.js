@@ -102,16 +102,26 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("  clearing the tap floor ("+v.tap+"px)", v.tap>=44);
     say("  sitting under the description and above the list", v.belowLede && v.aboveList);
     note("  sort", v.sorts.join(" "));
-    say("  and the three orders, relevance first and selected",
-      JSON.stringify(v.sorts)===JSON.stringify(["Relevance*","A–Z","Most used"]));
+    // the written order is editorial, so it is called Best fit, not Relevance, which read
+    // like a search score
+    say("  and the three orders, best fit first and selected",
+      JSON.stringify(v.sorts)===JSON.stringify(["Best fit*","A–Z","Most used"]));
     say("  with the sort inside the page ("+v.spill+"px)", v.spill<=0);
     // Three words were wider than the panel, so the control scrolled and the third order
     // sat off the edge. Then it was three glyphs you had to press to identify. It is one
     // inline picker now, the same control the Listen on row uses: the order it is on said
     // in a word, and the other two in the platform's own list behind it.
     say("  as one picker naming the order it is on (\""+v.cur+"\", "+v.segW+"px wide)",
-      v.cur==="Relevance" && v.segW<=180);
+      v.cur==="Best fit" && v.segW<=180);
     say("    still a tap target ("+v.tabTap+"px)", v.tabTap>=36);
+    { const h=await p.evaluate(()=>{
+        const u=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden)[0];
+        const c=u.querySelector(".picksort .pkcount"), r=u.querySelector(".pk .pick");
+        const y=sel=>r.querySelector(sel).getBoundingClientRect().top;
+        return {count:c?+c.textContent:-1, label:c?c.getAttribute("aria-label"):"",
+          order:y(".pknm")<y(".pkwhy") && y(".pkwhy")<y(".pkfam")};});
+      say("  the heading says how many ("+h.count+")", h.count===dinner[4].length && h.label===h.count+" styles");
+      say("  and each row reads name, then why it is here, then family and year", h.order); }
     // the sort is the order of the list, so it belongs on the list's heading, not adrift
     // under the lede where it read as another fact about the collection
     say("  on one line with a heading for the list (\""+v.headTx+"\")",
