@@ -955,7 +955,7 @@ function glideSheet(from){
   el.style.transition="none";
   el.style.maxHeight=""; el.style.height="";   // let the stylesheet state its target
   const to=el.offsetHeight;
-  if(Math.abs(to-from)<2){ el.style.transition=""; GLIDING=false; return; }
+  if(Math.abs(to-from)<2){ el.style.transition=""; GLIDING=false; syncSheetH(); return; }
   GLIDING=true;
   // the minimised state caps the sheet at 46vh, which would clamp the open height away
   // before the first frame and leave nothing to animate. The cap is off for the duration.
@@ -966,9 +966,9 @@ function glideSheet(from){
   requestAnimationFrame(()=>{
     el.style.height=to+"px";
     const done=e=>{ if(e.target!==el||e.propertyName!=="height") return;
-      el.removeEventListener("transitionend",done); GLIDING=false; el.style.height=""; el.style.maxHeight=""; };
+      el.removeEventListener("transitionend",done); GLIDING=false; el.style.height=""; el.style.maxHeight=""; syncSheetH(); };
     el.addEventListener("transitionend",done);
-    setTimeout(()=>{ el.removeEventListener("transitionend",done); GLIDING=false; el.style.height=""; el.style.maxHeight=""; },600);
+    setTimeout(()=>{ el.removeEventListener("transitionend",done); if(GLIDING){ GLIDING=false; el.style.height=""; el.style.maxHeight=""; syncSheetH(); } },600);
   });
 }
 function setOpen(v){
@@ -987,7 +987,7 @@ function setOpen(v){
   setOpenNow(v);
   if(glide) glideSheet(from);
 }
-function setOpenNow(v){ closeNav(); OPEN=v; setTimeout(sizeCard,0); setTimeout(syncMapPad,0); setTimeout(syncMapPad,380); if(OVERLAY && state.sel) setTimeout(()=>{ if(state.sel) select(state.sel,{scroll:true,smooth:!reduce,repaint:false}) },260); $("panel").classList.toggle("open",v); document.body.classList.toggle("open",v); $("expand").setAttribute("aria-expanded",v); $("expand").setAttribute("aria-label",v?"Hide details":"Show details"); $("pclose").setAttribute("aria-label",v?"Collapse details":"Expand details"); { const g=$("grab"); if(g){ g.setAttribute("aria-expanded",String(v)); g.setAttribute("aria-label",v?"Collapse details":"Expand details"); } } paintExpand(); if(v) $("panel").scrollTop=0; }
+function setOpenNow(v){ closeNav(); if(v) syncSheetH(); OPEN=v; setTimeout(sizeCard,0); setTimeout(syncMapPad,0); setTimeout(syncMapPad,380); if(OVERLAY && state.sel) setTimeout(()=>{ if(state.sel) select(state.sel,{scroll:true,smooth:!reduce,repaint:false}) },260); $("panel").classList.toggle("open",v); document.body.classList.toggle("open",v); $("expand").setAttribute("aria-expanded",v); $("expand").setAttribute("aria-label",v?"Hide details":"Show details"); $("pclose").setAttribute("aria-label",v?"Collapse details":"Expand details"); { const g=$("grab"); if(g){ g.setAttribute("aria-expanded",String(v)); g.setAttribute("aria-label",v?"Collapse details":"Expand details"); } } paintExpand(); if(v) $("panel").scrollTop=0; }
 function openPanel(){ setOpen(true); }
 function closePanel(){ setOpen(false); }
 function syncPeek(){}
@@ -1107,7 +1107,28 @@ function syncPull(){ const el=$("sheetpull"); if(!el) return; const l=el.querySe
 function sheetMin(){ return MINH || 170; }
 // the ceiling has to be the height the open state actually uses, or dragging up from an
 // open sheet pulls it down to the ceiling instead
-function sheetMax(){ return Math.round(innerHeight*0.7); }
+function sheetMax(){ return sheetOpenH(); }
+// The open sheet was 70vh. In a phone browser vh is the largest viewport the page could
+// have, not what is on screen, so in Safari the sheet came up over nearly the whole map.
+// Size it from what is really visible instead: the part of the sheet's container that is
+// inside the visual viewport. The map keeps at least a fifth of that, and the sheet never
+// grows past what 70vh gave it, so the installed app, where vh was right, is unchanged.
+function sheetOpenH(){
+  const el=$("panel"), box=el&&el.offsetParent; if(!box) return Math.round(innerHeight*0.7);
+  const r=box.getBoundingClientRect(), vv=window.visualViewport;
+  const vTop=vv?vv.offsetTop:0, vBot=vv?vv.offsetTop+vv.height:innerHeight;
+  const top=Math.max(r.top,vTop), bot=Math.min(r.bottom,vBot);
+  const sheetTop=top+0.2*Math.max(0,bot-top);
+  // unrounded: 70vh is 590.8px on an 844 screen, and a rounded 591 is a new height the
+  // sheet would animate to, a stray transition sitting on the panel
+  return Math.max(0, Math.min(innerHeight*0.7, r.bottom-sheetTop));
+}
+// written only when it changes and never mid-glide: a fresh inline value while the sheet is
+// animating re-targets the transition, and the glide test caught it as a snap
+function syncSheetH(){ const el=$("panel"); if(!el || GLIDING || DRAGGING) return;
+  const v=sheetOpenH().toFixed(2)+"px"; if(el.style.getPropertyValue("--sheeth")!==v) el.style.setProperty("--sheeth",v); }
+addEventListener("resize",syncSheetH); addEventListener("load",syncSheetH); setTimeout(syncSheetH,0);
+if(window.visualViewport) visualViewport.addEventListener("resize",syncSheetH);
 (function(){
   const g=$("grab"), el=$("panel"); if(!el) return;
   let y0=0, h0=0, t0=0, active=false, tapToggles=false;
