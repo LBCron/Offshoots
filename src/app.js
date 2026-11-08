@@ -1407,35 +1407,24 @@ function styleHead(n){
   return `<div class="sthead">`
     + `<h1 class="pttl"><span class="ptnm">${esc(n.name)}</span>`
     + `<span class="ptyr">${n.year<1950?esc(n.disp):"c. "+n.year}</span></h1>`
-    + introLine(n)
-    + fromModeLine(n)
-    + aboutFold(n) + `</div>`;
+    + introLine(n) + `</div>`;
 }
-// What the style is, in its own first sentence, under the name. General, true wherever
-// the style was reached from; the collection's line below it (when there is one) says
-// why it was put in front of you.
+// What the style is, in its own first sentence, under the name, and nothing else between
+// the name and the playlist: on a phone the playlist button is the thing most people came
+// for, and every line above it pushes it toward the bottom of a half-open sheet. The
+// collection's own line ("In Focus: written to be as ignorable…") went, because it said
+// again what the back pill and the row you had just tapped already said. About this
+// style moved below the playlist for the same reason.
 function introLine(n){
   const {intro}=introOf(n);
   return intro ? `<p class="stintro">${esc(intro)}</p>` : "";
 }
-// The collection this style was reached from, and the line that put it there. The
-// collection's page says why each style fits; the style's own panel said what the style
-// is and where it came from, and the reason you were sent here was gone the moment you
-// arrived. pushTrail() runs before the panel is built, so the trail's top is the page
-// you just left: when that is a collection holding this style, the line comes along.
-// The one line only, in the collection's words; "what it is" stays in About this style.
-function fromModeLine(n){
-  const v=TRAIL.length ? TRAIL[TRAIL.length-1] : null;
-  if(!v || !v.page || v.page.indexOf("mode:")!==0 || typeof MODES==="undefined") return "";
-  const m=MODES.find(x=>x[0]===v.page.slice(5)); if(!m) return "";
-  const pick=m[4].find(p=>p[0]===n.id); if(!pick) return "";
-  // plain text, not a control: the back pill above it already goes to the collection
-  return `<p class="frommode"><span class="frommodein">In <b>${esc(m[1])}</b></span>`
-    + `<span class="frommodewhy">${esc(pick[1])}</span></p>`;
-}
 // Collapsed, because the description is what you read once and the playlist is what you
 // came for. Open, it is the description and the one link that goes deeper on the style
 // itself rather than on anything in it.
+function aboutBelow(n){
+  const f=aboutFold(n); return f ? `<div class="aboutbelow">${f}</div>` : "";
+}
 function aboutFold(n){
   // With an intro under the name, the fold holds what the intro does not: the rest of
   // the written description, then where the style came from. Without one, it holds what
@@ -1594,6 +1583,7 @@ function panel(n,anc,desc){
   $("panelBody").innerHTML = PHEAD + `<div class="more">
     ${styleHead(n)}
     ${startSect(n)}
+    ${aboutBelow(n)}
     ${artistsSect(n,who,artistsHtml)}
     ${acrossSect(n)}
     ${inModesSect(n)}

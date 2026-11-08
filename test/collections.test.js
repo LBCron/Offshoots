@@ -337,29 +337,27 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     await p.click('.ppage:not([hidden]) .picks .pk .pick');
     await until(p,t=>location.hash==="#"+t && !!document.querySelector("#chart .n.cur"),first); await settle(p);
     const st=await p.evaluate(()=>({name:(document.querySelector(".pcard .pttl .ptnm")||{}).textContent,
-      from:(document.querySelector(".frommode .frommodein")||{}).textContent,
-      why:(document.querySelector(".frommode .frommodewhy")||{}).textContent,
+      line:!!document.querySelector(".frommode"),
       back:(document.querySelector("#panelBack .bklbl")||{}).textContent,
       intro:(document.querySelector(".sthead .stintro")||{}).textContent||"",
-      introFirst:(()=>{const i=document.querySelector(".sthead .stintro"), f=document.querySelector(".sthead .frommode");
-        return !!i && !!f && !!(i.compareDocumentPosition(f)&4);})(),
+      // nothing between the description and the playlist: About this style sits under it
+      aboutAfterListen:(()=>{const l=document.querySelector("#panelBody a.plbtn"), f=document.querySelector("#panelBody .aboutfold");
+        return !!l && !!f && !!(l.compareDocumentPosition(f)&4);})(),
       about:(document.querySelector(".aboutfold .note")||{}).textContent||""}));
-    say("the row opens the style ("+st.name+") with the collection it came from named under the title",
-      st.from==="In Focus" && st.back==="Focus");
-    say("  and the line that put it there: "+JSON.stringify(st.why), st.why===why);
-    say("  distinct from what the style is", st.about.indexOf(why)<0);
-    // What the style is goes under its name, from the written description, and before the
-    // collection's line: general first, then why it was put in front of you. Its first
+    // The collection's line went from the style panel: it repeated the back pill and the
+    // row just tapped, and pushed the playlist down a phone screen. It stays on the row.
+    say("the row opens the style ("+st.name+"), with back naming the collection", st.back==="Focus");
+    say("  and no second copy of the collection's line on the style", !st.line);
+    // What the style is goes under its name, from the written description: its first
     // sentence only, and the fold does not say it again.
     const desc=D.DESC[first]||"";
     say("  with what the style is under its name, from its description: "+JSON.stringify(st.intro.slice(0,60)),
       !!desc && st.intro.length>20 && desc.indexOf(st.intro)===0);
-    say("  ahead of the collection's line", st.introFirst);
-    say("  and not repeated in About this style", st.about.indexOf(st.intro)<0 && st.intro!==why);
-    // a style reached any other way carries no such line, and the same description
+    say("  About this style below the playlist, not between it and the name", st.aboutAfterListen);
+    say("  and not repeating the intro", st.about.indexOf(st.intro)<0 && st.about.indexOf(why)<0);
+    // a style reached any other way carries the same description
     await p.goto(URL+"#"+first); await p.reload(); await arm(p); await shown(p,"#chart .n"); await settle(p);
-    say("a style reached by link carries no collection line", await p.evaluate(()=>!document.querySelector(".frommode")));
-    say("  but the same line on what it is", await p.evaluate(t=>
+    say("a style reached by link carries the same line on what it is", await p.evaluate(t=>
       ((document.querySelector(".sthead .stintro")||{}).textContent||"")===t, st.intro));
     // a style with no written description gets no intro, and its fold is as it was
     await p.goto(URL+"#melodeath"); await p.reload(); await arm(p); await shown(p,"#chart .n"); await settle(p);
