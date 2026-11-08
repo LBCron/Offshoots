@@ -412,27 +412,27 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     return {overlap:Math.round(Math.min(s.bottom,pan.bottom)-Math.max(s.top,pan.top)), mapH:Math.round(s.height)};});
   const g1=await geo();
   say("the map runs behind the sheet ("+g1.overlap+"px)", g1.overlap>100);
-  // the frost is dark mode's: on light the sheet is opaque, the same panel as the sticky
-  // title bar, since no glass value matched that bar in Safari once the map went greyer
-  await p.emulateMedia({colorScheme:"dark"}); await settle(p);
-  const frost=await p.evaluate(()=>{const e=document.getElementById("panel");
-    const cs=getComputedStyle(e), af=getComputedStyle(e,"::after");
-    const a=(cs.backgroundColor.match(/[\/,]\s*(0?\.\d+|0|1)\s*\)?$/)||[])[1];
-    return [cs.backdropFilter||cs.webkitBackdropFilter||"none", cs.backgroundColor,
-      a===undefined?1:parseFloat(a), af.mixBlendMode];});
-  say("its ground is frosted: "+frost[0], /blur/.test(frost[0]));
-  say("and translucent: "+frost[1], /rgba|\/ 0\./.test(frost[1]));
-  // 0.96 was translucent on paper and solid to look at: a twentieth of the map came
-  // through, so the blur under it was work nobody saw.
-  say("  enough to see the map through ("+frost[2]+")", frost[2]<=0.85);
+  // The sheet is solid in both schemes, the same colour as the sticky title bar, so the
+  // two cannot read as two bands where they meet. It was glass: 78% on both, then solid on
+  // light only, and on dark the bar showed as a darker band on an iPhone. With nothing to
+  // see through there is no backdrop blur, and the grain blends as overlay, which averages
+  // to the panel's own colour (plain noise lifted the sheet three levels above the bar).
+  for(const scheme of ["light","dark"]){
+    await p.emulateMedia({colorScheme:scheme}); await settle(p);
+    const g=await p.evaluate(()=>{const e=document.getElementById("panel");
+      const cs=getComputedStyle(e), af=getComputedStyle(e,"::after");
+      const probe=document.createElement("div"); probe.style.background="var(--panel)"; e.appendChild(probe);
+      const panel=getComputedStyle(probe).backgroundColor; probe.remove();
+      const rgb=c=>{const m=c.match(/srgb ([\d.]+) ([\d.]+) ([\d.]+)(?: \/ ([\d.]+))?/);
+        if(m) return [m[1],m[2],m[3]].map(x=>Math.round(x*255)).join(",")+(m[4]&&+m[4]<1?" a"+m[4]:"");
+        const n=c.match(/[\d.]+/g)||[]; return n.slice(0,3).join(",")+(n.length>3&&+n[3]<1?" a"+n[3]:""); };
+      return {bg:rgb(cs.backgroundColor), panel:rgb(panel), bf:cs.backdropFilter||cs.webkitBackdropFilter||"none",
+        blend:af.mixBlendMode};});
+    say(scheme+": the sheet is the solid panel colour ("+g.bg+" vs "+g.panel+")", g.bg===g.panel && !/ a/.test(g.bg));
+    say("  with no blur behind it ("+g.bf+")", g.bf==="none");
+    say("  and its grain blending as overlay ("+g.blend+")", g.blend==="overlay");
+  }
   await p.emulateMedia({colorScheme:"light"}); await settle(p);
-  // And the blur has to actually blur. A mix-blend-mode on the grain layer composites
-  // against the backdrop, which silently defeats backdrop-filter on the sheet above it:
-  // the filter was declared, reported by getComputedStyle, and did nothing. Map labels
-  // came through sharp enough to read at any radius, 120px included. Nothing but a
-  // screenshot shows it, so this checks the cause rather than the symptom.
-  say("  with nothing blending over it to defeat the blur ("+frost[3]+")",
-    frost[3]==="normal");
   await raise(p); await opened();
   const g2=await geo();
   say("opening no longer resizes the map ("+g1.mapH+" -> "+g2.mapH+")", g1.mapH===g2.mapH);
@@ -464,8 +464,8 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     tint.ground===tint.neutral && tint.pair.indexOf(tint.ground)<0);
   say("  with the family ground kept for the label on a filled accent button ("+tint.accfg+")",
     tint.pair.indexOf(tint.accfg)>=0);
-  // frosted on dark; on light the sheet is opaque (see the frost check above)
-  say("and frosted over it", /blur/.test(tint.bf));
+  // solid, like the root sheet (see the ground check above)
+  say("and solid under it, with no blur", tint.bf==="none");
   await tp.close();
   // 1. a style chosen with the sheet open must land in the band still showing
   await p.click('[data-mode="winddown"]'); await rest(p);
