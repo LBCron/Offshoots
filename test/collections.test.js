@@ -356,6 +356,25 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("  none cut off"+(g.clipped.length?": "+g.clipped.join(", "):""), g.clipped.length===0);
     say("  and each row says it opens the collection", g.opens);
     say("  while the row of circles upstairs stays name-only", g.rowPlain===0);
+    // the sort cuts the list into sections with a heading each
+    const secs=async()=>p.evaluate(()=>[...document.querySelectorAll(".ppage:not([hidden]) .modesec")]
+      .map(x=>({t:x.querySelector(".msecttl").textContent, n:x.querySelectorAll(".moderow").length,
+        said:+x.querySelector(".sectaside").textContent})));
+    const quiet=await secs();
+    say("sorted quietest, the list is "+quiet.length+" bands: "+quiet.map(x=>x.t).join(", "),
+      quiet.map(x=>x.t).join()==="Still,Quiet,Steady,Lively,Loud" && quiet.every(x=>x.n===x.said)
+      && quiet.reduce((a,x)=>a+x.n,0)===D.MODES.length);
+    await p.selectOption(".msortsel","az");
+    await until(p,()=>document.querySelector(".msortsel").value==="az"); await settle(p);
+    const az=await secs();
+    say("  A to Z, one per letter ("+az.length+"): "+az.map(x=>x.t).join(""),
+      az.every(x=>x.t.length===1) && az.map(x=>x.t).join("")===az.map(x=>x.t).sort().join("")
+      && az.reduce((a,x)=>a+x.n,0)===D.MODES.length);
+    await p.selectOption(".msortsel","used");
+    await until(p,()=>document.querySelector(".msortsel").value==="used"); await settle(p);
+    const used=await secs();
+    say("  most used, with nothing opened yet: one band, "+used.map(x=>x.t).join(", "),
+      used.length===1 && used[0].n===D.MODES.length);
     await p.close(); }
   await b.close();
 })();

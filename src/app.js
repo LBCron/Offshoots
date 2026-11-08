@@ -2309,10 +2309,39 @@ function modeRow(m){
     + `<span class="mrdeck">${esc(m[2])}</span></span>`
     + GOCHEV + `</button>`;
 }
+// The list in sections, cut where the sort cuts it, so the order is visible rather than
+// inferred. Quietest gives five bands of intensity, named for the room they suit; A to Z
+// gives letters; Most used splits what this browser has opened from what it has not.
+// Each band is its own card with a small heading over it, the way the root panel's
+// groups sit, so the list reads as a few shelves instead of thirty-four rows.
+const LVNAME={1:["Still","Low lights, nothing to do"],2:["Quiet","Company, a table, a window seat"],
+  3:["Steady","A job to do, a room to fill"],4:["Lively","On your feet"],5:["Loud","As loud as it goes"]};
+function modeSections(how){
+  const list=modeOrderBy(how);
+  if(how==="az"){
+    const out=[]; list.forEach(m=>{ const k=m[1][0].toUpperCase();
+      const g=out[out.length-1]; if(g && g.key===k) g.rows.push(m); else out.push({key:k,title:k,rows:[m]}); });
+    return out; }
+  if(how==="used"){
+    const use=modeUse(), hot=list.filter(m=>(+use[m[0]]||0)>0), cold=list.filter(m=>!((+use[m[0]]||0)>0));
+    const out=[];
+    if(hot.length) out.push({key:"hot",title:"Opened here",sub:"What this browser comes back to",rows:hot});
+    if(cold.length) out.push({key:"cold",title:hot.length?"Not yet":"Everything",sub:hot.length?"":"Nothing opened here yet",rows:cold});
+    return out; }
+  const out=[]; list.forEach(m=>{ const k=m[5]||3;
+    const g=out[out.length-1]; if(g && g.key===k) g.rows.push(m);
+    else out.push({key:k,title:LVNAME[k][0],sub:LVNAME[k][1],rows:[m]}); });
+  return out;
+}
 function modeListHtml(){
   if(typeof MODES==="undefined") return "";
-  const rows=modeOrderBy(modeSort()).map(modeRow).join("");
-  return `<div class="modelist moderows listgrp" role="list">${rows}</div>`;
+  const secs=modeSections(modeSort()).map(g=>
+    `<section class="modesec lv${g.key}" aria-labelledby="msec-${esc(String(g.key))}">`
+    + `<h3 class="modesech" id="msec-${esc(String(g.key))}"><span class="msecttl">${esc(g.title)}</span>`
+    + (g.sub?`<span class="msecsub">${esc(g.sub)}</span>`:"")
+    + `<span class="sectaside">${g.rows.length}</span></h3>`
+    + `<div class="moderows listgrp" role="list">${g.rows.map(modeRow).join("")}</div></section>`).join("");
+  return `<div class="modelist">${secs}</div>`;
 }
 // The collections this style turns up in. The rest of the panel says what the style is
 // and where it came from; this says what it is for, which is the question a collection

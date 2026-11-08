@@ -1132,6 +1132,14 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
    does. The square is big enough to read the picture (64px), and the row's height comes
    from it, so every row is the same height whether its line wraps or not. */
 .moderows{display:flex;flex-direction:column}
+/* the sections the sort cuts the list into: a small heading, then a card of rows */
+.modesec{margin:0 0 18px}
+.modesec:last-child{margin-bottom:0}
+.modesech{display:flex;align-items:baseline;gap:8px;margin:0 0 8px;padding:0 2px;
+  font:700 var(--t-body)/var(--t-body-lh) var(--f-body);letter-spacing:-.01em;color:var(--fg)}
+.modesech .msecsub{flex:1 1 auto;min-width:0;font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modesech .sectaside{margin-left:auto;flex:none}
 .moderow{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;align-items:center;gap:14px;
   width:100%;min-height:84px;padding:10px 14px;color:var(--fg);transition:background .15s}
 .moderow:hover{background:color-mix(in srgb,var(--fg) 7%,transparent)}
