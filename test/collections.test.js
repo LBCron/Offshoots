@@ -340,14 +340,33 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
       from:(document.querySelector(".frommode .frommodein")||{}).textContent,
       why:(document.querySelector(".frommode .frommodewhy")||{}).textContent,
       back:(document.querySelector("#panelBack .bklbl")||{}).textContent,
+      intro:(document.querySelector(".sthead .stintro")||{}).textContent||"",
+      introFirst:(()=>{const i=document.querySelector(".sthead .stintro"), f=document.querySelector(".sthead .frommode");
+        return !!i && !!f && !!(i.compareDocumentPosition(f)&4);})(),
       about:(document.querySelector(".aboutfold .note")||{}).textContent||""}));
     say("the row opens the style ("+st.name+") with the collection it came from named under the title",
       st.from==="In Focus" && st.back==="Focus");
     say("  and the line that put it there: "+JSON.stringify(st.why), st.why===why);
     say("  distinct from what the style is", st.about.indexOf(why)<0);
-    // a style reached any other way carries no such line
+    // What the style is goes under its name, from the written description, and before the
+    // collection's line: general first, then why it was put in front of you. Its first
+    // sentence only, and the fold does not say it again.
+    const desc=D.DESC[first]||"";
+    say("  with what the style is under its name, from its description: "+JSON.stringify(st.intro.slice(0,60)),
+      !!desc && st.intro.length>20 && desc.indexOf(st.intro)===0);
+    say("  ahead of the collection's line", st.introFirst);
+    say("  and not repeated in About this style", st.about.indexOf(st.intro)<0 && st.intro!==why);
+    // a style reached any other way carries no such line, and the same description
     await p.goto(URL+"#"+first); await p.reload(); await arm(p); await shown(p,"#chart .n"); await settle(p);
     say("a style reached by link carries no collection line", await p.evaluate(()=>!document.querySelector(".frommode")));
+    say("  but the same line on what it is", await p.evaluate(t=>
+      ((document.querySelector(".sthead .stintro")||{}).textContent||"")===t, st.intro));
+    // a style with no written description gets no intro, and its fold is as it was
+    await p.goto(URL+"#melodeath"); await p.reload(); await arm(p); await shown(p,"#chart .n"); await settle(p);
+    const bare=await p.evaluate(()=>({intro:!!document.querySelector(".sthead .stintro"),
+      fold:(document.querySelector(".aboutfold .note")||{}).textContent||""}));
+    say("a style with no written description gets no intro, and keeps its fold ("+JSON.stringify(bare.fold.slice(0,40))+")",
+      !bare.intro && bare.fold.length>0);
     await p.close(); }
 
   // ---- the page says what each collection is for ----

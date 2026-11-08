@@ -179,12 +179,28 @@ function about(n){
   const written=(typeof DESC!=="undefined"&&DESC[n.id])||"";
   if(written) return written;
   if(n.prose) return n.prose;
+  return lineageLine(n);
+}
+// Where the style came from and how far it reached, in a sentence, from the map itself.
+function lineageLine(n){
   const names = ids => ids.slice(0,3).map(i=>byId[i].name);
   const list = xs => xs.length<2 ? xs[0] : xs.slice(0,-1).join(", ")+" and "+xs[xs.length-1];
   const bits=[];
   if(n.parents.length) bits.push(`Grew out of ${list(names(n.parents))}${n.parents.length>3?" and others":""}.`);
   if(n.children.length) bits.push(`Led to ${n.children.length} ${n.children.length===1?"style":"styles"}.`);
   return bits.join(" ");
+}
+// The written description split for the panel's head. Its first sentence says what the
+// style sounds like, which is what someone who has never heard it needs before anything
+// else, so it goes under the name; whatever follows stays in About this style. Only the
+// editorial DESC is split this way: a style without one has a data note or a sentence
+// built from the lineage, neither of which describes a sound, so it gets no intro and
+// keeps its fold exactly as it was.
+function introOf(n){
+  const t=(typeof DESC!=="undefined"&&DESC[n.id])||"";
+  if(!t) return {intro:"", rest:""};
+  const parts=t.match(/[^.!?]+[.!?]+(?=\s|$)/g)||[t];
+  return {intro:parts[0].trim(), rest:parts.slice(1).join(" ").trim()};
 }
 const SPK=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.2H2.2v3.6H4L7.2 12V4z"/><path d="M9.8 6a2.6 2.6 0 0 1 0 4"/><path d="M11.8 4.2a5 5 0 0 1 0 7.6"/></svg>`;
 const BRAND={apple:"#fa233b",spotify:"#1db954",qobuz:"#0070ef"};
@@ -1391,8 +1407,16 @@ function styleHead(n){
   return `<div class="sthead">`
     + `<h1 class="pttl"><span class="ptnm">${esc(n.name)}</span>`
     + `<span class="ptyr">${n.year<1950?esc(n.disp):"c. "+n.year}</span></h1>`
+    + introLine(n)
     + fromModeLine(n)
     + aboutFold(n) + `</div>`;
+}
+// What the style is, in its own first sentence, under the name. General, true wherever
+// the style was reached from; the collection's line below it (when there is one) says
+// why it was put in front of you.
+function introLine(n){
+  const {intro}=introOf(n);
+  return intro ? `<p class="stintro">${esc(intro)}</p>` : "";
 }
 // The collection this style was reached from, and the line that put it there. The
 // collection's page says why each style fits; the style's own panel said what the style
@@ -1413,10 +1437,14 @@ function fromModeLine(n){
 // came for. Open, it is the description and the one link that goes deeper on the style
 // itself rather than on anything in it.
 function aboutFold(n){
-  const txt=about(n);
-  if(!txt) return "";
+  // With an intro under the name, the fold holds what the intro does not: the rest of
+  // the written description, then where the style came from. Without one, it holds what
+  // it always did.
+  const {intro,rest}=introOf(n);
+  const txt = intro ? [rest, lineageLine(n)].filter(Boolean).join(" ") : about(n);
+  if(!txt && !intro) return "";
   return `<details class="xfold aboutfold"><summary><span>About this style</span>${FOLDTRI}</summary>`
-    + `<div class="xfoldb"><p class="note">${esc(txt)}</p>`
+    + `<div class="xfoldb">${txt?`<p class="note">${esc(txt)}</p>`:""}`
     + wiki(n).replace(">Learn more on Wikipedia<",">Read more on Wikipedia<")
     + `</div></details>`;
 }
