@@ -103,8 +103,8 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
       blank:a.every(x=>x.target==="_blank"&&/noopener/.test(x.rel)),
       tap:Math.min(...a.map(x=>Math.round(x.getBoundingClientRect().height))),
       beforeShare:!!(s.compareDocumentPosition(document.querySelector("[data-share]"))&4),
-      // "What it is" became the About this style fold directly under the name, so the
-      // thing Go deeper has to come after is the heading block, not a section
+      // "What it is" is the line under the name, inside the heading block, so the thing
+      // Go deeper has to come after is that block, not a section
       afterAbout:!!(document.querySelector(".sthead").compareDocumentPosition(s)&4)};});
   say("shown when the panel opens, as \""+r.head+"\"", r.shown && r.head==="Go Deeper");
   say("counted in the aside ("+r.aside+")", r.aside===r.n+" sources");
@@ -197,7 +197,7 @@ const opened=async q=>{ await until(q,()=>document.body.classList.contains("open
   say("  saying so plainly, with no count beside it (\""+(bare&&bare.empty)+"\")",
     !!bare && bare.empty.length>0 && bare.count===false);
   say("  and the way to add the first one", !!bare && bare.sug==="suggest.html?s=spirituals");
-  say("but still describes the style", (await p.$$(".aboutfold")).length===1);
+  say("but still says where to read about the style", (await p.$$(".sthead .stintro a.stwk")).length===1);
   await p.close();
 
   say("no page errors", errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);

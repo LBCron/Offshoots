@@ -5,7 +5,7 @@
 const path=require("path");
 const {chromium}=require("playwright");
 const skipWelcome=require("./_hello");
-const {settle,until,shown,arm}=require("./_wait");
+const {settle,until,shown,arm,raise}=require("./_wait");
 const URL="file://"+path.join(__dirname,"..","index.html");
 const say=(k,v)=>console.log((v===true?"PASS ":"FAIL ")+k+(typeof v!=="boolean"?": "+v:""));
 const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
@@ -77,13 +77,21 @@ const CHV=/M181\.66,133\.66l-80,80a8,8,0,0,1-11\.32-11\.32L164\.69,128/;
     +(f.open?", open":", shut"));
   // a triangle that does not turn when the fold opens is a triangle pointing the wrong
   // way. Checked here rather than on the root, which has no folds left to turn.
-  const turned=await q.evaluate(()=>{
-    const d=[...document.querySelectorAll("details")].find(x=>!x.open);
-    if(!d) return "every fold was already open";
+  // About this style was the fold this used to turn, near the top of the panel and so
+  // inside the half-open sheet. It is gone, so this takes Go deeper's first group, which
+  // sits below the peek: the sheet comes up first, since what the peek hides reports no
+  // transform at all.
+  if(!(await q.evaluate(()=>document.body.classList.contains("open")))){ await raise(q);
+    await until(q,()=>document.body.classList.contains("open")); }
+  await until(q,()=>!document.getElementById("panel").style.height); await settle(q);
+  const turned=await q.evaluate(async()=>{
+    const d=document.querySelector("details.xfold");
+    if(!d) return "no triangle fold on the panel";
     const g=d.querySelector("summary svg");
-    const was=getComputedStyle(g).transform;
-    d.open=true;
-    return {was, now:getComputedStyle(g).transform};
+    d.scrollIntoView({block:"center"});
+    const rest=()=>new Promise(z=>setTimeout(z,320));
+    d.open=false; await rest(); const was=getComputedStyle(g).transform;
+    d.open=true;  await rest(); return {was, now:getComputedStyle(g).transform};
   });
   say("it turns to face down when the fold opens",
     typeof turned==="object" && turned.was!==turned.now ? true : JSON.stringify(turned));

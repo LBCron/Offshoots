@@ -317,17 +317,16 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     await fc.close();
   }
 
-  // the description sits in a fold under the name rather than in a section further down,
-  // and it is shut until asked for: the playlist is what the panel opens on
-  const fold=await p.evaluate(()=>{ const d=document.querySelector(".aboutfold");
-    if(!d) return null;
-    const sm=d.querySelector("summary");
-    return {open:d.open, label:sm.textContent.replace(/\s+/g," ").trim(),
-      tap:Math.round(sm.getBoundingClientRect().height),
-      underName:document.querySelector(".pttl").compareDocumentPosition(d)&4?true:false};});
-  say("the description is folded under the name (\""+(fold&&fold.label)+"\")",
-    !!fold && fold.open===false && /About this style/.test(fold.label) && fold.underName);
-  say("  and its control clears the tap floor ("+(fold&&fold.tap)+"px)", !!fold && fold.tap>=44);
+  // The description sits under the name in full and ends on a Wikipedia link. It was a
+  // fold, About this style, whose only content other than the link was a lineage sentence
+  // that Explore the Connections already lists, and its row stood between name and playlist.
+  const intro=await p.evaluate(()=>{ const i=document.querySelector(".sthead .stintro");
+    if(!i) return null; const a=i.querySelector("a.stwk");
+    return {fold:!!document.querySelector(".aboutfold"), text:i.textContent.length,
+      wk:!!a && /wikipedia\.org/.test(a.href) && a.target==="_blank" && /Wikipedia/.test(a.getAttribute("aria-label")||""),
+      underName:document.querySelector(".pttl").compareDocumentPosition(i)&4?true:false};});
+  say("the description is under the name, with no fold", !!intro && !intro.fold && intro.underName && intro.text>40);
+  say("  ending on a Wikipedia link that says where it goes", !!intro && intro.wk);
   // the header stays put while the card scrolls under it, so the name, back and the X are
   // reachable at any scroll position. .pcard used to close right after the header, which
   // left the sticky box no room to travel.
@@ -363,28 +362,6 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     return {bg:cs.backgroundColor, alpha:n.length>3?+n[3]:1,
       scrolled:document.getElementById("panel").classList.contains("pscrolled")}; });
   say("  and opaque under the controls while it is ("+band.bg+")", band.scrolled && band.alpha===1);
-  // The fold under the name is the one disclosure left on the panel's own head, and its
-  // chevron has to turn back when it shuts: closeNav used to reset only .navbtn, which
-  // left the old title's chevron upside down after closing.
-  const fold2=await p.evaluate(async()=>{
-    const d=document.querySelector(".aboutfold"); if(!d) return null;
-    const sm=d.querySelector("summary"), cv=sm.querySelector("svg");
-    // Wait for the turn to finish rather than for 260ms. The transition is .18s, so on a
-    // loaded machine the stopwatch read the chevron mid-rotation and the check failed on
-    // a transform 1.5 degrees off the one it wanted.
-    const rested=async el=>{ let last=null, same=0;
-      for(let i=0;i<60 && same<3;i++){
-        await new Promise(z=>requestAnimationFrame(()=>z()));
-        const now=getComputedStyle(el).transform;
-        same = now===last ? same+1 : 0; last=now; }
-      return last; };
-    sm.click(); const open=await rested(cv);
-    sm.click(); const shut=await rested(cv);
-    return {open, shut, isOpen:d.open};});
-  say("opening the fold turns its chevron ("+(fold2&&fold2.open)+")",
-    !!fold2 && fold2.open!=="none");
-  say("  and closing turns it back ("+(fold2&&fold2.shut)+")",
-    !!fold2 && fold2.shut==="none" && fold2.isOpen===false);
   // back carries its destination, and gives it up rather than crowding the title
   const bk=await p.$eval("#panelBack",e=>{const l=e.querySelector(".bklbl");
     return {text:l.textContent, ellipsis:getComputedStyle(l).textOverflow};});
@@ -493,35 +470,23 @@ async function fresh(b,vp,hash){ const p=await b.newPage({viewport:vp});
     say("and the close still inset "+r.xR+"px", r.xR===16);
     await w.close(); }
 
-  // The prose was a "What it is" section below the playlist. It is a fold under the name
-  // now, so it is the first thing after the title and the last thing in the way: shut by
-  // default, and out of the peek entirely, which is for playing.
+  // The prose was a "What it is" section below the playlist, then a fold under the name.
+  // It is one line under the name now, and the peek, which is for playing, still has the
+  // playlist button in it: that is the thing the description must not push away.
   { const w=await b.newPage({viewport:M});
     await w.goto(URL+"#blackmetal"); await arm(w); await shown(w,"#chart .n");
     await until(w,()=>!!document.querySelector("#chart .n.cur")); await settle(w);
-    // The fold itself stays in the peek, shut: hiding it moved everything under it, and
-    // what the peek must never do is shift the button you are reaching for. What has to
-    // be true is that the prose is not showing, which being shut already gives.
-    // A closed <details> is collapsed by content-visibility rather than display, so its
-    // children still report their intrinsic size: the height that means anything is the
-    // fold's own, which is its summary and nothing else while it is shut.
-    say("the prose is not shown in the peek", await w.evaluate(()=>{
-      const d=document.querySelector(".aboutfold");
-      const sm=d.querySelector("summary");
-      return !d.open
-        && Math.abs(d.getBoundingClientRect().height - sm.getBoundingClientRect().height) <= 1;}));
+    const pk=await w.evaluate(()=>{ const a=document.querySelector("#panelBody a.plbtn").getBoundingClientRect();
+      return {open:document.body.classList.contains("open"), bottom:Math.round(a.bottom), vh:innerHeight,
+        intro:!!document.querySelector(".sthead .stintro")}; });
+    say("the peek shows the description and still the whole playlist button ("+pk.bottom+" of "+pk.vh+")",
+      pk.intro && pk.bottom<=pk.vh);
     await raise(w); await opened(w);
-    const r=await w.evaluate(()=>{ const s=document.querySelector(".aboutfold");
-      s.open=true;
+    const r=await w.evaluate(()=>{ const s=document.querySelector(".sthead .stintro");
       const tl=document.querySelector(".sect-connections .tally");
-      return {shown:getComputedStyle(s).display!=="none",
-        head:(s.querySelector("summary span")||{}).textContent||"",
-        prose:!!s.querySelector(".note") && !!s.querySelector("a.wk"),
-        tally:!!tl,
+      return {tally:!!tl, wk:!!s.querySelector("a.stwk"),
         beforeShare:!!(s.compareDocumentPosition(document.querySelector("[data-share]"))&4)}; });
-    say("and shown when the panel is open", r.shown);
-    say("under the control \""+r.head+"\"", r.head==="About this style");
-    say("carrying the description and the Wikipedia link", r.prose);
+    say("carrying the Wikipedia link", r.wk);
     say("with the tally moved in with the links it counts", r.tally);
     say("and still above the share button", r.beforeShare);
     await w.close(); }
