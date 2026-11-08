@@ -148,20 +148,21 @@ const state=p=>p.evaluate(()=>{
     const q=await fresh(b,M,hash);
     const v=await q.evaluate(()=>{
       const u=document.querySelector(".ppage:not([hidden])");
-      const grid=u.querySelector(".modegrid, .topgrid");
+      // the two pages share their skeleton; the list itself differs (Collections is a list
+      // of rows with a line under each name, Most influential a grid of circles), so the
+      // body's shape is not part of the comparison
       return {lede:!!u.querySelector(".pglede"),
         sortedBy:((u.querySelector(".secthead.picksort .secttl")||{}).textContent||"").trim().slice(0,9),
         picker:!!u.querySelector(".sortpick select"),
-        grid:!!grid && getComputedStyle(grid).display==="grid",
-        boxed:!!grid && grid.classList.contains("listgrp"),
+        list:!!u.querySelector(".moderows, .topgrid"),
         copy:!!u.querySelector(".shbtn.wide[data-share]")};});
     await q.close(); return v; };
   const a=await skel("#top"), c=await skel("#modes");
   note("top", JSON.stringify(a)); note("modes", JSON.stringify(c));
   say("Most influential is built like Collections", JSON.stringify(a)===JSON.stringify(c)
     ? true : JSON.stringify(a)+" vs "+JSON.stringify(c));
-  say("  both: a lede, a Sorted by picker, an unboxed grid and a link to the page",
-    a.lede && a.sortedBy==="Sorted by" && a.picker && a.grid && !a.boxed && a.copy);
+  say("  both: a lede, a Sorted by picker, the list and a link to the page",
+    a.lede && a.sortedBy==="Sorted by" && a.picker && a.list && a.copy);
 
   // and the sort on it actually sorts
   { const q=await fresh(b,M,"#top");
@@ -236,7 +237,7 @@ const state=p=>p.evaluate(()=>{
     // the collections page is a grid of circles rather than a list of rows, so count
     // whichever of the two that page is made of
     if(rows) say("  carrying all "+rows,
-      (await dl.$$eval('.ppage:not([hidden]) .listrow, .ppage:not([hidden]) .modegrid .mcirc,'
+      (await dl.$$eval('.ppage:not([hidden]) .listrow, .ppage:not([hidden]) .moderows .moderow,'
         +' .ppage:not([hidden]) .topgrid .tcirc', e=>e.length))===rows);
     await dl.close();
   }

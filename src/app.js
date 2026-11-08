@@ -2281,10 +2281,23 @@ function modeSect(){
 // printed at a third of the size the row upstairs prints it at, and the card around it
 // made the page read as a different component from the row it came from. Same circle,
 // same label, laid out as a grid instead of a scroller, on the panel rather than in a box.
+// A list of rows, not a grid: a rounded square of the art, the name, the one line on
+// what it is for, and a chevron saying it opens. Thirty-four circles in a grid asked you
+// to read the pictures; a row gives each one its line in full and reads top to bottom the
+// way a list of choices does. The sort still applies. The same descriptor the circle
+// carried in its title and label; nothing on the row suggests playback.
+function modeRow(m){
+  return `<button type="button" class="moderow lv${m[5]||3}" data-mode="${esc(m[0])}"`
+    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])} Opens the collection.">`
+    + `<i class="mrart hasimg">${moodArt(m[0])}<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
+    + `<span class="mrtx"><b class="mrlbl">${esc(m[1])}</b>`
+    + `<span class="mrdeck">${esc(m[2])}</span></span>`
+    + GOCHEV + `</button>`;
+}
 function modeListHtml(){
   if(typeof MODES==="undefined") return "";
-  const tiles=modeOrderBy(modeSort()).map(m=>modeTile(m,true)).join("");
-  return `<div class="modelist modegrid" role="list">${tiles}</div>`;
+  const rows=modeOrderBy(modeSort()).map(modeRow).join("");
+  return `<div class="modelist moderows listgrp" role="list">${rows}</div>`;
 }
 // The collections this style turns up in. The rest of the panel says what the style is
 // and where it came from; this says what it is for, which is the question a collection
