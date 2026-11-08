@@ -417,5 +417,34 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
       l.hash==="#modes" && Math.abs(l.sc-row)<=2);
     say("  whose back says Music Atlas", l.pill==="Music Atlas");
     await c.close(); }
+
+  // ---------- style to style through Connections, and back up the chain ----------
+  // Following a style's connections means opening Explore the Connections and tapping a
+  // name in it. Back used to rebuild the style with that fold shut, so the offset it
+  // restored pointed into a shorter page and the list was gone; and the pill clipped a
+  // ten-letter name.
+  { const c=await b.newContext({viewport:{width:M.width,height:M.height},isMobile:true,hasTouch:true});
+    const q=await c.newPage();
+    await q.goto(URL+"#ambient"); await ready(q);
+    await raise(q); await opened(q);
+    const left={};
+    for(const [from,to] of [["ambient","minimalism"],["minimalism","drone"]]){
+      await q.evaluate(()=>{const d=document.querySelector("#panelBody .sect-connections"); d.open=true;});
+      left[from]=await q.evaluate(t=>{ const e=document.querySelector(`#panelBody .cxgo[data-go="${t}"]`);
+        e.scrollIntoView({block:"center"}); const b=document.getElementById("panelBody");
+        b.dispatchEvent(new Event("scroll")); return b.scrollTop; },to);
+      await settle(q);
+      await q.evaluate(t=>document.querySelector(`#panelBody .cxgo[data-go="${t}"]`).click(),to); await at(q,"#"+to);
+    }
+    const clip=await q.evaluate(()=>{const l=document.querySelector("#panelBack .bklbl"); return {t:l.textContent, clipped:l.scrollWidth>l.clientWidth+1};});
+    say("the pill names \""+clip.t+"\" in full", clip.t==="Minimalism" && !clip.clipped);
+    for(const id of ["minimalism","ambient"]){
+      await q.click("#panelBack"); await at(q,"#"+id); await settle(q);
+      const r=await q.evaluate(()=>({open:document.querySelector("#panelBody .sect-connections").open,
+        sc:document.getElementById("panelBody").scrollTop}));
+      say("back to "+id+" reopens its Connections at "+r.sc+"px (left at "+left[id]+")",
+        r.open && Math.abs(r.sc-left[id])<=2);
+    }
+    await c.close(); }
   await b.close();
 })();
