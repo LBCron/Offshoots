@@ -1736,7 +1736,7 @@ body:not(.open) aside#panel{width:var(--sidew);cursor:pointer}
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
     aside#panel{background:var(--panel)}
   }
-  body.open aside#panel{height:70vh}
+  body.open aside#panel{height:var(--sheeth,70vh)}
   body:not(.open) aside#panel{height:auto;max-height:46vh;width:auto}
   body:not(.open) #panelBody{overflow:hidden;flex:0 1 auto}
 }
