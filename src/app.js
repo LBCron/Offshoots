@@ -189,10 +189,6 @@ function about(n){
 const SPK=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.2H2.2v3.6H4L7.2 12V4z"/><path d="M9.8 6a2.6 2.6 0 0 1 0 4"/><path d="M11.8 4.2a5 5 0 0 1 0 7.6"/></svg>`;
 const BRAND={apple:"#fa233b",spotify:"#1db954",qobuz:"#0070ef"};
 let SVC="apple"; try{ SVC=localStorage.getItem("svc")||"apple" }catch(e){}
-// whether anyone has ever chosen: the default is Apple Music until someone says otherwise,
-// and the first playlist button a new visitor meets says so, once, so the choice is made
-// where it matters (at the moment of listening) and not on the welcome card
-const svcChosen=()=>{ try{ return !!localStorage.getItem("svc"); }catch(e){ return true; } };
 const spHref = name=>`https://open.spotify.com/search/${encodeURIComponent(name)}`;
 const qbHref = name=>`https://www.qobuz.com/us-en/search?q=${encodeURIComponent(name)}`;
 const svcHref = name=> SVC==="spotify" ? spHref(name) : SVC==="qobuz" ? qbHref(name) : amHref(name);
@@ -298,7 +294,6 @@ const amCirc = name=>{
 const am = name=>`<a class="am" href="${svcHref(name)}" data-name="${esc(name)}" target="_blank" rel="noopener" title="Open ${esc(name)} in ${svcName()}" aria-label="${esc(name)}, open in ${svcName()}"><span>${esc(name)}</span><i class="amgo" aria-hidden="true">${OPENGO}</i></a>`;
 function setSvc(s){
   SVC=s; try{ localStorage.setItem("svc",s) }catch(e){}
-  document.querySelectorAll(".svcnote").forEach(n=>n.remove());
   // every link that names an artist, not only the chip-shaped ones: the circles in the
   // row and the rows on the Key artists page carry data-name too, and a.am missed both,
   // so switching service left them pointing at the service you had just left
@@ -1405,8 +1400,7 @@ function startSect(n){
     + `<b class="startttl">The essential ${esc(n.name)} playlist</b>`
     + `<span class="startsub">Meet the style through its defining songs.</span></span></div>`
     + open
-    + `<div class="svcline"><span class="svclbl">Your music service</span>${svcPicker("inline")}</div>`
-    + (svcChosen() ? "" : `<p class="svcnote">Opens in Apple Music unless you pick another. Kept on this device.</p>`));
+    + `<div class="svcline"><span class="svclbl">Your music service</span>${svcPicker("inline")}</div>`);
 }
 // Key artists, with the style in the heading so the row says whose list this is when you
 // have scrolled past the name.
