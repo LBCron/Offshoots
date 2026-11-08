@@ -746,9 +746,15 @@ function hereNow(){
   // Atlas and the Collections list underneath was gone, so choosing another collection
   // took a trip to the root and "See all" again. Each entry keeps the offset of the page
   // beneath it, which is what popPage() restores on the way down.
+  // And which folds were open on a style. Following a style's connections means opening
+  // Explore the Connections and tapping a name in it; back rebuilt that style with the
+  // fold shut, so the offset it restored pointed into a shorter page and the list you
+  // were walking through was gone. Kept by position: the same style rebuilds the same
+  // folds in the same order.
+  const folds = !top && state.sel ? [...document.querySelectorAll("#panelBody details")].map(d=>d.open) : null;
   return {sel:state.sel||null, mode:(typeof MODE!=="undefined"&&MODE)||null, scroll:root,
     page: top ? top.key : null, pageScroll: top && b ? b.scrollTop : 0,
-    stack: PSTACK.map(x=>({key:x.key, scroll:x.scroll||0}))}; }
+    stack: PSTACK.map(x=>({key:x.key, scroll:x.scroll||0})), folds}; }
 function pushTrail(){
   const v=hereNow(), last=TRAIL[TRAIL.length-1];
   if(last && last.sel===v.sel && last.mode===v.mode) return;   // nothing actually changed
@@ -788,6 +794,10 @@ function goBack(){
       if(onPage) st.forEach((e,i)=>{ if(PSTACK[i] && PSTACK[i].key===e.key) PSTACK[i].scroll=e.scroll; });
     } finally { GOINGBACK=false; }
     syncBack();
+  }
+  if(!onPage && v.folds){
+    const ds=[...document.querySelectorAll("#panelBody details")];
+    if(ds.length===v.folds.length) ds.forEach((d,i)=>{ if(v.folds[i]) d.open=true; });
   }
   const b=$("panelBody");
   const keep = onPage ? (v.pageScroll||0)
