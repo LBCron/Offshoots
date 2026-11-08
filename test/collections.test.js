@@ -355,6 +355,10 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("the Collections page prints each one's line under its name ("+g.decks+" of "+g.n+")", g.decks===g.n);
     say("  none cut off"+(g.clipped.length?": "+g.clipped.join(", "):""), g.clipped.length===0);
     say("  and each row says it opens the collection", g.opens);
+    say("  with the count of styles in it on the right", await p.evaluate(()=>
+      [...document.querySelectorAll(".ppage:not([hidden]) .moderow")].every(r=>{
+        const c=r.querySelector(".mrct"), m=MODES.find(x=>x[0]===r.dataset.mode);
+        return c && +c.textContent===m[4].length && c.getBoundingClientRect().left>r.querySelector(".mrtx").getBoundingClientRect().right-1;})));
     say("  while the row of circles upstairs stays name-only", g.rowPlain===0);
     // the sort cuts the list into sections with a heading each
     const secs=async()=>p.evaluate(()=>[...document.querySelectorAll(".ppage:not([hidden]) .modesec")]

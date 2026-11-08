@@ -2306,10 +2306,12 @@ function modeSect(){
 // carried in its title and label; nothing on the row suggests playback.
 function modeRow(m){
   return `<button type="button" class="moderow lv${m[5]||3}" data-mode="${esc(m[0])}"`
-    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])} Opens the collection.">`
+    + ` title="${esc(m[2])}" aria-label="${esc(m[1])}. ${esc(m[2])} ${m[4].filter(([id])=>byId[id]).length} styles. Opens the collection.">`
     + `<i class="mrart hasimg">${moodArt(m[0])}<b class="facefb">${MODEICON[m[0]]||""}</b></i>`
     + `<span class="mrtx"><b class="mrlbl">${esc(m[1])}</b>`
     + `<span class="mrdeck">${esc(m[2])}</span></span>`
+    // how many styles are in it, in the room before the chevron; the label says it too
+    + `<em class="mrct">${m[4].filter(([id])=>byId[id]).length}</em>`
     + GOCHEV + `</button>`;
 }
 // The list in sections, cut where the sort cuts it, so the order is visible rather than
