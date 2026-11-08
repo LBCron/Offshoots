@@ -1115,17 +1115,17 @@ function sheetMax(){ return sheetOpenH(); }
 // The open sheet was 70vh. In a phone browser vh is the largest viewport the page could
 // have, not what is on screen, so in Safari the sheet came up over nearly the whole map.
 // Size it from what is really visible instead: the part of the sheet's container that is
-// inside the visual viewport. The map keeps at least a fifth of that, and the sheet never
-// grows past what 70vh gave it, so the installed app, where vh was right, is unchanged.
+// inside the visual viewport. The map keeps a fifth of that and the sheet takes the rest,
+// in the browser and the installed app alike (70vh had left the app's map a third).
 function sheetOpenH(){
   const el=$("panel"), box=el&&el.offsetParent; if(!box) return Math.round(innerHeight*0.7);
   const r=box.getBoundingClientRect(), vv=window.visualViewport;
   const vTop=vv?vv.offsetTop:0, vBot=vv?vv.offsetTop+vv.height:innerHeight;
   const top=Math.max(r.top,vTop), bot=Math.min(r.bottom,vBot);
   const sheetTop=top+0.2*Math.max(0,bot-top);
-  // unrounded: 70vh is 590.8px on an 844 screen, and a rounded 591 is a new height the
-  // sheet would animate to, a stray transition sitting on the panel
-  return Math.max(0, Math.min(innerHeight*0.7, r.bottom-sheetTop));
+  // unrounded: a rounded value next to the one already applied is a new height the sheet
+  // animates to, a stray transition sitting on the panel that the glide test catches
+  return Math.max(0, r.bottom-sheetTop);
 }
 // written only when it changes and never mid-glide: a fresh inline value while the sheet is
 // animating re-targets the transition, and the glide test caught it as a snap
