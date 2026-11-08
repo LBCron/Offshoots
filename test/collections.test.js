@@ -343,18 +343,19 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
   // ---- the page says what each collection is for ----
   { const p=await (await b.newContext({viewport:{width:390,height:844}})).newPage();
     await p.goto(URL+"#modes"); await arm(p); await shown(p,"#chart .n"); await settle(p);
-    await until(p,()=>!!document.querySelector('.ppage:not([hidden]) .modegrid'));
+    await until(p,()=>!!document.querySelector('.ppage:not([hidden]) .moderows'));
     const g=await p.evaluate(()=>{
-      const t=[...document.querySelectorAll(".ppage:not([hidden]) .modegrid .mcirc")];
+      const t=[...document.querySelectorAll(".ppage:not([hidden]) .moderows .moderow")];
       return {n:t.length,
-        decks:t.filter(x=>(x.querySelector(".mcdeck")||{}).textContent).length,
-        clipped:t.filter(x=>{const d=x.querySelector(".mcdeck"); return d && d.scrollHeight>d.clientHeight+1;})
-          .map(x=>x.querySelector(".mclbl").textContent),
+        decks:t.filter(x=>(x.querySelector(".mrdeck")||{}).textContent).length,
+        clipped:t.filter(x=>{const d=x.querySelector(".mrdeck"); return d && d.scrollHeight>d.clientHeight+1;})
+          .map(x=>x.querySelector(".mrlbl").textContent),
         opens:t.every(x=>/Opens the collection/.test(x.getAttribute("aria-label")||"")),
-        rowPlain:[...document.querySelectorAll(".sect-modes .mrow .mcirc .mcdeck")].length};});
+        rowPlain:document.querySelectorAll(".sect-modes .mrow .mcirc .mrdeck").length};});
     say("the Collections page prints each one's line under its name ("+g.decks+" of "+g.n+")", g.decks===g.n);
     say("  none cut off"+(g.clipped.length?": "+g.clipped.join(", "):""), g.clipped.length===0);
-    say("  and each tile says it opens the collection", g.opens);
+    say("  and each row says it opens the collection", g.opens);
+    say("  while the row of circles upstairs stays name-only", g.rowPlain===0);
     await p.close(); }
   await b.close();
 })();

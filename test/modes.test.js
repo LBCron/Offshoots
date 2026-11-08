@@ -200,36 +200,30 @@ const spell=n=>n<=20?WORDS[n]
   const upDisc=await p.$eval(".sect-modes .mcirc .mco",
     e=>Math.round(e.getBoundingClientRect().width));
   await p.click(".sect-modes .secthead"); await onPage(p,"modes");
-  // The page wears the row's own tiles now. It was a two-column list of 28px thumbnails
-  // inside a shaded card, which printed the one picture per collection at a third of the
-  // size the row upstairs prints it at, and boxed a grid of round pictures inside a
-  // rectangle. Same circle, same label, wrapped into a grid instead of a scroller.
+  // The page is a list of rows: the art as a rounded square, the name, the one line on
+  // what the collection is for, and a chevron saying it opens. It was a grid of the
+  // row's circles, which asked you to read thirty-four pictures; a row gives each its
+  // line in full and reads top to bottom the way a list of choices does.
   const all=await p.evaluate(()=>{
     const g=document.querySelector(".ppage:not([hidden]) .modelist");
-    const t=[...g.querySelectorAll(".mcirc")];
-    const gb=g.getBoundingClientRect();
-    const cols=new Set(t.map(x=>Math.round(x.getBoundingClientRect().left))).size;
-    const disc=t[0].querySelector(".mco").getBoundingClientRect();
-    // the same tile as the row on the root page, measured rather than assumed
-    return {n:t.length, cols, grid:getComputedStyle(g).display,
-      disc:Math.round(disc.width),
-      over:t.some(x=>x.getBoundingClientRect().right>gb.right+1
-                 || x.getBoundingClientRect().left<gb.left-1),
-      boxed:g.classList.contains("listgrp"),
-      bg:getComputedStyle(g).backgroundColor,
-      rows:[...g.querySelectorAll(".listrow")].length,
-      labelled:t.every(x=>((x.querySelector(".mclbl")||{}).textContent||"").trim().length>0),
-      tall:t.every(x=>x.getBoundingClientRect().height>=44)};});
-  // two across on a phone since the page took the one-line descriptor under each name:
-  // a sentence in a third of the width was four lines of eleven characters
-  say("listing all "+all.n+" as a grid of circles, "+all.cols+" across",
-    all.n===nModes && all.grid==="grid" && all.cols>=2);
-  say("  each saying what it is for", await p.$$eval(".ppage:not([hidden]) .modegrid .mcirc",
-    e=>e.every(x=>((x.querySelector(".mcdeck")||{}).textContent||"").trim().length>12)));
-  say("  at the same size the row upstairs draws them ("+all.disc+"px vs "+upDisc+"px)",
-    all.disc===upDisc && all.disc>=80);
-  say("  with no card around them", !all.boxed && /rgba\(0, 0, 0, 0\)|transparent/.test(all.bg)
-    && all.rows===0);
+    const t=[...g.querySelectorAll(".moderow")];
+    const gb=g.getBoundingClientRect(), bb=document.getElementById("panelBody").getBoundingClientRect();
+    const art=t[0].querySelector(".mrart").getBoundingClientRect();
+    return {n:t.length, art:Math.round(art.width), radius:getComputedStyle(t[0].querySelector(".mrart")).borderRadius,
+      cols:new Set(t.map(x=>Math.round(x.getBoundingClientRect().left))).size,
+      over:t.some(x=>x.getBoundingClientRect().right>gb.right+1 || x.getBoundingClientRect().left<gb.left-1),
+      inside:gb.right<=bb.right+1,
+      labelled:t.every(x=>((x.querySelector(".mrlbl")||{}).textContent||"").trim().length>0),
+      decks:t.every(x=>((x.querySelector(".mrdeck")||{}).textContent||"").trim().length>12),
+      chev:t.every(x=>!!x.querySelector(".lrcv")),
+      opens:t.every(x=>/Opens the collection/.test(x.getAttribute("aria-label")||"")),
+      tall:t.every(x=>x.getBoundingClientRect().height>=64),
+      same:new Set(t.map(x=>Math.round(x.getBoundingClientRect().height))).size};});
+  say("listing all "+all.n+" as rows, one per line", all.n===nModes && all.cols===1 && !all.over && all.inside);
+  say("  each with its art as a "+all.art+"px rounded square", all.art>=56 && all.radius!=="0px");
+  say("  its name and what it is for", all.labelled && all.decks);
+  say("  and a chevron saying it opens, which the label says too", all.chev && all.opens);
+  say("  all "+all.same+" height"+(all.same===1?"":"s")+", none under 64px", all.tall && all.same<=2);
   say("  none spilling out of the grid", all.over===false);
   say("  every one labelled and a real tap target", all.labelled && all.tall);
   // the page ends with the share button every collection page has, not the bare
@@ -286,7 +280,7 @@ const spell=n=>n<=20?WORDS[n]
       after.slice(2).join("/")===before.filter(x=>x!=="Road trip"&&x!=="Dance floor").join("/"));
     // the list behind the heading is the stable reference, so it must not reorder
     await q.click(".sect-modes .secthead"); await onPage(q,"modes");
-    const page=await q.$$eval(".ppage:not([hidden]) .modelist .mclbl",e=>e.map(x=>x.textContent));
+    const page=await q.$$eval(".ppage:not([hidden]) .modelist .mrlbl",e=>e.map(x=>x.textContent));
     say("  while the full list stays put ("+page.slice(0,2).join(", ")+")",
       page.join("/")===before.join("/"));
     await q.close(); }
@@ -457,11 +451,11 @@ const spell=n=>n<=20?WORDS[n]
   await d.click(".sect-modes .secthead"); await onPage(d,"modes");
   const dl=await d.evaluate(()=>{
     const g=document.querySelector(".ppage:not([hidden]) .modelist");
-    const t=[...g.querySelectorAll(".mcirc")], gb=g.getBoundingClientRect();
+    const t=[...g.querySelectorAll(".moderow")], gb=g.getBoundingClientRect();
     return {cols:new Set(t.map(x=>Math.round(x.getBoundingClientRect().left))).size,
       clipped:t.filter(x=>x.getBoundingClientRect().right>gb.right+1)
-               .map(x=>x.querySelector(".mclbl").textContent)};});
-  say("and its full set runs "+dl.cols+" across", dl.cols>=2);
+               .map(x=>x.querySelector(".mrlbl").textContent)};});
+  say("and its full set is rows there too", dl.cols===1);
   await d.click("#panelBack"); await onPage(d,"root");
   say("and clips nothing"+(dl.clipped.length?": "+dl.clipped.join(", "):""), dl.clipped.length===0);
   await d.click('[data-mode="sit"]'); await onPage(d,"mode:sit");
@@ -490,7 +484,7 @@ const spell=n=>n<=20?WORDS[n]
     const read=()=>s.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
       return {on:[...u.querySelectorAll(".sortx")].map(x=>x.textContent),
-        labels:[...u.querySelectorAll(".modegrid .mclbl")].map(x=>x.textContent),
+        labels:[...u.querySelectorAll(".moderows .mrlbl")].map(x=>x.textContent),
         stored:(()=>{try{return localStorage.getItem("musicatlas.modesort")}catch(e){return null}})()};});
 
     const start=await read();
@@ -540,7 +534,7 @@ const spell=n=>n<=20?WORDS[n]
     const r=await s2.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
       return {on:(u.querySelector(".sortx")||{}).textContent,
-        first:(u.querySelector(".modegrid .mclbl")||{}).textContent};});
+        first:(u.querySelector(".moderows .mrlbl")||{}).textContent};});
     say("a remembered sort is honoured next time the page opens",
       r.on==="A–Z" && r.first==="Burn it off");
     await s2.close(); }
@@ -552,7 +546,7 @@ const spell=n=>n<=20?WORDS[n]
     const r=await s3.evaluate(()=>{
       const ps=[...document.querySelectorAll(".ppage")].filter(x=>!x.hidden), u=ps[ps.length-1];
       return {on:(u.querySelector(".sortx")||{}).textContent,
-        rows:u.querySelectorAll(".modegrid .mcirc").length};});
+        rows:u.querySelectorAll(".moderows .moderow").length};});
     say("a nonsense stored sort falls back to quietest, with every mode still there",
       r.on==="Quietest" && r.rows===(await s3.evaluate(()=>MODES.length)));
     await s3.close(); }
