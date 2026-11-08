@@ -446,5 +446,48 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
         r.open && Math.abs(r.sc-left[id])<=2);
     }
     await c.close(); }
+
+  // ---------- the browser's own back walks the same trail ----------
+  // Every step the pill can undo is a history entry, so Android's back, the iPhone swipe
+  // and a desktop browser's arrow follow the trail instead of leaving the site from three
+  // styles deep. Forward retraces it; the pill and the browser stay in step; a shared link
+  // still leaves on the first back, since nobody walked anywhere to get there.
+  { const c=await b.newContext({viewport:{width:M.width,height:M.height},isMobile:true,hasTouch:true});
+    const q=await c.newPage();
+    await q.goto("about:blank"); await q.goto(URL); await ready(q);
+    await raise(q); await opened(q);
+    await q.click('[data-mode="winddown"]'); await onPage(q,"mode:winddown");
+    const first=await q.$eval(".ppage:not([hidden]) .picks .pick",e=>e.dataset.go);
+    await q.click(".ppage:not([hidden]) .picks .pick"); await at(q,"#"+first);
+    await open(q);
+    // two more styles through Connections
+    const hops=[];
+    for(let k=0;k<2;k++){
+      await openCx(q);
+      const nx=await q.$eval(".sect-connections .cxgo",e=>e.dataset.go);
+      await q.$eval(`.sect-connections .cxgo[data-go="${nx}"]`,e=>e.scrollIntoView({block:"center"})); await settle(q);
+      await q.click(`.sect-connections .cxgo[data-go="${nx}"]`); await at(q,"#"+nx); await open(q); hops.push(nx);
+    }
+    note("walked", "Wind down -> "+[first,...hops].join(" -> "));
+    const h=()=>q.evaluate(()=>location.hash);
+    await q.goBack(); await at(q,"#"+hops[0]);
+    say("browser back steps one style back ("+(await h())+")", (await h())==="#"+hops[0]);
+    await q.click("#panelBack"); await at(q,"#"+first);
+    say("  the pill after it steps one more, in step ("+(await h())+")", (await h())==="#"+first);
+    await q.goForward(); await at(q,"#"+hops[0]);
+    say("  browser forward retraces ("+(await h())+")", (await h())==="#"+hops[0]);
+    await q.goBack(); await at(q,"#"+first);
+    await q.goBack(); await onPage(q,"mode:winddown");
+    say("  and back again reaches the collection, with its back to the root",
+      (await h())==="#mode:winddown" && (await label(q))==="Back to Music Atlas");
+    await q.goBack(); await at(q,"");
+    say("  then the root", (await h())==="" && (await q.$$(".ppage:not([data-p='root'])")).length===0);
+    await q.goBack().catch(()=>{});
+    say("  and only then does it leave the site", !q.url().startsWith("file:"));
+    // a shared link: nothing was walked, so the first back leaves
+    const r=await c.newPage(); await r.goto("about:blank"); await r.goto(URL+"#drone"); await ready(r);
+    await r.goBack().catch(()=>{});
+    say("a shared link's first browser back leaves the site", !r.url().startsWith("file:"));
+    await c.close(); }
   await b.close();
 })();

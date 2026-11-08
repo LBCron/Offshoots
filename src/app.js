@@ -758,10 +758,79 @@ function hereNow(){
 function pushTrail(){
   const v=hereNow(), last=TRAIL[TRAIL.length-1];
   if(last && last.sel===v.sel && last.mode===v.mode) return;   // nothing actually changed
+  histPush();
   TRAIL.push(v); if(TRAIL.length>TRAILMAX) TRAIL.shift();
   syncBack();
 }
 let GOINGBACK=false;
+// ---------- the browser's own back ----------
+// Every step the back pill can undo is also an entry in the browser's history, so the
+// system back (Android's button, the iPhone swipe, a desktop browser's arrow) walks the
+// same trail as the pill instead of leaving the site from three styles deep. Selecting
+// used to replace the address rather than push it, on the view that styles should not
+// fill the back button; with a pill that already walks them, the two disagreeing was the
+// worse surprise. One entry per user action (a select and a page change in the same
+// tick are one step), and none until the visitor has touched something, so arriving on
+// a link and the delayed opens at boot add nothing.
+let HISTOK=false, HISTTICK=false, HISTMUTE=false;
+// Entries are numbered, so a history event can tell back from forward: the browser fires
+// the same event for both, and treating Forward as another Back walked the wrong way.
+let HIDX=(history.state&&history.state.i)||0;
+// The entry the app loads on gets a number too, so an entry with no state can only be one
+// the app did not write: a typed address, or a link to a #hash. That is a step forward.
+try{ if(!history.state) history.replaceState({ma:1,i:0},"",location.href); }catch(e){}
+["pointerdown","keydown"].forEach(t=>addEventListener(t,()=>{ HISTOK=true; },{capture:true,once:true}));
+function histPush(){
+  if(!HISTOK || GOINGBACK || HISTMUTE || HISTTICK) return;
+  HISTTICK=true; setTimeout(()=>{ HISTTICK=false; },0);
+  try{ history.pushState({ma:1,i:++HIDX},"",location.href); }catch(e){}
+}
+function stepBack(){ if(!popPage()) goBack(); }
+// The pill goes through the browser when the entry is one of ours, so the two stay in
+// step; otherwise (history the app did not write) it steps in-app.
+function backPressed(){
+  // only while one of the app's entries is behind this one: the step boot records on a
+  // shared link (back to the map) has no entry, and history.back() there left the site
+  if(history.state && history.state.ma && history.state.i>0){ try{ history.back(); return; }catch(e){} }
+  stepBack();
+}
+// Show what the address names, the way arriving on it would. As a step forward it records
+// a crumb like any other move (so back undoes it) without writing another entry; as a
+// fallback for a back with nothing left in the trail (after a reload, or past the trail's
+// thirty steps) it records nothing.
+function showAddress(asStep,hash){
+  const h=decodeURIComponent(((hash===undefined?location.hash:hash)||"").slice(1));
+  const run=()=>{
+    if(byId[h]) select(h,{scroll:true,smooth:!reduce});
+    else if(h && (pageExists(h) || FOLDS[h])) pushPage(h);
+    else { while(PSTACK.length && popPage()); if(state.sel) clearSel(); }
+  };
+  if(asStep){ HISTMUTE=true; try{ run(); } finally { HISTMUTE=false; } }
+  else { GOINGBACK=true; try{ run(); } finally { GOINGBACK=false; } }
+  syncBack();
+}
+addEventListener("popstate",e=>{
+  if(!e.state || !e.state.ma){
+    HIDX++; try{ history.replaceState({ma:1,i:HIDX},"",location.href); }catch(x){}
+    showAddress(true); return;
+  }
+  const i=e.state.i||0;
+  if(i>HIDX){ HIDX=i; showAddress(true); return; }
+  // back, possibly several entries at once from a long-press on the browser's arrow
+  const want=location.hash||"";
+  let n=Math.max(1,HIDX-i); HIDX=i;
+  while(n-- > 0){
+    if(PSTACK.length || TRAIL.length) stepBack();
+    else break;
+  }
+  // The address is what the browser went back to, and the trail can disagree with it:
+  // after a reload the trail holds only the one step boot records (back to the map), so
+  // stepping it from Minimalism landed on the map while the address said Ambient. When
+  // they differ, the address wins.
+  const showing = PSTACK.length ? PSTACK[PSTACK.length-1].key : (state.sel||"");
+  const named = decodeURIComponent(want.slice(1));
+  if(showing!==named){ showAddress(false,want); setHash(named); }
+});
 function goBack(){
   closeNav();
   const v=TRAIL.pop(); if(!v) return;
@@ -1848,8 +1917,10 @@ function hashOf(key){ return encodeURIComponent(key).replace(/%3A/g,":"); }
 function setHash(id){
   const want = id ? "#"+hashOf(id) : "";
   if((location.hash||"") === want) return;
-  // replace, not push: selecting styles shouldn't fill the back button
-  try{ history.replaceState(null,"",want || location.pathname+location.search); }catch(e){ if(id) location.hash=want; }
+  // replace: the entry for this step was pushed already by histPush(), so this only names it
+  // keeping the entry's own state, which carries its number (see histPush): replacing it
+  // with null made every entry read as the first, and one back walked several
+  try{ history.replaceState(history.state,"",want || location.pathname+location.search); }catch(e){ if(id) location.hash=want; }
 }
 // The row that hands the file over.
 //
@@ -1946,7 +2017,7 @@ function shareSel(btn0){
   } else copy();
 }
 { const sp=$("sheetpull"); if(sp) sp.addEventListener("click",()=>{ restoreSheet(); }); }
-{ const pn=$("panel"); if(pn) pn.addEventListener("click",e=>{ if(e.target.closest("#panelBack")){ e.preventDefault(); e.stopPropagation(); if(!popPage()) goBack(); } },true); }
+{ const pn=$("panel"); if(pn) pn.addEventListener("click",e=>{ if(e.target.closest("#panelBack")){ e.preventDefault(); e.stopPropagation(); backPressed(); } },true); }
 { const hb=$("mapHome"); if(hb) hb.addEventListener("click",e=>{ e.preventDefault(); goHome(); }); }
 // the hardware/browser back gesture should feel the same as the button
 addEventListener("keydown",e=>{
@@ -2548,6 +2619,7 @@ function pushPage(key){
     // a slot between the lede and the body, for a control that acts on the whole page
     + (d.top||"")
     + `<div class="more pgbody">${d.html}</div>`;
+  histPush();
   PSTACK.push({key,title:d.title,scroll:body.scrollTop});
   setHash(key);
   stack.appendChild(page);
