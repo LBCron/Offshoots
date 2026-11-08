@@ -879,10 +879,14 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 .pick.withart .pcovph{display:grid;place-items:center;
   background:linear-gradient(145deg,color-mix(in srgb,var(--c) 70%,#000) 0%,color-mix(in srgb,var(--c) 32%,#000) 100%)}
 .pick.withart .pcovph b{font:700 25px var(--f-body);color:#fff;opacity:.92}
-/* with a Listen pill taking the right edge, the family and year go under the name at
-   every width rather than sharing its line and wrapping "Modern Classical" in two */
-.picks .pick.withart .pkfam{grid-column:2;grid-row:2;margin-top:2px}
-.picks .pick.withart .pkwhy{grid-column:2;grid-row:3}
+/* Name, then why it is here, then where it sits on the map. The reason is the line you
+   choose by, so it follows the name directly; family and year are the atlas's facts and
+   come last and quietest. They used to sit between the two, so the eye went name, a
+   mono line of metadata, and only then the sentence that answers "is this for me". */
+.picks .pick.withart .pkwhy{grid-column:2;grid-row:2;margin-top:1px}
+.picks .pick.withart .pkfam{grid-column:2;grid-row:3;margin-top:3px}
+.picksort .secttl{display:flex;align-items:baseline;gap:8px}
+.pkcount{font:500 var(--t-foot)/1 var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
 /* the hairline starts past the art so the eye runs down the names */
 .picks:has(.pick.withart){--seplead:90px}
 @media (max-width:899px){ .picks:has(.pick.withart){--seplead:90px}
