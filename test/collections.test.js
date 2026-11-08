@@ -364,6 +364,11 @@ const note=(k,v)=>console.log("     "+k+(v===undefined?"":": "+v));
     say("sorted quietest, the list is "+quiet.length+" bands: "+quiet.map(x=>x.t).join(", "),
       quiet.map(x=>x.t).join()==="Still,Quiet,Steady,Lively,Loud" && quiet.every(x=>x.n===x.said)
       && quiet.reduce((a,x)=>a+x.n,0)===D.MODES.length);
+    await p.selectOption(".msortsel","loud");
+    await until(p,()=>document.querySelector(".msortsel").value==="loud"); await settle(p);
+    const loud=await secs();
+    say("  loudest, the same bands the other way: "+loud.map(x=>x.t).join(", "),
+      loud.map(x=>x.t).join()==="Loud,Lively,Steady,Quiet,Still" && loud.reduce((a,x)=>a+x.n,0)===D.MODES.length);
     await p.selectOption(".msortsel","az");
     await until(p,()=>document.querySelector(".msortsel").value==="az"); await settle(p);
     const az=await secs();

@@ -514,11 +514,12 @@ const spell=n=>n<=20?WORDS[n]
     }
     say("  all "+total+" modes survive every sort", kept && total===want);
     say("  and the control marks and stores the one that is on", named);
-    // Loudest-first is gone: it was the same axis read backwards, and as an icon it was
-    // the same speaker with one more wave on it. A browser that stored it falls back.
-    say("  there is one intensity order, not two",
+    // Loudest-first is back: as an icon it was the same speaker with one more wave on it,
+    // but the control is a word now, and a list that opens on Workout is a different list
+    say("  both intensity orders are offered, as words",
       await s.evaluate(()=>{const sel=document.querySelector(".msortsel");
-        return sel.options.length===3 && ![...sel.options].some(o=>o.value==="loud");}));
+        const v=[...sel.options].map(o=>o.value), t=[...sel.options].map(o=>o.textContent);
+        return v.includes("quiet") && v.includes("loud") && t.includes("Quietest") && t.includes("Loudest");}));
     say("  A–Z really is alphabetical", seen.az===seen.az.split("|").slice()
       .sort((x,y)=>x.localeCompare(y)).join("|"));
     // nothing has been opened in this browser, so "most used" has no tally to go on and
