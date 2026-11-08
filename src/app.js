@@ -1255,7 +1255,9 @@ function svcPicker(kind){ return `<span class="svc${kind==="inline"?" svcinline"
   + `Kept on this device until you change it. Currently ${esc(svcName())}.">`
   + `<option value="apple"${SVC==="apple"?" selected":""}>Apple Music</option>`
   + `<option value="spotify"${SVC==="spotify"?" selected":""}>Spotify</option>`
-  + `<option value="qobuz"${SVC==="qobuz"?" selected":""}>Qobuz</option>`
+  // Qobuz has artist links but no playlists anywhere on the map yet, so its option says
+  // so before you choose it rather than after every playlist button goes grey
+  + `<option value="qobuz"${SVC==="qobuz"?" selected":""}>Qobuz (no playlists yet)</option>`
   + `</select></span>`; }
 // one control at the top right of every panel: it puts the card away and leaves the map
 // whole. The pull tab at the bottom of the screen brings it back.
@@ -1412,11 +1414,28 @@ function startSect(n){
     + ` data-ap="${ap?esc("https://music.apple.com"+ap):""}" data-spid="${esc(sp)}"`
     + ` data-style="${esc(n.name)}">`
     + `<i class="plbgo" aria-hidden="true">${OPENGO}</i><span class="plsvc"></span></a>`;
+  // The cover and the playlist's name, then the button that says where it opens. A
+  // "Start listening" overline and "Meet the style through its defining songs." sat
+  // around the name: the same two lines on all 461 styles, saying what the button below
+  // them says, and on a phone they were the tallest thing between the name and the
+  // button.
+  //
+  // Beside the cover, what is on it: how many songs and the first few artists, from the
+  // playlist's own track list (SONGS) and artist list (ROSTER). Real, specific to each
+  // playlist, and the room next to a 128px cover was otherwise empty.
+  const songs=(typeof SONGS!=="undefined"&&SONGS[n.id])||[];
+  // a collaboration is listed as its own entry ("Cluster & Brian Eno"); counted as people,
+  // so the line does not read "Cluster, Cluster & Brian Eno"
+  const roster=[...new Set(((typeof ROSTER!=="undefined"&&ROSTER[n.id])||[])
+    .flatMap(a=>a.split(/\s+&\s+/)).map(a=>a.trim()).filter(Boolean))];
+  const show=roster.slice(0,3), more=roster.length-show.length;
+  const who = show.length ? esc(show.join(", "))+(more>0?` and ${more} more`:"") : "";
   return sect("listen","",
     `<div class="startrow">${cover(n.id,n)}`
-    + `<span class="starttx"><span class="overline">Start listening</span>`
-    + `<b class="startttl">The essential ${esc(n.name)} playlist</b>`
-    + `<span class="startsub">Meet the style through its defining songs.</span></span></div>`
+    + `<span class="starttx"><b class="startttl">The essential ${esc(n.name)} playlist</b>`
+    + (songs.length?`<span class="startn">${songs.length} songs</span>`:"")
+    + (who?`<span class="startwho">${who}</span>`:"")
+    + `</span></div>`
     + open
     + `<div class="svcline"><span class="svclbl">Your music service</span>${svcPicker("inline")}</div>`);
 }

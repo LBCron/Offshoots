@@ -336,7 +336,7 @@ aside h3,.pcard h3.sec{font:700 var(--t-head)/var(--t-head-lh) var(--f-body);let
 .picks>.pk+.pk::after{content:"";position:absolute;left:var(--seplead);right:16px;top:0;
   height:.5px;background:var(--sep);pointer-events:none}
 .picks>.pk:hover::after,.picks>.pk:hover+.pk::after{opacity:0}
-.pklis{flex:none;display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 12px 0 13px;
+.pklis{position:relative;flex:none;display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 12px 0 13px;
   margin-right:var(--ppad);border-radius:999px;text-decoration:none;cursor:pointer;
   font:600 var(--t-sub)/1 var(--f-body);color:var(--accent);
   background:color-mix(in srgb,var(--accent) 12%,transparent);transition:background .15s}
@@ -344,6 +344,8 @@ aside h3,.pcard h3.sec{font:700 var(--t-head)/var(--t-head-lh) var(--f-body);let
 .pklis:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}
 .pklis:focus-visible{outline:0;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
 .pklis[hidden]{display:none}
+/* drawn at 36px so the row stays compact, hit at 44 */
+.pklis::before{content:"";position:absolute;inset:-4px -2px}
 .pick{all:unset;display:grid;grid-template-columns:auto 1fr auto;column-gap:9px;align-items:baseline;
   box-sizing:border-box;width:100%;min-height:var(--tap);padding:12px 16px;border-radius:14px;cursor:pointer;
   background:var(--fill2);transition:background .15s}
@@ -2401,6 +2403,9 @@ a.am .amgo{display:none}
 .overline{font:600 var(--t-sub)/1.3 var(--f-body);letter-spacing:0;color:var(--muted)}
 .startttl{font:600 var(--t-head)/var(--t-head-lh) var(--f-body);letter-spacing:-.01em;color:var(--fg)}
 .startsub{font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
+.startn{font:500 var(--t-foot)/1.3 var(--f-mono);color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.startwho{font:400 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted);text-wrap:pretty;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 
 /* one button, and it says where it goes */
 /* The one track a collection opens with. A card rather than a row, because it is not
@@ -2438,6 +2443,7 @@ a.am .amgo{display:none}
   transition:filter .15s}
 .plbtn:hover{filter:brightness(1.08);color:var(--accfg,var(--accent-fg))}
 .plbtn:active{filter:brightness(.94)}
+.plbtn:focus-visible{outline:3px solid color-mix(in srgb,var(--acc,var(--blue)) 45%,transparent);outline-offset:3px}
 .plbtn .plbgo{flex:none;display:grid;place-items:center;width:17px;height:17px}
 .plbtn .plbgo svg{width:17px;height:17px}
 .plbtn.off{background:var(--fill2);color:var(--muted);cursor:default}
