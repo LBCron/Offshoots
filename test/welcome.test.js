@@ -152,18 +152,15 @@ const svcStored=q=>q.evaluate(()=>{ try{ return localStorage.getItem("svc"); }ca
     await until(q,()=>document.body.classList.contains("open"));
     await until(q,()=>!document.getElementById("panel").style.height); await settle(q);
     const panel=await q.evaluate(()=>{
-      const sv=document.querySelector(".svctx"), note=document.querySelector(".svcnote");
+      const sv=document.querySelector(".svctx");
       const links=[...document.querySelectorAll("#panel a[href]")].map(a=>a.href)
         .filter(h=>/spotify|music\.apple|qobuz/.test(h));
       return {picker:sv?sv.textContent.trim():"none", n:links.length,
         apple:links.length>0 && links.every(h=>/music\.apple/.test(h)),
-        note:note?note.textContent.trim():"", noteSize:note?parseFloat(getComputedStyle(note).fontSize):0,
         opts:document.querySelectorAll('#panel .svcsel option').length};});
     say("a style panel still works with no service chosen: "+panel.n+" Apple Music links by default",
       panel.n>0 && panel.apple);
     say("  with the picker right there ("+panel.opts+" services)", panel.opts===3);
-    say("  and a line saying why, at a readable size ("+panel.noteSize+"px)",
-      /Apple Music/.test(panel.note) && /device/.test(panel.note) && panel.noteSize>=13);
     await q.selectOption('#panel .svcsel','spotify');
     await until(q,()=>{ try{ return localStorage.getItem("svc")==="spotify"; }catch(e){ return true; } });
     await settle(q);
@@ -171,11 +168,9 @@ const svcStored=q=>q.evaluate(()=>{ try{ return localStorage.getItem("svc"); }ca
       const links=[...document.querySelectorAll("#panel a[href]")].map(a=>a.href)
         .filter(h=>/spotify|music\.apple|qobuz/.test(h));
       return {cur:!!document.querySelector("#chart .n.cur"), open:document.body.classList.contains("open"),
-        allSpotify:links.length>0 && links.every(h=>/open\.spotify\.com/.test(h)),
-        note:!!document.querySelector(".svcnote")};});
+        allSpotify:links.length>0 && links.every(h=>/open\.spotify\.com/.test(h))};});
     say("picking Spotify there keeps the style and the panel and rewrites the links",
       after.cur && after.open && after.allSpotify);
-    say("  and the why-line goes away once a choice is made", !after.note);
     await c.close(); }
 
   // ---------- installing is offered from About, not from the welcome ----------
