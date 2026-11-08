@@ -1419,9 +1419,23 @@ function startSect(n){
   // around the name: the same two lines on all 461 styles, saying what the button below
   // them says, and on a phone they were the tallest thing between the name and the
   // button.
+  //
+  // Beside the cover, what is on it: how many songs and the first few artists, from the
+  // playlist's own track list (SONGS) and artist list (ROSTER). Real, specific to each
+  // playlist, and the room next to a 128px cover was otherwise empty.
+  const songs=(typeof SONGS!=="undefined"&&SONGS[n.id])||[];
+  // a collaboration is listed as its own entry ("Cluster & Brian Eno"); counted as people,
+  // so the line does not read "Cluster, Cluster & Brian Eno"
+  const roster=[...new Set(((typeof ROSTER!=="undefined"&&ROSTER[n.id])||[])
+    .flatMap(a=>a.split(/\s+&\s+/)).map(a=>a.trim()).filter(Boolean))];
+  const show=roster.slice(0,3), more=roster.length-show.length;
+  const who = show.length ? esc(show.join(", "))+(more>0?` and ${more} more`:"") : "";
   return sect("listen","",
     `<div class="startrow">${cover(n.id,n)}`
-    + `<span class="starttx"><b class="startttl">The essential ${esc(n.name)} playlist</b></span></div>`
+    + `<span class="starttx"><b class="startttl">The essential ${esc(n.name)} playlist</b>`
+    + (songs.length?`<span class="startn">${songs.length} songs</span>`:"")
+    + (who?`<span class="startwho">${who}</span>`:"")
+    + `</span></div>`
     + open
     + `<div class="svcline"><span class="svclbl">Your music service</span>${svcPicker("inline")}</div>`);
 }
