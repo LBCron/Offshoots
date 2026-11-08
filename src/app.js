@@ -750,8 +750,14 @@ function hereNow(){
   // so by the time back runs the stack is gone; without this the crumb could only ever
   // point at the root, and leaving a mood to look at one of its styles cost you the mood.
   const top = PSTACK.length ? PSTACK[PSTACK.length-1] : null;
+  // The whole stack, not only its top. Keeping the top alone meant Collections, then
+  // Focus, then a style, then back, rebuilt Focus by itself: its back pill said Music
+  // Atlas and the Collections list underneath was gone, so choosing another collection
+  // took a trip to the root and "See all" again. Each entry keeps the offset of the page
+  // beneath it, which is what popPage() restores on the way down.
   return {sel:state.sel||null, mode:(typeof MODE!=="undefined"&&MODE)||null, scroll:root,
-    page: top ? top.key : null, pageScroll: top && b ? b.scrollTop : 0}; }
+    page: top ? top.key : null, pageScroll: top && b ? b.scrollTop : 0,
+    stack: PSTACK.map(x=>({key:x.key, scroll:x.scroll||0}))}; }
 function pushTrail(){
   const v=hereNow(), last=TRAIL[TRAIL.length-1];
   if(last && last.sel===v.sel && last.mode===v.mode) return;   // nothing actually changed
@@ -781,7 +787,17 @@ function goBack(){
   // A page you had open is reopened before any of that, because it is the thing you were
   // actually looking at and the root underneath it is not where you were.
   let onPage=false;
-  if(v.page){ GOINGBACK=true; try{ onPage=pushPage(v.page); } finally { GOINGBACK=false; } }
+  if(v.page){
+    GOINGBACK=true;
+    try{
+      const st = v.stack && v.stack.length ? v.stack : [{key:v.page, scroll:v.scroll||0}];
+      onPage = st.every(e=>pushPage(e.key));
+      // pushPage() noted the offset of whatever was showing as it went, which during a
+      // replay is the top of each freshly built page; put back the ones you actually left
+      if(onPage) st.forEach((e,i)=>{ if(PSTACK[i] && PSTACK[i].key===e.key) PSTACK[i].scroll=e.scroll; });
+    } finally { GOINGBACK=false; }
+    syncBack();
+  }
   const b=$("panelBody");
   const keep = onPage ? (v.pageScroll||0)
     : v.sel && byId[v.sel] ? (v.scroll||0) : 0;

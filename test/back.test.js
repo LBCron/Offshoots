@@ -384,5 +384,38 @@ const openCx=async q=>{ await q.$eval(".sect-connections",e=>{ if(!e.open) e.ope
     say(name+" no page errors", p._errs.length===0 ? true : p._errs.filter(x=>!/Failed to load/.test(x)).join(" | ")||true);
   }
 
+
+  // ---------- Collections, a collection, a style, and back down both ----------
+  // The crumb kept only the top page, so back from a style rebuilt the collection by
+  // itself: its pill said Music Atlas and the Collections list under it was gone, and
+  // picking another collection meant the root and "See all" again.
+  { const c=await b.newContext({viewport:{width:M.width,height:M.height},isMobile:true,hasTouch:true});
+    const q=await c.newPage();
+    await q.goto(URL); await ready(q);
+    await q.evaluate(()=>document.querySelector('[data-page="modes"]').click()); await onPage(q,"modes");
+    // leave each page part way down, so landing at the top would show
+    const row=await q.evaluate(()=>{ const b=document.getElementById("panelBody"), r=document.querySelector('.moderow[data-mode="focus"]');
+      b.scrollTop=Math.max(0,r.offsetTop-200); b.dispatchEvent(new Event("scroll")); return b.scrollTop; });
+    await settle(q);
+    await q.click('.moderow[data-mode="focus"]'); await onPage(q,"mode:focus");
+    const pk=await q.evaluate(()=>{ const b=document.getElementById("panelBody");
+      b.scrollTop=400; b.dispatchEvent(new Event("scroll")); return b.scrollTop; });
+    await settle(q);
+    const id=await q.evaluate(()=>{ const r=[...document.querySelectorAll('.ppage:not([hidden]) .pick')]
+      .find(x=>x.getBoundingClientRect().top>200); return r.dataset.go; });
+    await q.click(`.ppage:not([hidden]) .pick[data-go="${id}"]`); await at(q,"#"+id);
+    const pill=()=>q.evaluate(()=>{const b=document.getElementById("panelBack"); return b.hidden?"":b.querySelector(".bklbl").textContent;});
+    const sc=()=>q.evaluate(()=>document.getElementById("panelBody").scrollTop);
+    await q.click("#panelBack"); await onPage(q,"mode:focus");
+    const f={pill:await pill(), sc:await sc()};
+    say("back from a style reached through Collections lands on the collection ("+f.sc+"px, left at "+pk+")",
+      Math.abs(f.sc-pk)<=2);
+    say("  whose own back still says Collections", f.pill==="Collections");
+    await q.click("#panelBack"); await onPage(q,"modes");
+    const l={pill:await pill(), sc:await sc(), hash:await q.evaluate(()=>location.hash)};
+    say("and back again lands on the Collections list ("+l.sc+"px, left at "+row+")",
+      l.hash==="#modes" && Math.abs(l.sc-row)<=2);
+    say("  whose back says Music Atlas", l.pill==="Music Atlas");
+    await c.close(); }
   await b.close();
 })();
