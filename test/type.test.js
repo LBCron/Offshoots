@@ -245,9 +245,10 @@ const readRules=(p)=>p.evaluate(()=>{
     // title. It came down and stopped scaling when Start listening gave the title and its
     // introduction the width instead: what the art has to do now is say which record this
     // is, at a glance, beside words that carry the rest. Same size on every tier, so the
-    // block reads the same everywhere.
+    // block reads the same everywhere. 128 since the About fold left the head: with only
+    // the name and its description above it, the cover is the panel's one picture.
     say("playlist cover: phone "+sizes.phone+", tablet "+sizes.tablet+", desktop "+sizes.desktop,
-      sizes.phone>=88 && sizes.phone<=120
+      sizes.phone>=88 && sizes.phone<=136
       && sizes.tablet===sizes.phone && sizes.desktop===sizes.phone);
     const dp=await b.newPage({viewport:{width:1440,height:900}});
     await dp.goto(URL+"#jamband"); await selected(dp);
