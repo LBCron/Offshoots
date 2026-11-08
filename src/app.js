@@ -2199,12 +2199,13 @@ function modeOrder(adaptive){
 // hunting a name you already know. So the list gets the choice stated out loud: quiet to
 // loud, what this browser opens most, or plain A to Z. Quietest stays the default, so
 // nothing moves until it is asked to.
-// Loudest-first went: it is the same axis as Quietest read backwards, and as an icon it
+// Loudest-first is back now that the control is a word rather than an icon: as a glyph it
 // was the same speaker with one more wave on it, which is not a difference you can see at
-// 18px. One intensity order is enough, and a stored "loud" falls back to it below.
+// 18px, but "Loudest" reads fine and a list that opens on Workout is a different list.
 const MODESORT_KEY="musicatlas.modesort";
 const MODESORTS=[
   ["quiet","Quietest","Quietest first"],
+  ["loud","Loudest","Loudest first"],
   ["used","Most used","What this browser opens most"],
   ["az","A–Z","By name, A to Z"]];
 function modeSort(){
@@ -2216,6 +2217,8 @@ function setModeSort(v){ try{ localStorage.setItem(MODESORT_KEY,v); }catch(e){} 
 function modeOrderBy(how){
   const lv=m=>m[5]||3, quiet=MODES.slice().sort((a,b)=>lv(a)-lv(b));
   if(how==="az")   return MODES.slice().sort((a,b)=>a[1].localeCompare(b[1]));
+  // the same bands read from the other end, each band in its written order
+  if(how==="loud") return MODES.slice().sort((a,b)=>lv(b)-lv(a));
   if(how==="used"){
     // ties fall back to the quiet order, so an untouched browser still reads quiet to loud
     // rather than scrambling into whatever order MODES happens to be declared in
