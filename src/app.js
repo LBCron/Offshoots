@@ -25,9 +25,12 @@ const amHref = name=> AMID[name] ? `${amScheme}music.apple.com/us/artist/${AMID[
 function wikiTitle(n,u){ const m=u.match(/\/wiki\/([^?#]+)$/); if(m && !/^Special:/.test(m[1])){ try{ return decodeURIComponent(m[1]).replace(/_/g," ") }catch(e){} } return n.name; }
 // Wikipedia: the article recorded as a source when there is one, otherwise a "go to article" search on the style name
 function wikiTxt(n){ return wiki(n).replace("class=\"wk\"","class=\"wk txt\"").replace(/<svg[\s\S]*?<\/svg>/,"").replace(/<\/?span>/g,""); }
-function wiki(n){
-  const u=(n.sources||[]).find(s=>/wikipedia\.org\/wiki\//.test(s))
+function wikiUrl(n){
+  return (n.sources||[]).find(s=>/wikipedia\.org\/wiki\//.test(s))
     || "https://en.wikipedia.org/wiki/Special:Search?go=Go&search="+encodeURIComponent(n.name.split("/")[0].replace(/\([^)]*\)/g,"").trim());
+}
+function wiki(n){
+  const u=wikiUrl(n);
   return `<a class="wk" href="${esc(u)}" target="_blank" rel="noopener" title="Read about ${esc(n.name)} on Wikipedia"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 3.2A6.3 6.3 0 0 1 8 4.4a6.3 6.3 0 0 1 5.5-1.2v8.6A6.3 6.3 0 0 0 8 13a6.3 6.3 0 0 0-5.5-1.2z"/><path d="M8 4.4V13"/></svg><span>Learn more on Wikipedia</span></a>`;
 }
 // Emily's own Apple Music class playlists, keyed by style id (paths are relative to music.apple.com)
@@ -173,34 +176,6 @@ function paintPlay(){
         : "No "+svcName()+" playlist for "+nm+" yet";
     }
   });
-}
-// one plain sentence about the style: its own note when that is prose, otherwise built from the lineage
-function about(n){
-  const written=(typeof DESC!=="undefined"&&DESC[n.id])||"";
-  if(written) return written;
-  if(n.prose) return n.prose;
-  return lineageLine(n);
-}
-// Where the style came from and how far it reached, in a sentence, from the map itself.
-function lineageLine(n){
-  const names = ids => ids.slice(0,3).map(i=>byId[i].name);
-  const list = xs => xs.length<2 ? xs[0] : xs.slice(0,-1).join(", ")+" and "+xs[xs.length-1];
-  const bits=[];
-  if(n.parents.length) bits.push(`Grew out of ${list(names(n.parents))}${n.parents.length>3?" and others":""}.`);
-  if(n.children.length) bits.push(`Led to ${n.children.length} ${n.children.length===1?"style":"styles"}.`);
-  return bits.join(" ");
-}
-// The written description split for the panel's head. Its first sentence says what the
-// style sounds like, which is what someone who has never heard it needs before anything
-// else, so it goes under the name; whatever follows stays in About this style. Only the
-// editorial DESC is split this way: a style without one has a data note or a sentence
-// built from the lineage, neither of which describes a sound, so it gets no intro and
-// keeps its fold exactly as it was.
-function introOf(n){
-  const t=(typeof DESC!=="undefined"&&DESC[n.id])||"";
-  if(!t) return {intro:"", rest:""};
-  const parts=t.match(/[^.!?]+[.!?]+(?=\s|$)/g)||[t];
-  return {intro:parts[0].trim(), rest:parts.slice(1).join(" ").trim()};
 }
 const SPK=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.2H2.2v3.6H4L7.2 12V4z"/><path d="M9.8 6a2.6 2.6 0 0 1 0 4"/><path d="M11.8 4.2a5 5 0 0 1 0 7.6"/></svg>`;
 const BRAND={apple:"#fa233b",spotify:"#1db954",qobuz:"#0070ef"};
@@ -1409,33 +1384,22 @@ function styleHead(n){
     + `<span class="ptyr">${n.year<1950?esc(n.disp):"c. "+n.year}</span></h1>`
     + introLine(n) + `</div>`;
 }
-// What the style is, in its own first sentence, under the name, and nothing else between
-// the name and the playlist: on a phone the playlist button is the thing most people came
-// for, and every line above it pushes it toward the bottom of a half-open sheet. The
-// collection's own line ("In Focus: written to be as ignorable…") went, because it said
-// again what the back pill and the row you had just tapped already said. About this
-// style moved below the playlist for the same reason.
+// What the style is, under its name, ending on where to read more, and nothing else
+// between the name and the playlist: on a phone the playlist button is the thing most
+// people came for, and every line above it pushes it toward the bottom of a half-open
+// sheet. The collection's line ("In Focus: written to be as ignorable…") went because it
+// said again what the back pill and the row just tapped said. About this style went too:
+// on 407 styles it held "Grew out of…, led to N styles", which Explore the Connections
+// lists by name, and on the rest a second sentence (now shown here) or a data note. What
+// it was really for was the Wikipedia link, which ends this line instead.
+//
+// Only the written DESC is shown. A style without one gets the link alone: its data note
+// and lineage sentence describe where it came from, not what it sounds like.
 function introLine(n){
-  const {intro}=introOf(n);
-  return intro ? `<p class="stintro">${esc(intro)}</p>` : "";
-}
-// Collapsed, because the description is what you read once and the playlist is what you
-// came for. Open, it is the description and the one link that goes deeper on the style
-// itself rather than on anything in it.
-function aboutBelow(n){
-  const f=aboutFold(n); return f ? `<div class="aboutbelow">${f}</div>` : "";
-}
-function aboutFold(n){
-  // With an intro under the name, the fold holds what the intro does not: the rest of
-  // the written description, then where the style came from. Without one, it holds what
-  // it always did.
-  const {intro,rest}=introOf(n);
-  const txt = intro ? [rest, lineageLine(n)].filter(Boolean).join(" ") : about(n);
-  if(!txt && !intro) return "";
-  return `<details class="xfold aboutfold"><summary><span>About this style</span>${FOLDTRI}</summary>`
-    + `<div class="xfoldb">${txt?`<p class="note">${esc(txt)}</p>`:""}`
-    + wiki(n).replace(">Learn more on Wikipedia<",">Read more on Wikipedia<")
-    + `</div></details>`;
+  const t=(typeof DESC!=="undefined"&&DESC[n.id])||"";
+  const wk=`<a class="stwk" href="${esc(wikiUrl(n))}" target="_blank" rel="noopener"`
+    + ` aria-label="Read about ${esc(n.name)} on Wikipedia">Wikipedia<i aria-hidden="true">${OPENGO}</i></a>`;
+  return t ? `<p class="stintro">${esc(t)} ${wk}</p>` : `<p class="stintro stbare">${wk}</p>`;
 }
 // One button, saying where it goes, instead of a service name in a heading and another in
 // a row. The selector sits under it, because you choose a service once and open playlists
@@ -1583,7 +1547,6 @@ function panel(n,anc,desc){
   $("panelBody").innerHTML = PHEAD + `<div class="more">
     ${styleHead(n)}
     ${startSect(n)}
-    ${aboutBelow(n)}
     ${artistsSect(n,who,artistsHtml)}
     ${acrossSect(n)}
     ${inModesSect(n)}

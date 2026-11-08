@@ -1169,6 +1169,15 @@ a.deepsug:focus-visible{outline:0;box-shadow:inset 0 0 0 2px color-mix(in srgb,v
 /* what the style is, under its name: the description's first sentence, at reading size */
 .stintro{margin:4px 0 8px;font:400 var(--t-body)/var(--t-body-lh) var(--f-body);color:var(--fg);
   text-wrap:pretty;max-width:60ch}
+/* where to read more, at the end of the description: a word and the out-of-app mark,
+   in the accent, small enough to read as a footnote rather than a second button */
+.stwk{white-space:nowrap;font:500 var(--t-sub)/1 var(--f-body);color:var(--accent);text-decoration:none;
+  padding:6px 0;margin-left:2px}
+.stwk i{display:inline-block;width:11px;height:11px;margin-left:3px;vertical-align:-1px}
+.stwk i svg{width:100%;height:100%}
+.stwk:hover{text-decoration:underline;text-underline-offset:2px}
+.stwk:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.stintro.stbare{margin-top:0}
 
 /* and the page it opens carries the same colour on the title */
 /* The title mark is the circle you tapped, arrived at: same fill, same colour, the size
@@ -2364,8 +2373,6 @@ a.am .amgo{display:none}
 .pttl .ptyr{font:400 var(--t-sub)/1 var(--f-mono);color:var(--muted);letter-spacing:0}
 /* the fold sits where a subtitle would, so it reads as part of the heading block */
 .aboutfold{margin-top:0}
-/* below the playlist now, as its own short block before the artists */
-.aboutbelow{margin:-6px 0 18px}
 .aboutfold summary{min-height:var(--tap);gap:7px;
   font:500 var(--t-sub)/var(--t-sub-lh) var(--f-body);color:var(--muted)}
 .aboutfold summary span{flex:0 1 auto}
